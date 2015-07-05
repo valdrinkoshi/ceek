@@ -13,9 +13,10 @@ app.use(express.bodyParser());    // Middleware for reading request body
 var linkedInClientId = '756jhxy8catk44';
 var linkedInClientSecret = 'BPdKzczERTAvfusd';
 
-var linkedInRedirectEndpoint = 'https://www.linkedin.com/uas/oauth2/authorization?';
-var linkedInValidateEndpoint = 'https://www.linkedin.com/uas/oauth2/accessToken';
-var linkedInUserEndpoint = "https://api.linkedin.com/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json";
+var linkedInBaseUrl = 'https://www.linkedin.com';
+var linkedInRedirectEndpoint = linkedInBaseUrl + '/uas/oauth2/authorization?';
+var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
+var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
 var ceekOAuth2RedirecUri = "https://ceek.parseapp.com/oauthCallback";
 if (process && process.env && process.env.LOCAL === "1") {

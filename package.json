@@ -1,0 +1,23 @@
+{
+  "name": "ceek",
+  "version": "0.0.1",
+  "description": "",
+  "main": "cloud/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/valdrinkoshi/ceek.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/valdrinkoshi/ceek/issues"
+  },
+  "homepage": "https://github.com/valdrinkoshi/ceek",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.2"
+  }
+}

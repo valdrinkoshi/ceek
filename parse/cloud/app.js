@@ -18,6 +18,9 @@ var linkedInValidateEndpoint = 'https://www.linkedin.com/uas/oauth2/accessToken'
 var linkedInUserEndpoint = "https://api.linkedin.com/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json";
 
 var ceekOAuth2RedirecUri = "https://ceek.parseapp.com/oauthCallback";
+if (process.env.LOCAL === "1") {
+  ceekOAuth2RedirecUri = "http://localhost:3000/oauthCallback";
+}
 
 /**
  * In the Data Browser, set the Class Permissions for these 2 classes to
@@ -39,7 +42,6 @@ app.get('/hello', function(req, res) {
 });
 
 app.get('/authorize', function(req, res) {
-
   var tokenRequest = new TokenRequest();
   // Secure the object against public access.
   tokenRequest.setACL(restrictedAcl);
@@ -203,7 +205,8 @@ var getLinkedInAccessToken = function(code) {
     url: linkedInValidateEndpoint,
     headers: {
       'Accept': 'application/json',
-      'User-Agent': 'Parse.com Cloud Code'
+      'User-Agent': 'Parse.com Cloud Code',
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: body
   });

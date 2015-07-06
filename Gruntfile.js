@@ -25,6 +25,16 @@ module.exports = function(grunt) {
         cwd: 'server',
         dest: 'parse/cloud/',
         src: '**/*'
+      },
+      vendor: { 
+        files: [{
+          expand: true,
+          cwd: 'node_modules/',
+          src: ['react-bootstrap/dist/react-bootstrap.min.js',
+            'react-router/umd/ReactRouter.min.js'],
+          dest: 'parse/public/lib/',
+          flatten: true
+        }]
       }
     },
     clean: {
@@ -52,6 +62,6 @@ module.exports = function(grunt) {
 
 
   grunt.registerTask('default', ['jshint']);
-  grunt.registerTask('parse-copy',['copy:client','copy:server']);
-  grunt.registerTask('serve', ['clean:parse','parse-copy', 'exec:serve','watch:parse']);
+  grunt.registerTask('parse-copy',['copy:client','copy:vendor', 'copy:server']);
+  grunt.registerTask('serve', ['clean:parse','parse-copy', 'exec:serve', 'watch:parse']);
 };

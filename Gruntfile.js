@@ -31,8 +31,24 @@ module.exports = function(grunt) {
           expand: true,
           cwd: 'node_modules/',
           src: ['react-bootstrap/dist/react-bootstrap.min.js',
-            'react-router/umd/ReactRouter.min.js'],
+            'react-router/umd/ReactRouter.min.js',
+            'bootstrap/dist/js/bootstrap.min.js'],
           dest: 'parse/public/lib/',
+          flatten: true
+        },
+        {
+          expand: true,
+          cwd: 'node_modules/',
+          src: ['bootstrap/dist/css/bootstrap.min.css',
+            'bootstrap/dist/css/bootstrap-theme.min.css'],
+          dest: 'parse/public/css/',
+          flatten: true
+        },
+        {
+          expand: true,
+          cwd: 'node_modules/',
+          src: ['bootstrap/dist/fonts/*'],
+          dest: 'parse/public/fonts/',
           flatten: true
         }]
       }

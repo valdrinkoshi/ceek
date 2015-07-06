@@ -2,12 +2,17 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     jshint: {
-      files: ['Gruntfile.js', 'parse/**/*.js', 'test/**/*.js'],
+      files: ['Gruntfile.js', 'client/**/*.js', 'test/**/*.js'],
       options: {
         globals: {}
       }
     },
-    watch: {},
+    watch: {
+      parse: {
+        files: ['Gruntfile.js', 'client/**/*','server/**/*'],
+        tasks: ['parse-copy']
+      }
+    },
     copy: {
       client: {
         expand: true,
@@ -33,13 +38,20 @@ module.exports = function(grunt) {
         }]
       }
     },
+    exec: {
+      serve: 'cd parse/ && parsedev &',
+      deploy: 'cd parse/ && parse deploy'
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  //grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-exec');
+
 
   grunt.registerTask('default', ['jshint']);
-  grunt.registerTask('serve', ['clean:parse','copy:client','copy:server']);
+  grunt.registerTask('parse-copy',['copy:client','copy:server']);
+  grunt.registerTask('serve', ['clean:parse','parse-copy', 'exec:serve','watch:parse']);
 };

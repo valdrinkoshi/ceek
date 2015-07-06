@@ -6,7 +6,7 @@
   <title>LinkedIn Authentication</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <!-- Latest compiled and minified JavaScript -->
-  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+  <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
   <script type="text/javascript">
     Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
   </script>
@@ -14,7 +14,6 @@
   <!-- Optional theme 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
   -->
-  <!--
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
@@ -25,6 +24,8 @@
     var Button = ReactBootstrap.Button;
     var Panel = ReactBootstrap.Panel;
     var Navbar = ReactBootstrap.Navbar;
+    var ListGroup = ReactBootstrap.ListGroup;
+    var ListGroupItem = ReactBootstrap.ListGroupItem;
     var CollapsibleNav = ReactBootstrap.CollapsibleNav;
     var NavItem = ReactBootstrap.NavItem;
     var Nav = ReactBootstrap.Nav;
@@ -32,10 +33,8 @@
     var Link = ReactRouter.Link;
     var RouteHandler = ReactRouter.RouteHandler;
   </script>
-  <script src="../build/user.js"></script>
-  <script src="../build/login.js"></script>
-  <script src="../build/app.js"></script>
-  -->
+  <script src="build/user.js"></script>
+  <script src="build/login.js"></script>
 </head>
 <body>
   <div class="container">
@@ -57,25 +56,9 @@
         </li>
       </ul>
     </div>
-    <script type="text/javascript">
-      if (!Parse.User.current()) {
-        window.location.href='/authorize';
-      } else {
-        Parse.Cloud.run('getUserProfileData', {}).then(
-        function(response) {
-          $('#name').text(response.get('firstName') + " " + response.get('lastName'));
-          $('#email').text(response.get('emailAddress'));
-          $('#description').text(response.get('summary'));
-          $('#github_details').show();
-        },
-        function(error) {
-          console.log(error);
-          alert('There was an error getting your LinkedIn details, ' + 'please check the console for more information.');
-        });
-      }
-    </script>
   </div>
 </body>
+  <script src="build/app.js"></script>
 </html>
 <!--
 <html>

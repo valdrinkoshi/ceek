@@ -123,7 +123,7 @@ app.get('/oauthCallback', function(req, res) {
   }).then(function(user) {
     /**
      * Render a page which sets the current user on the client-side and then
-     *   redirects to /main
+     *   redirects to /index.html
      */
        Parse.Cloud.useMasterKey();
     res.render('store_auth', { sessionToken: user.getSessionToken() });
@@ -138,10 +138,6 @@ app.get('/oauthCallback', function(req, res) {
     res.render('error', { errorMessage: JSON.stringify(error) });
   });
 
-});
-
-app.get('/main', function(req, res) {
-  res.render('main', {});
 });
 
 var getLinkedInUserDetails = function(accessToken) {

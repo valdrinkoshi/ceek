@@ -1,4 +1,83 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+  <title>LinkedIn Authentication</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+  <script type="text/javascript">
+    Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
+  </script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <!-- Optional theme 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  -->
+  <!--
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+  <script src="https://www.parsecdn.com/js/parse-react.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-router/0.13.3/ReactRouter.js"></script>
+  <script src="lib/react-bootstrap/react-bootstrap.min.js"></script>
+  <script type="text/javascript">
+    var Button = ReactBootstrap.Button;
+    var Panel = ReactBootstrap.Panel;
+    var Navbar = ReactBootstrap.Navbar;
+    var CollapsibleNav = ReactBootstrap.CollapsibleNav;
+    var NavItem = ReactBootstrap.NavItem;
+    var Nav = ReactBootstrap.Nav;
+    var Route = ReactRouter.Route;
+    var Link = ReactRouter.Link;
+    var RouteHandler = ReactRouter.RouteHandler;
+  </script>
+  <script src="../build/user.js"></script>
+  <script src="../build/login.js"></script>
+  <script src="../build/app.js"></script>
+  -->
+</head>
+<body>
+  <div class="container">
+    <h1 class="intro">LinkedIn Authentication</h1>
+    <div id="github_details" style="display:none">
+      <h2>You're logged in with LinkedIn!</h2>
+      <ul>
+        <li>
+          <h3>Name</h3>
+          <p id="name"></p>
+        </li>
+        <li>
+          <h3>Email Address</h3>
+          <p id="email"></p>
+        </li>
+        <li>
+          <h3>Description</h3>
+          <p id="description"></p>
+        </li>
+      </ul>
+    </div>
+    <script type="text/javascript">
+      if (!Parse.User.current()) {
+        window.location.href='/authorize';
+      } else {
+        Parse.Cloud.run('getUserProfileData', {}).then(
+        function(response) {
+          $('#name').text(response.get('firstName') + " " + response.get('lastName'));
+          $('#email').text(response.get('emailAddress'));
+          $('#description').text(response.get('summary'));
+          $('#github_details').show();
+        },
+        function(error) {
+          console.log(error);
+          alert('There was an error getting your LinkedIn details, ' + 'please check the console for more information.');
+        });
+      }
+    </script>
+  </div>
+</body>
+</html>
+<!--
 <html>
   <head>
     <title>Ceek</title>
@@ -18,3 +97,4 @@
     </div>
   </body>
 </html>
+-->

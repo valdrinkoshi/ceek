@@ -65,7 +65,7 @@ module.exports = function(grunt) {
       }
     },
     exec: {
-      serve: 'cd parse/ && parsedev &',
+      serve: 'jsx --watch client/scripts/ parse/public/build & cd parse/ && parsedev &',
       deploy: 'cd parse/ && parse deploy'
     }
   });

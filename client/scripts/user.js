@@ -5,7 +5,8 @@ var User = React.createClass({
   },
   componentDidMount: function() {
     var _this = this;
-    Parse.Cloud.run('getUserProfileData', {}).then(
+    if (Parse.User.current()) {
+      Parse.Cloud.run('getUserProfileData', {}).then(
       function(response) {
         _this.setState({
           user: {
@@ -18,7 +19,10 @@ var User = React.createClass({
       function(error) {
         console.log(error);
         alert('There was an error getting your LinkedIn details, ' + 'please check the console for more information.');
-        });
+      });
+    } else {
+      this.transitionTo("/");
+    }
   },
   render () {
     return (

@@ -2,22 +2,15 @@ var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
     return {
-      loggedIn: false,
+      loggedIn: Parse.User.current() != null,
     };
   },
   handleSelect: function (selectedKey) {
     console.log(selectedKey);
     if (selectedKey === 3) {
+      Parse.User.logOut();
+      this.transitionTo("/");
     }
-  },
-  handleLogin: function () {
-    var isAuthorized = true;
-    if (isAuthorized) {
-      this.transitionTo("user/:id", {id: "EM"})
-    } else {
-      this.transitionTo("/")
-    }
-    this.setState({loggedIn: isAuthorized})
   },
   render () {
     var navbarContent = null;
@@ -43,14 +36,11 @@ var App = React.createClass({
 
 var routes = [
 <Route handler={App}>
-  <Route name="/" handler={User}/>
+  <Route name="/" handler={SignUp}/>
+  <Route name="/profile" handler={User}/>
 </Route>
 ];
 
-if (!Parse.User.current()) {
-  window.location.href='/authorize';
-} else {
-  ReactRouter.run(routes, function (Handler, state) {
-    React.render(<Handler/>, document.body);
-  });
-}
+ReactRouter.run(routes, function (Handler, state) {
+  React.render(<Handler/>, document.body);
+});

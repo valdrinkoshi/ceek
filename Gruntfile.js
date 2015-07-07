@@ -7,10 +7,19 @@ module.exports = function(grunt) {
         globals: {}
       }
     },
+    react: {
+      files: {
+        expand: true,
+        cwd: 'client/scripts',
+        src: ['**/*.js'],
+        dest: 'parse/public/scripts',
+        ext: '.js'
+      }
+    },
     watch: {
       parse: {
         files: ['Gruntfile.js', 'client/**/*','server/**/*'],
-        tasks: ['parse-copy']
+        tasks: ['react','parse-copy']
       }
     },
     copy: {
@@ -18,7 +27,7 @@ module.exports = function(grunt) {
         expand: true,
         cwd: 'client',
         dest: 'parse/public/',
-        src: '**/*'
+        src: ['**/*.css', '**/*.html']
       },
       server: {
         expand: true,
@@ -65,7 +74,7 @@ module.exports = function(grunt) {
       }
     },
     exec: {
-      serve: 'jsx --watch client/scripts/ parse/public/build & cd parse/ && parsedev &',
+      serve: 'cd parse/ && parsedev &',
       deploy: 'cd parse/ && parse deploy'
     }
   });
@@ -75,9 +84,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-exec');
+  grunt.loadNpmTasks('grunt-react');
 
 
   grunt.registerTask('default', ['jshint']);
   grunt.registerTask('parse-copy',['copy:client','copy:vendor', 'copy:server']);
-  grunt.registerTask('serve', ['clean:parse','parse-copy', 'exec:serve', 'watch:parse']);
+  grunt.registerTask('serve', ['clean:parse','parse-copy', 'react', 'exec:serve', 'watch:parse']);
 };

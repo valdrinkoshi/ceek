@@ -74,7 +74,7 @@ module.exports = function(grunt) {
       }
     },
     exec: {
-      serve: 'cd parse/ && parsedev &',
+      serve: 'cd parse/ && export CEEK_LOCAL=1 && parsedev &',
       deploy: 'cd parse/ && parse deploy'
     }
   });

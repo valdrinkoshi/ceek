@@ -19,7 +19,7 @@ var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
 var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
 var ceekOAuth2RedirecUri = "https://ceek.parseapp.com/oauthCallback";
-if (process && process.env && process.env.LOCAL === "1") {
+if (process && process.env && process.env.CEEK_LOCAL === "1") {
   ceekOAuth2RedirecUri = "http://localhost:3000/oauthCallback";
 }
 

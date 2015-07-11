@@ -11,27 +11,27 @@ var Education = t.struct({
 });
 
 var Profile = t.struct({
-  name: t.Str,
-  surname: t.Str,
-  email: t.Str,
+  firstName: t.Str,
+  lastName: t.Str,
+  emailAddress: t.Str,
   summary: t.Str,
   education: t.maybe(t.list(Education))
 });
 
 var options = {
   fields: {
-    name: {
-    disabled: true,
+    firstName: {
+      disabled: true,
       attrs: {
         className: 'form-control',
       }
     },
-  email: {
+    emailAddress: {
       type: 'static'
-  },
-  summary: {
+    },
+    summary: {
       type: 'textarea'
-  }
+    }
   }
 };
 
@@ -49,9 +49,9 @@ var User = React.createClass({
       function(response) {
         _this.setState({
           value: {
-            name: response.get('firstName'),
-            surname: response.get('lastName'),
-            email: response.get('emailAddress'),
+            firstName: response.get('firstName'),
+            lastName: response.get('lastName'),
+            emailAddress: response.get('emailAddress'),
             summary: response.get('summary'),
             education: response.get('education')
           }
@@ -75,11 +75,10 @@ var User = React.createClass({
       console.log(value);
       Parse.Cloud.run('setUserProfileData', value).then(
       function(response) {
-        alert("okp");
+        console.log(response);
       },
       function(error) {
         console.log(error);
-        alert('There was an error getting your LinkedIn details, ' + 'please check the console for more information.');
       });
     }
   },

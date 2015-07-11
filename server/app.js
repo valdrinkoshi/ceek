@@ -263,6 +263,36 @@ Parse.Cloud.define('getUserProfileData', function(request, response) {
   });
 });
 
+Parse.Cloud.define('setUserProfileData', function(request, response) {
+  if (!request.user) {
+    return response.error('Must be logged in.');
+  }
+  var query = new Parse.Query(TokenStorage);
+  query.equalTo('user', request.user);
+  query.ascending('createdAt');
+  
+  Parse.Promise.as().then(function() {
+    return query.first({ useMasterKey: true });
+  }).then(function(tokenData) {
+    var linkedInId = tokenData.get('linkedInId');
+    if (!linkedInId) {
+      return Parse.Promise.error('No linkedInId data found.');
+    }
+    var userProfileQuery = new Parse.Query(UserProfile);
+    userProfileQuery.equalTo('linkedInId', linkedInId);
+    userProfileQuery.ascending('createdAt');
+    return userProfileQuery.first({ useMasterKey: true });
+  }).then(function(userDataResponse) {
+    //TODO: perform validation.
+    return userDataResponse.save(request.params, { useMasterKey: true });
+  }).then(function(userDataResponse) {
+    response.success({});
+  }, function(error) {
+    response.error(error);
+  });
+});
+
+
 
 // // Example reading from the request query string of an HTTP get request.
 // app.get('/test', function(req, res) {

@@ -136,18 +136,12 @@ var User = React.createClass({
       Parse.Cloud.run('getUserProfileData', {}).then(
       function(response) {
         _this.setState({
-          value: {
-            firstName: response.get('firstName'),
-            lastName: response.get('lastName'),
-            emailAddress: response.get('emailAddress'),
-            summary: response.get('summary'),
-            education: response.get('education')
-          }
+          value: response.attributes
         });
       },
       function(error) {
         console.log(error);
-        alert('There was an error saving your data');
+        alert('There was an error getting your data');
       });
     } else {
       this.transitionTo("/");
@@ -167,6 +161,7 @@ var User = React.createClass({
       },
       function(error) {
         console.log(error);
+        aler('There was an error saving your data');
       });
     }
   },

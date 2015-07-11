@@ -1,3 +1,6 @@
+var React = require('react');
+var ReactRouter = require('react-router');
+
 var SignUp = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   componentDidMount: function() {
@@ -16,3 +19,4 @@ var SignUp = React.createClass({
     )
   }
 });
+module.exports = SignUp;

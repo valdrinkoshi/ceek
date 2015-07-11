@@ -19,7 +19,7 @@ var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
 var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
 var ceekOAuth2RedirecUri = "https://ceek.parseapp.com/oauthCallback";
-if (process && process.env && process.env.LOCAL === "1") {
+if (process && process.env && process.env.CEEK_LOCAL === "1") {
   ceekOAuth2RedirecUri = "http://localhost:3000/oauthCallback";
 }
 
@@ -262,6 +262,36 @@ Parse.Cloud.define('getUserProfileData', function(request, response) {
     response.error(error);
   });
 });
+
+Parse.Cloud.define('setUserProfileData', function(request, response) {
+  if (!request.user) {
+    return response.error('Must be logged in.');
+  }
+  var query = new Parse.Query(TokenStorage);
+  query.equalTo('user', request.user);
+  query.ascending('createdAt');
+  
+  Parse.Promise.as().then(function() {
+    return query.first({ useMasterKey: true });
+  }).then(function(tokenData) {
+    var linkedInId = tokenData.get('linkedInId');
+    if (!linkedInId) {
+      return Parse.Promise.error('No linkedInId data found.');
+    }
+    var userProfileQuery = new Parse.Query(UserProfile);
+    userProfileQuery.equalTo('linkedInId', linkedInId);
+    userProfileQuery.ascending('createdAt');
+    return userProfileQuery.first({ useMasterKey: true });
+  }).then(function(userDataResponse) {
+    //TODO: perform validation.
+    return userDataResponse.save(request.params, { useMasterKey: true });
+  }).then(function(userDataResponse) {
+    response.success({});
+  }, function(error) {
+    response.error(error);
+  });
+});
+
 
 
 // // Example reading from the request query string of an HTTP get request.

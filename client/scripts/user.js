@@ -1,3 +1,6 @@
+var React = require('react');
+var ReactRouter = require('react-router');
+
 var User = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
@@ -36,3 +39,4 @@ var User = React.createClass({
     )
   }
 });
+module.exports = User;

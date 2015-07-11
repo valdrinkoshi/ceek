@@ -1,3 +1,8 @@
+var React = require('react');
+var ReactRouter = require('react-router');
+var SignUp = require('SignUp');
+var User = require('User');
+
 var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
@@ -33,6 +38,8 @@ var App = React.createClass({
     )
   }
 });
+
+module.exports = App;
 
 var routes = [
 <Route handler={App}>

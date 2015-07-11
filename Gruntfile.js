@@ -13,7 +13,7 @@ module.exports = function (grunt) {
                 src: [],
                 dest: 'parse/public/scripts/vendor.js',
                 options: {
-                  require: ['jquery', 'bootstrap', 'react', 'react-bootstrap', 'react-router','tcomb-form'],
+                  require: ['jquery', 'bootstrap', 'react', 'classnames', 'react-bootstrap', 'react-router','tcomb-form'],
                   transform: ['reactify'],
                 }
               },

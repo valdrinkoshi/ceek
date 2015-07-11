@@ -1,4 +1,5 @@
 var React = require('react');
+var classNames = require('classnames');
 var ReactRouter = require('react-router');
 var t = require('tcomb-form');
 var Form = t.form.Form;
@@ -27,43 +28,52 @@ var RoleType = t.struct({
 });
 
 
-function getBootStrapClassName (size, value) {
-  return ['col', size, value].join('-');
+function getBootStrapClassName (screenSize, columnValue) {
+  return ['col', screenSize, columnValue].join('-');
 };
 
-//tentative for dynamic 2 columns layout, this is probably the wrong way to do it!
-var twoColumnsLayout = function(locals){
-  //layouts in two columns
-  var bootstrapColumnWidth = 12;
-  var totColumns = 2;
-  var value = bootstrapColumnWidth/totColumns;
-  var bootstrapClassName = getBootStrapClassName("md", value);
-  var order = locals.order || Object.keys(locals.inputs);
-  var totInputs = order.length;
-  var totRows = totInputs/totColumns;
-  var inputPerColumn = totInputs/totRows;
-  var inputInCurrentColumn = 0;
-  var groupedControls = [[]];
-  console.log(bootstrapClassName);
-  for (var i = 0; i < order.length; i++) {
-      var currentChild = (<div className={bootstrapClassName}>{locals.inputs[order[i]]}</div>);
+function getBootStrapClassSet (config) {
+  var classes = {};
+  for (var screenSize in config) {
+    classes[getBootStrapClassName(screenSize, config[screenSize])] = true;
+  }
+  return classNames(classes);
+};
+
+
+//tentative for dynamic N columns layout, this is probably the wrong way to do it!
+var getMultiColumnsLayout = function(totColumns){
+  return function(locals){
+    //layouts in two columns
+    var bootstrapColumnWidth = 12;
+    var columnValue = bootstrapColumnWidth/totColumns;
+    var bootstrapClasses = getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnValue, 'lg': columnValue}); 
+    var order = locals.order || Object.keys(locals.inputs);
+    var totInputs = order.length;
+    var totRows = totInputs/totColumns;
+    var inputPerColumn = totInputs/totRows;
+    var inputInCurrentColumn = 0;
+    var groupedControls = [[]];
+    for (var i = 0; i < order.length; i++) {
+      var currentChild = (<div className={bootstrapClasses}>{locals.inputs[order[i]]}</div>);
       if (inputInCurrentColumn == inputPerColumn) {
         groupedControls.push([]);
         inputInCurrentColumn = 0;
       }
       groupedControls[groupedControls.length-1].push(currentChild);
       inputInCurrentColumn++;
-  }
-  var layoutNodes = [];
-  for (var i = 0; i < groupedControls.length; i++) {
-    var currentColumn = (<div className="row">{groupedControls[i]}</div>);
-    layoutNodes.push(currentColumn);
-  }
-  return (
-    <div>
-      {layoutNodes}
-    </div>
-  );
+    }
+    var layoutNodes = [];
+    for (var i = 0; i < groupedControls.length; i++) {
+      var currentColumn = (<div className="row">{groupedControls[i]}</div>);
+      layoutNodes.push(currentColumn);
+    }
+    return (
+      <div>
+        {layoutNodes}
+      </div>
+    );
+  };
 };
 
 var Profile = t.struct({
@@ -85,7 +95,7 @@ var options = {
       type: 'static'
     },
     roleType: {
-      template: twoColumnsLayout
+      template: getMultiColumnsLayout(3)
     },
     summary: {
       type: 'textarea'
@@ -117,7 +127,7 @@ var User = React.createClass({
       },
       function(error) {
         console.log(error);
-        alert('There was an error getting your LinkedIn details, ' + 'please check the console for more information.');
+        alert('There was an error saving your data');
       });
     } else {
       this.transitionTo("/");

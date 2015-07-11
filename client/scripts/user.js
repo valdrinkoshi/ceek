@@ -4,6 +4,12 @@ var ReactRouter = require('react-router');
 var t = require('tcomb-form');
 var Form = t.form.Form;
 
+var i18n = {
+  'firstName': 'Name',
+  'employmentType': 'This Employment Type',
+  'employmentType.permanent': 'Permanent (full time)'
+};
+
 var Education = t.struct({
   collegeName: t.Str,
   startDate: t.Dat,
@@ -109,7 +115,16 @@ var Profile = t.struct({
 var options = {
   fields: {
     firstName: {
+      label: i18n['firstName'],
       disabled: true,
+    },
+    employmentType: {
+      label: i18n['employmentType'],
+      fields: {
+        permanent: {
+          label: i18n['employmentType.permanent'],
+        }
+      }
     },
     emailAddress: {
       type: 'static'
@@ -125,11 +140,13 @@ var options = {
 
 var User = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
+
   getInitialState() {
     return {
       value: {}
     };
   },
+
   componentDidMount() {
     var _this = this;
     if (Parse.User.current()) {
@@ -147,8 +164,8 @@ var User = React.createClass({
       this.transitionTo("/");
     }
   },
+
   save() {
-  
     // call getValue() to get the values of the form
     var value = this.refs.form.getValue();
     // if validation fails, value will be null
@@ -179,7 +196,6 @@ var User = React.createClass({
       </div>
     );
   }
-
 });
 
 module.exports = User;

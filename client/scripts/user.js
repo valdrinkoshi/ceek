@@ -70,7 +70,7 @@ var getMultiColumnsLayout = function(totColumns){
     var inputInCurrentColumn = 0;
     var groupedControls = [[]];
     for (var i = 0; i < order.length; i++) {
-      var currentChild = (<LayoutColumn key={i} columnSpan={columnSpan}>{locals.inputs[order[i]]}</LayoutColumn>); //(<div key={i} className={bootstrapClasses}>{locals.inputs[order[i]]}</div>);
+      var currentChild = (<LayoutColumn key={i} columnSpan={columnSpan}>{locals.inputs[order[i]]}</LayoutColumn>);
       if (inputInCurrentColumn == inputPerColumn) {
         groupedControls.push([]);
         inputInCurrentColumn = 0;
@@ -87,7 +87,10 @@ var getMultiColumnsLayout = function(totColumns){
     });
     return (
       <div>
-        {layoutNodes}
+        <fieldset>
+          <legend>{locals.label}</legend>
+          {layoutNodes}
+        </fieldset>
       </div>
     );
   };

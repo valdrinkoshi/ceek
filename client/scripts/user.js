@@ -27,27 +27,42 @@ var RoleType = t.struct({
   okay: t.Bool
 });
 
-
-function getBootStrapClassName (screenSize, columnValue) {
-  return ['col', screenSize, columnValue].join('-');
-};
-
-function getBootStrapClassSet (config) {
-  var classes = {};
-  for (var screenSize in config) {
-    classes[getBootStrapClassName(screenSize, config[screenSize])] = true;
+var LayoutRow = React.createClass({
+  render () {
+    return (
+      <div className="row">
+        {this.props.children}
+      </div>
+    );
   }
-  return classNames(classes);
-};
+});
 
+var LayoutColumn = React.createClass({
+  getBootStrapClassName (screenSize, columnValue) {
+    return ['col', screenSize, columnValue].join('-');
+  },
+  getBootStrapClassSet (config) {
+    var classes = {};
+    for (var screenSize in config) {
+      classes[this.getBootStrapClassName(screenSize, config[screenSize])] = true;
+    }
+    return classNames(classes);
+  },
+  render () {
+    var columnSpan = this.props.columnSpan || 6;
+    var bootstrapClasses = this.getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnSpan, 'lg': columnSpan}); 
+    return (
+      <div className={bootstrapClasses}>{this.props.children}</div>
+    );
+  }
+});
 
 //tentative for dynamic N columns layout, this is probably the wrong way to do it!
 var getMultiColumnsLayout = function(totColumns){
   return function(locals){
     //layouts in two columns
     var bootstrapColumnWidth = 12;
-    var columnValue = bootstrapColumnWidth/totColumns;
-    var bootstrapClasses = getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnValue, 'lg': columnValue}); 
+    var columnSpan = bootstrapColumnWidth/totColumns;
     var order = locals.order || Object.keys(locals.inputs);
     var totInputs = order.length;
     var totRows = totInputs/totColumns;
@@ -55,7 +70,7 @@ var getMultiColumnsLayout = function(totColumns){
     var inputInCurrentColumn = 0;
     var groupedControls = [[]];
     for (var i = 0; i < order.length; i++) {
-      var currentChild = (<div className={bootstrapClasses}>{locals.inputs[order[i]]}</div>);
+      var currentChild = (<LayoutColumn key={i} columnSpan={columnSpan}>{locals.inputs[order[i]]}</LayoutColumn>); //(<div key={i} className={bootstrapClasses}>{locals.inputs[order[i]]}</div>);
       if (inputInCurrentColumn == inputPerColumn) {
         groupedControls.push([]);
         inputInCurrentColumn = 0;
@@ -63,11 +78,13 @@ var getMultiColumnsLayout = function(totColumns){
       groupedControls[groupedControls.length-1].push(currentChild);
       inputInCurrentColumn++;
     }
-    var layoutNodes = [];
-    for (var i = 0; i < groupedControls.length; i++) {
-      var currentColumn = (<div className="row">{groupedControls[i]}</div>);
-      layoutNodes.push(currentColumn);
-    }
+    var layoutNodes = groupedControls.map(function (controls, rowId) {
+      return (
+        <LayoutRow key={rowId}>
+          {controls}
+        </LayoutRow>
+      );
+    });
     return (
       <div>
         {layoutNodes}

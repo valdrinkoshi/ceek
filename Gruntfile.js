@@ -27,14 +27,21 @@ module.exports = function (grunt) {
                     './client/scripts/signup.js:SignUp',
                     './client/scripts/user.js:User',
                   ],
-                  external: ['react']
+                  external: ['react'],
+                  browserifyOptions: {
+                    debug: true
+                  }
                 }
               },
         },
         watch: {
+            vendor: {
+                files: ['Gruntfile.js'],
+                tasks: ['default', 'copy:vendor']
+            },
             parse: {
-                files: ['Gruntfile.js', 'client/**/*', 'server/**/*'],
-                tasks: ['default', 'parse-copy']
+                files: ['client/**/*', 'server/**/*'],
+                tasks: ['jshint', 'browserify:ceek', 'copy:client', 'copy:server']
             }
         },
         copy: {
@@ -92,10 +99,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-exec');
-    grunt.loadNpmTasks('grunt-react');
-
 
     grunt.registerTask('default', ['jshint', 'browserify']);
-    grunt.registerTask('parse-copy', ['copy:client', 'copy:vendor', 'copy:server']);
-    grunt.registerTask('serve', ['clean:parse', 'default', 'parse-copy', 'exec:serve', 'watch:parse']);
+    grunt.registerTask('build', ['clean', 'default', 'copy']);
+    grunt.registerTask('serve', ['build', 'exec:serve', 'watch']);
+    grunt.registerTask('deploy', ['exec:deploy']);
 };

@@ -165,6 +165,24 @@ var User = React.createClass({
     }
   },
 
+  postFile (event) {
+    event.preventDefault();
+    var parseFile = new Parse.File("file.pdf", React.findDOMNode(this.refs.fileToUpload).files[0]);
+    parseFile.save().then(function(file) {
+      Parse.Cloud.run('parseLICV', {url: file._url}).then(
+      function(response) {
+        alert(response);
+      },
+      function(error) {
+        console.log(error);
+        alert('There was an error getting your data');
+      });
+    }, function(error) {
+      alert(error);
+    });
+    return;
+  },
+
   save() {
     // call getValue() to get the values of the form
     var value = this.refs.form.getValue();
@@ -182,10 +200,13 @@ var User = React.createClass({
       });
     }
   },
-
   render() {
     return (
       <div>
+        <form onSubmit={this.postFile} encType="multipart/form-data">
+          <input type="file" ref="fileToUpload" name="fileToUpload" id="fileToUpload" />
+          <input type="submit" value="upload cv" />
+        </form>
         <Form
           ref="form"
           type={Profile}

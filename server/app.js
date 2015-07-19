@@ -246,24 +246,9 @@ Parse.Cloud.define('getUserProfileData', function(request, response) {
   if (!request.user) {
     return response.error('Must be logged in.');
   }
-  var query = new Parse.Query(TokenStorage);
-  query.equalTo('user', request.user);
-  query.ascending('createdAt');
-  
-  Parse.Promise.as().then(function() {
-    return query.first({ useMasterKey: true });
-  }).then(function(tokenData) {
-    var linkedInId = tokenData.get('linkedInId');
-    if (!linkedInId) {
-      return Parse.Promise.error('No linkedInId data found.');
-    }
-    var userProfileQuery = new Parse.Query(UserProfile);
-    userProfileQuery.equalTo('linkedInId', linkedInId);
-    userProfileQuery.ascending('createdAt');
-    return userProfileQuery.first({ useMasterKey: true });
-  }).then(function(userDataResponse) {
+  getUserProfile(request.user).then(function(userDataResponse) {
     var userData = userDataResponse;
-    response.success(userData);
+    response.success(userData.attributes);
   }, function(error) {
     response.error(error);
   });
@@ -319,35 +304,6 @@ var getUserProfile = function(user) {
   });
 }
 
-app.post('/uploadLICV', function(req, res) {
-  console.log(">>>>");
-  console.log(req.files);
-  fs.readFile(req.files.fileToUpload.path, {encoding: 'base64'}, function (err, data) {
-    if (err) {
-      throw err;
-    }
-    var body = '';
-    var postBody = '--AaB03x\r\nContent-Disposition: form-data; name="fileToUpload"; filename="file.pdf"\r\nContent-Type: application/pdf\r\nContent-Transfer-Encoding: base64\r\n\r\n';
-    body += postBody;
-    body += data;
-    body += '\r\n--AaB03x';
-    Parse.Cloud.httpRequest(
-    {
-      method:'POST',
-      url: herokuMuleUploadLICVService,
-      headers:{
-        'Content-Type': 'multipart/form-data; boundary=AaB03x',
-      },
-      body: body
-    }).then(function (data) {
-      var jsonCV = data.data;
-      console.log(typeof jsonCV);
-      console.log(jsonCV[0]);
-      res.end(data.text);
-    });
-  });
-});
-
 Parse.Cloud.define('parseLICV', function(request, response) {
   if (!request.user) {
     return response.error('Must be logged in.');
@@ -367,7 +323,7 @@ Parse.Cloud.define('parseLICV', function(request, response) {
         userProfile.set('education', formattedCV.education);
         userProfile.set('experience', formattedCV.experience);
         userProfile.save(null, {useMasterKey: true});
-        response.success(data.text);
+        response.success(userProfile.attributes);
       });
   });
 });

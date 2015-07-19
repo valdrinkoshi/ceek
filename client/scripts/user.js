@@ -17,6 +17,14 @@ var Education = t.struct({
   description: t.Str
 });
 
+var Experience = t.struct({
+  role: t.Str,
+  companyName: t.Str,
+  startDate: t.Dat,
+  endDate: t.Dat,
+  description: t.Str
+});
+
 var EmploymentType = t.struct({
   permanent: t.Bool,
   contract: t.Bool,
@@ -109,6 +117,7 @@ var Profile = t.struct({
   summary: t.Str,
   employmentType: EmploymentType,
   roleType: RoleType,
+  experience: t.maybe(t.list(Experience)),
   education: t.maybe(t.list(Education))
 });
 
@@ -153,7 +162,7 @@ var User = React.createClass({
       Parse.Cloud.run('getUserProfileData', {}).then(
       function(response) {
         _this.setState({
-          value: response.attributes
+          value: response
         });
       },
       function(error) {
@@ -165,13 +174,17 @@ var User = React.createClass({
     }
   },
 
-  postFile (event) {
+  uploadLICV (event) {
     event.preventDefault();
-    var parseFile = new Parse.File("file.pdf", React.findDOMNode(this.refs.fileToUpload).files[0]);
-    parseFile.save().then(function(file) {
-      Parse.Cloud.run('parseLICV', {url: file._url}).then(
+    var _this = this;
+    var file = React.findDOMNode(this.refs.fileToUpload).files[0];
+    var parseFile = new Parse.File(file.name, file);
+    parseFile.save().then(function(parseFile) {
+      Parse.Cloud.run('parseLICV', {url: parseFile.url()}).then(
       function(response) {
-        alert(response);
+        _this.setState({
+          value: response
+        })
       },
       function(error) {
         console.log(error);
@@ -203,12 +216,12 @@ var User = React.createClass({
   render() {
     return (
       <div>
-        <form onSubmit={this.postFile} encType="multipart/form-data">
-          <input type="file" ref="fileToUpload" name="fileToUpload" id="fileToUpload" />
-          <input type="submit" value="upload cv" />
+        <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
+          <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
+          <input type='submit' value='upload cv' />
         </form>
         <Form
-          ref="form"
+          ref='form'
           type={Profile}
           options={options}
           value={this.state.value}

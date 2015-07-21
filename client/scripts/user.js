@@ -12,6 +12,7 @@ var i18n = {
 
 var Education = t.struct({
   collegeName: t.Str,
+  degree: t.Str,
   startDate: t.Dat,
   endDate: t.Dat,
   description: t.Str
@@ -143,7 +144,26 @@ var options = {
     },
     summary: {
       type: 'textarea'
+    },
+    education: {
+      item: {
+        fields: {
+          description: {
+            type: 'textarea',
+          }
+        }
+      }
+    },
+    experience: {
+      item: {
+        fields: {
+          description: {
+            type: 'textarea',
+          }
+        }
+      }
     }
+
   }
 };
 

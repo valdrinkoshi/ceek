@@ -124,8 +124,7 @@ restrictedAcl.setPublicWriteAccess(false);
 // This is an example of hooking up a request handler with a specific request
 // path and HTTP verb using the Express routing API.
 app.get('/hello', function(req, res) {
-  console.log("EHLLO!")
-  res.end("{ message: 'Congrats, you just set up your app!' }");
+  res.render('hello', { message: 'Congrats, you just set up your app!' });
 });
 
 app.get('/authorize', function(req, res) {

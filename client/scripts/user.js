@@ -271,7 +271,8 @@ var User = React.createClass({
     event.preventDefault();
     var _this = this;
     var file = React.findDOMNode(this.refs.fileToUpload).files[0];
-    var parseFile = new Parse.File(file.name, file);
+    var fileName = file.name.replace(/[^a-zA-Z0-9_.]/g, '_');
+    var parseFile = new Parse.File(fileName, file);
     parseFile.save().then(function(parseFile) {
       Parse.Cloud.run('parseLICV', {url: parseFile.url()}).then(
       function(response) {
@@ -284,7 +285,7 @@ var User = React.createClass({
         alert('There was an error getting your data');
       });
     }, function(error) {
-      alert(error);
+      console.log(error);
     });
     return;
   },
@@ -302,7 +303,7 @@ var User = React.createClass({
       },
       function(error) {
         console.log(error);
-        aler('There was an error saving your data');
+        alert('There was an error saving your data');
       });
     }
   },

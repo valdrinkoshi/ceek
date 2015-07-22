@@ -3,7 +3,9 @@ var express = require('express');
 var app = express();
 var querystring = require('querystring');
 var _ = require('underscore');
-var Buffer = require('buffer').Buffer;
+var fs = require('fs');
+var http = require('http');
+
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -18,9 +20,12 @@ var linkedInRedirectEndpoint = linkedInBaseUrl + '/uas/oauth2/authorization?';
 var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
 var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
-var ceekOAuth2RedirecUri = "https://ceek.parseapp.com/oauthCallback";
-if (process && process.env && process.env.CEEK_LOCAL === "1") {
-  ceekOAuth2RedirecUri = "http://localhost:3000/oauthCallback";
+var ceekOAuth2RedirecUri = 'https://ceek.parseapp.com/oauthCallback';
+var herokuMuleBaseUrl = 'https://stormy-cliffs-8651.herokuapp.com';
+var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
+if (process && process.env && process.env.CEEK_LOCAL === '1') {
+  ceekOAuth2RedirecUri = 'http://localhost:3000/oauthCallback';
+  herokuMuleBaseUrl = 'http://localhost:5000/';
 }
 
 /**
@@ -39,7 +44,8 @@ restrictedAcl.setPublicWriteAccess(false);
 // This is an example of hooking up a request handler with a specific request
 // path and HTTP verb using the Express routing API.
 app.get('/hello', function(req, res) {
-  res.render('hello', { message: 'Congrats, you just set up your app!' });
+  console.log("EHLLO!")
+  res.end("{ message: 'Congrats, you just set up your app!' }");
 });
 
 app.get('/authorize', function(req, res) {
@@ -240,24 +246,9 @@ Parse.Cloud.define('getUserProfileData', function(request, response) {
   if (!request.user) {
     return response.error('Must be logged in.');
   }
-  var query = new Parse.Query(TokenStorage);
-  query.equalTo('user', request.user);
-  query.ascending('createdAt');
-  
-  Parse.Promise.as().then(function() {
-    return query.first({ useMasterKey: true });
-  }).then(function(tokenData) {
-    var linkedInId = tokenData.get('linkedInId');
-    if (!linkedInId) {
-      return Parse.Promise.error('No linkedInId data found.');
-    }
-    var userProfileQuery = new Parse.Query(UserProfile);
-    userProfileQuery.equalTo('linkedInId', linkedInId);
-    userProfileQuery.ascending('createdAt');
-    return userProfileQuery.first({ useMasterKey: true });
-  }).then(function(userDataResponse) {
+  getUserProfile(request.user).then(function(userDataResponse) {
     var userData = userDataResponse;
-    response.success(userData);
+    response.success(userData.attributes);
   }, function(error) {
     response.error(error);
   });
@@ -292,7 +283,50 @@ Parse.Cloud.define('setUserProfileData', function(request, response) {
   });
 });
 
+var getUserProfile = function(user) {
+  var query = new Parse.Query(TokenStorage);
+  query.equalTo('user', user);
+  query.ascending('createdAt');
+  
+  return Parse.Promise.as().then(function() {
+    return query.first({ useMasterKey: true });
+  }).then(function(tokenData) {
+    var linkedInId = tokenData.get('linkedInId');
+    if (!linkedInId) {
+      return Parse.Promise.error('No linkedInId data found.');
+    }
+    var userProfileQuery = new Parse.Query(UserProfile);
+    userProfileQuery.equalTo('linkedInId', linkedInId);
+    userProfileQuery.ascending('createdAt');
+    return userProfileQuery.first({ useMasterKey: true });
+  }).then(function (userDataProfile) {
+    return Parse.Promise.as(userDataProfile);
+  });
+}
 
+Parse.Cloud.define('parseLICV', function(request, response) {
+  if (!request.user) {
+    return response.error('Must be logged in.');
+  }
+  var url = request.params.url;
+  console.log(url);
+  var query = querystring.stringify({
+      'file_url': url
+  });
+  Parse.Cloud.httpRequest(
+    {
+      method:'GET',
+      url: herokuMuleUploadLICVService+'?'+query,
+    }).then(function (data) {
+      var formattedCV = data.data;
+      getUserProfile(request.user).then(function (userProfile) {
+        userProfile.set('education', formattedCV.education);
+        userProfile.set('experience', formattedCV.experience);
+        userProfile.save(null, {useMasterKey: true});
+        response.success(userProfile.attributes);
+      });
+  });
+});
 
 // // Example reading from the request query string of an HTTP get request.
 // app.get('/test', function(req, res) {

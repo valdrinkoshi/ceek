@@ -12,6 +12,15 @@ var i18n = {
 
 var Education = t.struct({
   collegeName: t.Str,
+  degree: t.Str,
+  startDate: t.Dat,
+  endDate: t.Dat,
+  description: t.Str
+});
+
+var Experience = t.struct({
+  role: t.Str,
+  companyName: t.Str,
   startDate: t.Dat,
   endDate: t.Dat,
   description: t.Str
@@ -109,6 +118,7 @@ var Profile = t.struct({
   summary: t.Str,
   employmentType: EmploymentType,
   roleType: RoleType,
+  experience: t.maybe(t.list(Experience)),
   education: t.maybe(t.list(Education))
 });
 
@@ -134,7 +144,26 @@ var options = {
     },
     summary: {
       type: 'textarea'
+    },
+    education: {
+      item: {
+        fields: {
+          description: {
+            type: 'textarea',
+          }
+        }
+      }
+    },
+    experience: {
+      item: {
+        fields: {
+          description: {
+            type: 'textarea',
+          }
+        }
+      }
     }
+
   }
 };
 
@@ -153,7 +182,7 @@ var User = React.createClass({
       Parse.Cloud.run('getUserProfileData', {}).then(
       function(response) {
         _this.setState({
-          value: response.attributes
+          value: response
         });
       },
       function(error) {
@@ -163,6 +192,28 @@ var User = React.createClass({
     } else {
       this.transitionTo("/");
     }
+  },
+
+  uploadLICV (event) {
+    event.preventDefault();
+    var _this = this;
+    var file = React.findDOMNode(this.refs.fileToUpload).files[0];
+    var parseFile = new Parse.File(file.name, file);
+    parseFile.save().then(function(parseFile) {
+      Parse.Cloud.run('parseLICV', {url: parseFile.url()}).then(
+      function(response) {
+        _this.setState({
+          value: response
+        })
+      },
+      function(error) {
+        console.log(error);
+        alert('There was an error getting your data');
+      });
+    }, function(error) {
+      alert(error);
+    });
+    return;
   },
 
   save() {
@@ -182,12 +233,15 @@ var User = React.createClass({
       });
     }
   },
-
   render() {
     return (
       <div>
+        <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
+          <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
+          <input type='submit' value='upload cv' />
+        </form>
         <Form
-          ref="form"
+          ref='form'
           type={Profile}
           options={options}
           value={this.state.value}

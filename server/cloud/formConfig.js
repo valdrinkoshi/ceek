@@ -1,5 +1,6 @@
 var formDef = {
   "meta": {
+    "options": {"order": ["firstName", "lastName", "emailAddress", "summary", "employmentType", "roleType", "experience", "education"]},
     "kind": "struct",
     "props": {
       "education": {
@@ -14,7 +15,7 @@ var formDef = {
                   "props": {
                     "collegeName": {"meta": {"kind": "irreducible", "name": "Str"}},
                     "degree": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "description": {"meta": {"kind": "irreducible", "name": "Str"}},
+                    "description": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}},
                     "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                     "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                   }
@@ -24,7 +25,7 @@ var formDef = {
           }
         }
       },
-      "emailAddress": {"meta": {"kind": "irreducible", "name": "Str"}},
+      "emailAddress": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"static"}}},
       "experience": {
         "meta": {
           "kind": "maybe",
@@ -37,7 +38,7 @@ var formDef = {
                   "props": {
                     "companyName": {"meta": {"kind": "irreducible", "name": "Str"}},
                     "role": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "description": {"meta": {"kind": "irreducible", "name": "Str"}},
+                    "description": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}},
                     "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                     "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                   }
@@ -47,10 +48,11 @@ var formDef = {
           }
         }
       },
-      "firstName": {"meta": {"kind": "irreducible", "name": "Str"}},
+      "firstName": {"meta": {"kind": "irreducible", "name": "Str", "options":{"disabled":true, "label":"firstName"}}},
       "lastName": {"meta": {"kind": "irreducible", "name": "Str"}},
       "roleType": {
         "meta": {
+          "options": {"template": ["getMultiColumnsLayout", 3]},
           "kind": "struct",
           "props": {
             "developer": {"meta": {"kind": "irreducible", "name": "Bool"}},
@@ -64,16 +66,17 @@ var formDef = {
       },
       "employmentType": {
         "meta": {
+          "options": {"label": "employmentType"},
           "kind": "struct",
           "props": {
             "contract": {"meta": {"kind": "irreducible", "name": "Bool"}},
             "inter": {"meta": {"kind": "irreducible", "name": "Bool"}},
             "partTime": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "permanent": {"meta": {"kind": "irreducible", "name": "Bool"}}
+            "permanent": {"meta": {"kind": "irreducible", "name": "Bool", "options": {"label": "employmentType.permanent"}}}
           }
         }
       },
-      "summary": {"meta": {"kind": "irreducible", "name": "Str"}}
+      "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}}
     }
   }
 };

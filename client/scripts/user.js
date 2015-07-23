@@ -5,123 +5,13 @@ var t = require('tcomb-form');
 var Form = t.form.Form;
 var formGenerationUtils = require('./formGenerationUtils.js');
 
-var formDef = {
-  "meta": {
-    "kind": "struct",
-    "props": {
-      "education": {
-        "meta": {
-          "kind": "maybe",
-          "type": {
-            "meta": {
-              "kind": "list",
-              "type": {
-                "meta": {
-                  "kind": "struct",
-                  "props": {
-                    "collegeName": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "degree": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "description": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                    "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "emailAddress": {"meta": {"kind": "irreducible", "name": "Str"}},
-      "experience": {
-        "meta": {
-          "kind": "maybe",
-          "type": {
-            "meta": {
-              "kind": "list",
-              "type": {
-                "meta": {
-                  "kind": "struct",
-                  "props": {
-                    "companyName": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "role": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "description": {"meta": {"kind": "irreducible", "name": "Str"}},
-                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                    "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "firstName": {"meta": {"kind": "irreducible", "name": "Str"}},
-      "lastName": {"meta": {"kind": "irreducible", "name": "Str"}},
-      "roleType": {
-        "meta": {
-          "kind": "struct",
-          "props": {
-            "developer": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "doesntMatter": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "frontEndDeveloper": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "fullStackDeveloper": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "moneyForNothing": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "okay": {"meta": {"kind": "irreducible", "name": "Bool"}}
-          }
-        }
-      },
-      "employmentType": {
-        "meta": {
-          "kind": "struct",
-          "props": {
-            "contract": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "inter": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "partTime": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "permanent": {"meta": {"kind": "irreducible", "name": "Bool"}}
-          }
-        }
-      },
-      "summary": {"meta": {"kind": "irreducible", "name": "Str"}}
-    }
-  }
-};
-
 var i18n = {
   'firstName': 'Name',
   'employmentType': 'This Employment Type',
   'employmentType.permanent': 'Permanent (full time)'
 };
 
-/*var Education = t.struct({
-  collegeName: t.Str,
-  degree: t.Str,
-  startDate: t.Dat,
-  endDate: t.Dat,
-  description: t.Str
-});
 
-var Experience = t.struct({
-  role: t.Str,
-  companyName: t.Str,
-  startDate: t.Dat,
-  endDate: t.Dat,
-  description: t.Str
-});
-
-var EmploymentType = t.struct({
-  permanent: t.Bool,
-  contract: t.Bool,
-  partTime: t.Bool,
-  inter: t.Bool
-});
-
-var RoleType = t.struct({
-  developer: t.Bool,
-  fullStackDeveloper: t.Bool,
-  frontEndDeveloper: t.Bool,
-  moneyForNothing: t.Bool,
-  doesntMatter: t.Bool,
-  okay: t.Bool
-});*/
 
 var LayoutRow = React.createClass({
   render () {
@@ -192,8 +82,6 @@ var getMultiColumnsLayout = function(totColumns){
   };
 };
 
-var Profile = formGenerationUtils.generateForm(formDef);
-
 var options = {
   order: ['firstName', 'lastName', 'emailAddress', 'summary', 'employmentType', 'roleType', 'experience', 'education'],
   fields: {
@@ -236,7 +124,6 @@ var options = {
         }
       }
     }
-
   }
 };
 
@@ -245,6 +132,7 @@ var User = React.createClass({
 
   getInitialState() {
     return {
+      formDef: null,
       value: {}
     };
   },
@@ -254,8 +142,11 @@ var User = React.createClass({
     if (Parse.User.current()) {
       Parse.Cloud.run('getUserProfileData', {}).then(
       function(response) {
+        var formDef = formGenerationUtils.generateForm(response.formDef);
+        var userProfileData = response.userProfileData;
         _this.setState({
-          value: response
+          formDef: formDef,
+          value: userProfileData
         });
       },
       function(error) {
@@ -308,19 +199,28 @@ var User = React.createClass({
     }
   },
   render() {
+    var output;
+    if (this.state.formDef) {
+      output =
+        <div>
+          <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
+            <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
+            <input type='submit' value='upload cv' />
+          </form>
+          <Form
+            ref='form'
+            type={this.state.formDef}
+            options={options}
+            value={this.state.value}
+          />
+          <Button onClick={this.save}>Save</Button>
+        </div>;
+    } else {
+      output = <div></div>;
+    }
     return (
       <div>
-        <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
-          <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
-          <input type='submit' value='upload cv' />
-        </form>
-        <Form
-          ref='form'
-          type={Profile}
-          options={options}
-          value={this.state.value}
-        />
-        <Button onClick={this.save}>Save</Button>
+        {output}
       </div>
     );
   }

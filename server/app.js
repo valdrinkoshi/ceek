@@ -9,6 +9,8 @@ var formConfig = require('cloud/formConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 
+var ADMIN_ROLE_NAME = 'admin';
+
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
 app.set('view engine', 'ejs');    // Set the template engine
@@ -241,8 +243,6 @@ var newLinkedInUser = function(accessToken, linkedInData) {
     userRoleQuery.equalTo('name', 'user');
     userRoleQuery.ascending('createdAt');
     return userRoleQuery.first({useMasterKey: true}).then(function (role) {
-      console.log('therole');
-      console.log(role);
       var relation = role.relation('users'); 
       relation.add(user);
       role.save();
@@ -272,6 +272,32 @@ var getUserProfile = function(user) {
     return userProfileQuery.first({ useMasterKey: true });
   }).then(function (userDataProfile) {
     return Parse.Promise.as(userDataProfile);
+  });
+}
+
+var getRole = function(roleName) {
+  var roleQuery = new Parse.Query(Parse.Role);
+  roleQuery.equalTo('name', roleName);
+  roleQuery.ascending('createdAt');
+  return roleQuery.first({ useMasterKey: true });
+}
+
+var userHasRole = function(user, roleName) {
+  return getRole(roleName).then(function (role) {
+    if (role) {
+      var usersRelation = role.relation('users');
+      var usersRelationQuery = usersRelation.query();
+      usersRelationQuery.equalTo(user.objectId);
+      return usersRelationQuery.first({useMasterKey: true}).then(function (user) {
+        if (user) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    } else {
+      return false;
+    }
   });
 }
 
@@ -328,7 +354,6 @@ app.get('/profile', function(request, response) {
       return fail(response, 'Must be logged in.');
     }
     getUserProfile(user).then(function(userDataResponse) {
-      console.log(user);
       var userData = userDataResponse;
       success(response, {
         formDef: formConfig.formDefinition,
@@ -349,7 +374,6 @@ app.post('/profile', function(request, response) {
     }
     getUserProfile(user).then(function(userDataResponse) {
       var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(request.body.data));
-      console.log(validatedForm);
       return userDataResponse.save(validatedForm, { useMasterKey: true });
     }).then(function(userDataResponse) {
       success(response, {});
@@ -360,7 +384,7 @@ app.post('/profile', function(request, response) {
 });
 
 app.get('/pprofile/:id', function(request, response) {
-  console.log(">pprofile", request.params.id);
+  
   var publicProfileId = request.params.id;
   var publicProfileQuery = new Parse.Query(PublicProfile);
   publicProfileQuery.equalTo('objectId', publicProfileId);
@@ -372,20 +396,63 @@ app.get('/pprofile/:id', function(request, response) {
   }).then(function(publicProfileData) {
     if (publicProfileData) {
       var userProfileQuery = new Parse.Query(UserProfile);
-      userProfileQuery.equalTo('userProfileId', publicProfileData.userProfileId);
+      userProfileQuery.equalTo('objectId', publicProfileData.get('userProfileId'));
       userProfileQuery.ascending('createdAt');
       return userProfileQuery.first({ useMasterKey: true });
     } else {
-      response.render('error', {errorMessage: 'Profile Expired'});
+      var errorMessage = {errorMessage: 'Profile Expired'};
+      if (request.accepts('html')) {
+        response.render('error', errorMessage);
+      } else {
+        fail(response, errorMessage);
+      }
     }
   }).then(function (userDataProfile) {
-    console.log(userDataProfile);
     //TODO trim data?
     if (userDataProfile) {
-      response.render('pprofile', userDataProfile.attributes);
+      if (request.accepts('html')) {
+        response.render('pprofile', userDataProfile.attributes);
+      } else {
+        success(response, userDataProfile.attributes);
+      }
     } else {
-      response.render('error');
+      var errorMessage = {errorMessage: 'Profile lost'};
+      if (request.accepts('html')) {
+        response.render('error', errorMessage);
+      } else {
+        fail(response, errorMessage);
+      }
     }
+  });
+});
+
+app.post('/pprofile', function(request, response) {
+  Parse.User.become(request.body.sessionToken).then(function (user) {
+    if (!user) {
+      return fail(response, 'Must be logged in.');
+    }
+    userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+      if (isAdmin) {
+        var userId = request.body.userId;
+        var publicProfile = new PublicProfile();
+        publicProfile.set('userProfileId', userId);
+        publicProfile.set('visible', true);
+        publicProfile.set('expireDate', new Date(Date.now()+86400000));
+        publicProfile.save(null, {
+          useMasterKey: true,
+          success: function (publicProfile) {
+            success(response, {publicProfileId: publicProfile.id});
+          },
+          error: function (object, error) {
+            fail(response, {msg: error});
+          }
+        })
+      } else {
+        fail(response, {msg: 'Admin permission needed'});
+      }
+    });
+  }, function (error) {
+    fail(response, error);
   });
 });
 

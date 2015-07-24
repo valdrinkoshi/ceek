@@ -5,7 +5,8 @@ var querystring = require('querystring');
 var _ = require('underscore');
 var fs = require('fs');
 var http = require('http');
-
+var formConfig = require('cloud/formConfig.js');
+var formValidationUtils = require('cloud/formValidationUtils.js');
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -44,8 +45,7 @@ restrictedAcl.setPublicWriteAccess(false);
 // This is an example of hooking up a request handler with a specific request
 // path and HTTP verb using the Express routing API.
 app.get('/hello', function(req, res) {
-  console.log("EHLLO!")
-  res.end("{ message: 'Congrats, you just set up your app!' }");
+  res.render('hello', { message: 'Congrats, you just set up your app!' });
 });
 
 app.get('/authorize', function(req, res) {
@@ -242,47 +242,6 @@ var newLinkedInUser = function(accessToken, linkedInData) {
   });
 }
 
-Parse.Cloud.define('getUserProfileData', function(request, response) {
-  if (!request.user) {
-    return response.error('Must be logged in.');
-  }
-  getUserProfile(request.user).then(function(userDataResponse) {
-    var userData = userDataResponse;
-    response.success(userData.attributes);
-  }, function(error) {
-    response.error(error);
-  });
-});
-
-Parse.Cloud.define('setUserProfileData', function(request, response) {
-  if (!request.user) {
-    return response.error('Must be logged in.');
-  }
-  var query = new Parse.Query(TokenStorage);
-  query.equalTo('user', request.user);
-  query.ascending('createdAt');
-  
-  Parse.Promise.as().then(function() {
-    return query.first({ useMasterKey: true });
-  }).then(function(tokenData) {
-    var linkedInId = tokenData.get('linkedInId');
-    if (!linkedInId) {
-      return Parse.Promise.error('No linkedInId data found.');
-    }
-    var userProfileQuery = new Parse.Query(UserProfile);
-    userProfileQuery.equalTo('linkedInId', linkedInId);
-    userProfileQuery.ascending('createdAt');
-    return userProfileQuery.first({ useMasterKey: true });
-  }).then(function(userDataResponse) {
-    //TODO: perform validation.
-    return userDataResponse.save(request.params, { useMasterKey: true });
-  }).then(function(userDataResponse) {
-    response.success({});
-  }, function(error) {
-    response.error(error);
-  });
-});
-
 var getUserProfile = function(user) {
   var query = new Parse.Query(TokenStorage);
   query.equalTo('user', user);
@@ -304,27 +263,85 @@ var getUserProfile = function(user) {
   });
 }
 
-Parse.Cloud.define('parseLICV', function(request, response) {
-  if (!request.user) {
-    return response.error('Must be logged in.');
+function success (res, data) {
+  if (typeof data !== 'object') {
+    data = {msg: data};
   }
-  var url = request.params.url;
-  console.log(url);
-  var query = querystring.stringify({
-      'file_url': url
+  return writeResponse(res, 200, 'application/json', JSON.stringify(data));
+}
+
+function fail (res, data) {
+  if (typeof data !== 'object') {
+    data = {msg: data};
+  }
+  return writeResponse(res, 400, 'application/json', JSON.stringify(data));
+}
+
+function writeResponse (res, statusCode, contentType, data) {
+  res.writeHead(statusCode, {
+    'Content-Type': contentType
   });
-  Parse.Cloud.httpRequest(
+  res.end(data);
+  return res;
+}
+
+app.get('/parseLICV', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    if (!user) {
+      return fail(response, 'Must be logged in.');
+    }
+    var url = request.query.url;
+    var query = querystring.stringify({
+      'file_url': url
+    });
+    Parse.Cloud.httpRequest(
     {
       method:'GET',
       url: herokuMuleUploadLICVService+'?'+query,
     }).then(function (data) {
       var formattedCV = data.data;
-      getUserProfile(request.user).then(function (userProfile) {
+      getUserProfile(user).then(function (userProfile) {
         userProfile.set('education', formattedCV.education);
         userProfile.set('experience', formattedCV.experience);
         userProfile.save(null, {useMasterKey: true});
-        response.success(userProfile.attributes);
+        success(response, userProfile.attributes);
       });
+    });
+  });
+});
+
+app.get('/profile', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    if (!user) {
+      return fail(response, 'Must be logged in.');
+    }
+    getUserProfile(user).then(function(userDataResponse) {
+      console.log(user);
+      var userData = userDataResponse;
+      success(response, {
+        formDef: formConfig.formDefinition,
+        userProfileData: userData.attributes
+      });
+    }, function(error) {
+      fail(response, error);
+    });
+  });
+});
+
+app.post('/profile', function(request, response) {
+  Parse.User.become(request.body.sessionToken).then(function (user) {
+    if (!user) {
+      return fail(response, 'Must be logged in.');
+    }
+    getUserProfile(user).then(function(userDataResponse) {
+      var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(request.body.data));
+      console.log(validatedForm);
+      return userDataResponse.save(validatedForm, { useMasterKey: true });
+    }).then(function(userDataResponse) {
+      success(response, {});
+    }, function(error) {
+      fail(response, error);
+    });
   });
 });
 

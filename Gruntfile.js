@@ -13,7 +13,7 @@ module.exports = function (grunt) {
                 src: [],
                 dest: 'parse/public/scripts/vendor.js',
                 options: {
-                  require: ['jquery', 'bootstrap', 'react', 'classnames', 'react-bootstrap', 'react-router','tcomb-form'],
+                  require: ['jquery', 'bootstrap', 'react', 'classnames', 'react-bootstrap', 'react-router','tcomb-form', './client/scripts/formGenerationUtils.js'],
                   transform: ['reactify'],
                 }
               },
@@ -54,6 +54,12 @@ module.exports = function (grunt) {
             server: {
                 expand: true,
                 cwd: 'server',
+                dest: 'parse/cloud/',
+                src: '**/*'
+            },
+            server_cloud: {
+                expand: true,
+                cwd: 'server/cloud/',
                 dest: 'parse/cloud/',
                 src: '**/*'
             },

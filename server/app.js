@@ -7,6 +7,7 @@ var fs = require('fs');
 var http = require('http');
 var formConfig = require('cloud/formConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
+var Buffer = require('buffer').Buffer;
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -37,6 +38,7 @@ if (process && process.env && process.env.CEEK_LOCAL === '1') {
 var TokenRequest = Parse.Object.extend("TokenRequest");
 var TokenStorage = Parse.Object.extend("TokenStorage");
 var UserProfile = Parse.Object.extend("UserProfile");
+var PublicProfile = Parse.Object.extend("PublicProfile");
 
 var restrictedAcl = new Parse.ACL();
 restrictedAcl.setPublicReadAccess(false);
@@ -235,8 +237,18 @@ var newLinkedInUser = function(accessToken, linkedInData) {
     ts.set('accessToken', accessToken);
     ts.set('user', user);
     ts.setACL(restrictedAcl);
-    // Use the master key because TokenStorage objects should be protected.
-    return ts.save(null, { useMasterKey: true });
+    var userRoleQuery = new Parse.Query(Parse.Role);
+    userRoleQuery.equalTo('name', 'user');
+    userRoleQuery.ascending('createdAt');
+    return userRoleQuery.first({useMasterKey: true}).then(function (role) {
+      console.log('therole');
+      console.log(role);
+      var relation = role.relation('users'); 
+      relation.add(user);
+      role.save();
+      // Use the master key because TokenStorage objects should be protected.
+      return ts.save(null, { useMasterKey: true });
+    });
   }).then(function(tokenStorage) {
     return upsertLinkedInUser(accessToken, linkedInData);
   });
@@ -325,6 +337,8 @@ app.get('/profile', function(request, response) {
     }, function(error) {
       fail(response, error);
     });
+  }, function (error) {
+    fail(response, error);
   });
 });
 
@@ -342,6 +356,36 @@ app.post('/profile', function(request, response) {
     }, function(error) {
       fail(response, error);
     });
+  });
+});
+
+app.get('/pprofile/:id', function(request, response) {
+  console.log(">pprofile", request.params.id);
+  var publicProfileId = request.params.id;
+  var publicProfileQuery = new Parse.Query(PublicProfile);
+  publicProfileQuery.equalTo('objectId', publicProfileId);
+  publicProfileQuery.greaterThan('expireDate', new Date());
+  publicProfileQuery.equalTo('visible', true);
+  publicProfileQuery.ascending('createdAt');
+  Parse.Promise.as().then(function() {
+    return publicProfileQuery.first({ useMasterKey: true });
+  }).then(function(publicProfileData) {
+    if (publicProfileData) {
+      var userProfileQuery = new Parse.Query(UserProfile);
+      userProfileQuery.equalTo('userProfileId', publicProfileData.userProfileId);
+      userProfileQuery.ascending('createdAt');
+      return userProfileQuery.first({ useMasterKey: true });
+    } else {
+      response.render('error', {errorMessage: 'Profile Expired'});
+    }
+  }).then(function (userDataProfile) {
+    console.log(userDataProfile);
+    //TODO trim data?
+    if (userDataProfile) {
+      response.render('pprofile', userDataProfile.attributes);
+    } else {
+      response.render('error');
+    }
   });
 });
 

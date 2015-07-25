@@ -59,14 +59,17 @@ var providers = {
 };
 
 Parse.Cloud.job('loadJobs', loadJobs);
+loadJobs({}, {});
 
 function loadJobs(request, status) {
     Parse.Cloud.useMasterKey();
     return getJobs()
         .then(saveJobs)
         .then(function () {
+            console.log('success', arguments.length);
             status.success('Saved successfully ' + arguments.length + ' new jobs');
         }, function (error) {
+            console.log('fail', error);
             status.error('Failed to save new jobs. ' + error);
         });
 }
@@ -81,17 +84,19 @@ function getJobs() {
 }
 
 function getJobjsForProvider(providerData, providerName) {
+    console.log('getJobjsForProvider start: ' + providerName + ' data ' + providerData);
     return Parse.Cloud.httpRequest(providerData.requestData)
         .then(function (response) {
+            console.log('getJobjsForProvider success: ' + providerName);
             return parseJobs(response.data, providerName);
-        }, function (error) {
+        }, function () {
             console.log('getJobjsForProvider failed: ' + providerName);
-            console.log(error);
             return Parse.Promise.as([]);
         });
 }
 
 function saveJobs(jobs) {
+    console.log('saving jobs ' + jobs.length);
     var promises = _.map(jobs, saveJob);
     return Parse.Promise.when(promises);
 }
@@ -116,8 +121,8 @@ function parseJobs(jobs, provider) {
     var parsed = _.map(jobs, function (job) {
         return parseJob(job, provider);
     });
-    _.remove(parsed, _.isUndefined);
-    return parsed;
+    console.log('parseJobs done ' + provider + ' jobs ' + parsed.length);
+    return _.filter(parsed, _.isObject);
 }
 
 function parseJob(job, provider) {
@@ -151,7 +156,7 @@ function getValue(data, provider, key) {
     var keys = path.split('.');
     var result = data;
     _.forEach(keys, function (k) {
-        if (!k.length) {
+        if (!k.length || !result) {
             //stop the loop if no key
             return false;
         }
@@ -164,10 +169,6 @@ function getValue(data, provider, key) {
         }
         else {
             result = result[k];
-        }
-        if (!result) {
-            //stop the loop
-            return false;
         }
     });
     return result;

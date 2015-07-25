@@ -22,7 +22,7 @@ var providers = {
         },
         mapping: {
             jobsList: '',
-            id: 'id',
+            jobId: 'id',
             title: 'title',
             url: 'url',
             type: 'type',
@@ -46,7 +46,7 @@ var providers = {
         },
         mapping: {
             jobsList: 'listings.listing',
-            id: 'id',
+            jobId: 'id',
             title: 'title',
             url: 'url',
             type: 'type',
@@ -66,10 +66,10 @@ function loadJobs(request, status) {
     return getJobs()
         .then(saveJobs)
         .then(function () {
-            console.log('success', arguments.length);
-            status.success('Saved successfully ' + arguments.length + ' new jobs');
+            console.log('Saved successfully ' + _.size(arguments) + ' new jobs');
+            status.success('Saved successfully ' + _.size(arguments) + ' new jobs');
         }, function (error) {
-            console.log('fail', error);
+            console.log('Failed to save new jobs. ' + error);
             status.error('Failed to save new jobs. ' + error);
         });
 }
@@ -102,42 +102,42 @@ function saveJobs(jobs) {
 
 function saveJob(jobData) {
     return findJob(jobData).then(function (job) {
-        console.log('saveJob: saving ' + jobData.provider + ' id ' + jobData.id + ' new = ' + !job);
+        console.log('saveJob: saving ' + jobData.provider + ' jobId ' + jobData.jobId + ' new = ' + !job);
         job = job || new Job();
         job.setACL(restrictedAcl);
         return job.save(jobData, {useMasterKey: true});
     }).then(function () {
-        console.log('saveJob: saved ' + jobData.provider + ' id ' + jobData.id);
+        console.log('saveJob: saved ' + jobData.provider + ' jobId ' + jobData.jobId);
     }, function (error) {
-        console.log('saveJob: failed ' + jobData.provider + ' id ' + jobData.id);
-        console.log(error);
+        console.log('saveJob: failed ' + jobData.provider + ' jobId ' + jobData.jobId + ' ' + error);
     });
 }
 
 function findJob(jobData) {
     var query = new Parse.Query(Job);
-    query.equalTo('jobId', jobData.id);
+    query.equalTo('jobId', jobData.jobId);
     query.equalTo('provider', jobData.provider);
     return query.first({useMasterKey: true});
 }
 
 function parseJobs(jobs, provider) {
-    jobs = getValue(jobs, provider, 'jobsList');
+    console.log('parseJobs raw data ' + JSON.stringify(jobs || {}));
+    jobs = getValue(jobs, provider, 'jobsList') || [];
     var parsed = _.map(jobs, function (job) {
         return parseJob(job, provider);
     });
     parsed = _.filter(parsed, _.isObject);
-    console.log('parseJobs ' + parsed.length + ' jobs from ' + provider);
+    console.log('parseJobs ' + provider + ': ' + _.size(jobs) + ' received, ' + _.size(parsed) + ' parsed');
     return parsed;
 }
 
 function parseJob(job, provider) {
-    var contact = getContact(job, provider),
-        jobId = getValue(job, provider, 'id');
+    var contact = getContact(job, provider) || '',
+        jobId = getValue(job, provider, 'jobId') || '';
     if (_.size(contact) && _.size(jobId)) {
         return {
             provider: provider,
-            id: jobId,
+            jobId: jobId,
             url: getValue(job, provider, 'url'),
             title: getValue(job, provider, 'title'),
             type: getValue(job, provider, 'type'),
@@ -163,7 +163,7 @@ function getValue(data, provider, key) {
     var keys = path.split('.');
     var result = data;
     _.forEach(keys, function (k) {
-        if (!k.length || !result) {
+        if (!_.size(k) || !result) {
             //stop the loop if no key
             return false;
         }

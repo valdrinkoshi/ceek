@@ -59,7 +59,7 @@ var providers = {
 };
 
 Parse.Cloud.job('loadJobs', loadJobs);
-loadJobs({}, {});
+//loadJobs({}, {});
 
 function loadJobs(request, status) {
     Parse.Cloud.useMasterKey();
@@ -84,7 +84,7 @@ function getJobs() {
 }
 
 function getJobjsForProvider(providerData, providerName) {
-    console.log('getJobjsForProvider start: ' + providerName + ' data ' + providerData);
+    console.log('getJobjsForProvider start: ' + providerName);
     return Parse.Cloud.httpRequest(providerData.requestData)
         .then(function (response) {
             console.log('getJobjsForProvider success: ' + providerName);
@@ -96,22 +96,27 @@ function getJobjsForProvider(providerData, providerName) {
 }
 
 function saveJobs(jobs) {
-    console.log('saving jobs ' + jobs.length);
     var promises = _.map(jobs, saveJob);
     return Parse.Promise.when(promises);
 }
 
 function saveJob(jobData) {
     return findJob(jobData).then(function (job) {
+        console.log('saveJob: saving ' + jobData.provider + ' id ' + jobData.id + ' new = ' + !job);
         job = job || new Job();
         job.setACL(restrictedAcl);
         return job.save(jobData, {useMasterKey: true});
+    }).then(function () {
+        console.log('saveJob: saved ' + jobData.provider + ' id ' + jobData.id);
+    }, function (error) {
+        console.log('saveJob: failed ' + jobData.provider + ' id ' + jobData.id);
+        console.log(error);
     });
 }
 
 function findJob(jobData) {
     var query = new Parse.Query(Job);
-    query.equalTo('jobId', jobData.jobId);
+    query.equalTo('jobId', jobData.id);
     query.equalTo('provider', jobData.provider);
     return query.first({useMasterKey: true});
 }
@@ -121,16 +126,18 @@ function parseJobs(jobs, provider) {
     var parsed = _.map(jobs, function (job) {
         return parseJob(job, provider);
     });
-    console.log('parseJobs done ' + provider + ' jobs ' + parsed.length);
-    return _.filter(parsed, _.isObject);
+    parsed = _.filter(parsed, _.isObject);
+    console.log('parseJobs ' + parsed.length + ' jobs from ' + provider);
+    return parsed;
 }
 
 function parseJob(job, provider) {
-    var contact = getContact(job, provider);
-    if (contact) {
+    var contact = getContact(job, provider),
+        jobId = getValue(job, provider, 'id');
+    if (_.size(contact) && _.size(jobId)) {
         return {
             provider: provider,
-            id: getValue(job, provider, 'id'),
+            id: jobId,
             url: getValue(job, provider, 'url'),
             title: getValue(job, provider, 'title'),
             type: getValue(job, provider, 'type'),

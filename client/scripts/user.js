@@ -2,6 +2,7 @@ var React = require('react');
 var ReactRouter = require('react-router');
 var t = require('tcomb-form');
 var Form = t.form.Form;
+var Services = require('./Services.js');
 var formGenerationUtils = require('./formGenerationUtils.js');
 
 var User = React.createClass({
@@ -17,7 +18,7 @@ var User = React.createClass({
   componentDidMount() {
     var _this = this;
     if (Parse.User.current()) {
-      $.get('profile', {sessionToken: Parse.User.current().getSessionToken()}, function (response) {
+      Services.GetProfile().then(function (response) {
         var formDef = formGenerationUtils.generateForm(response.formDef);
         var formOptions = formGenerationUtils.generateOptions(response.formDef);
         var userProfileData = response.userProfileData;
@@ -39,10 +40,11 @@ var User = React.createClass({
     var fileName = file.name.replace(/[^a-zA-Z0-9_.]/g, '_');
     var parseFile = new Parse.File(fileName, file);
     parseFile.save().then(function(parseFile) {
-      $.get('parseLICV', {sessionToken: Parse.User.current().getSessionToken(), url: parseFile.url()}, function (response) {
-          _this.setState({
-            value: response
-          });
+      Services.ParseLICV(parseFile.url()).then(function (response) {
+        console.log(response);
+        _this.setState({
+          value: response
+        });
       });
     });
   },
@@ -54,7 +56,8 @@ var User = React.createClass({
     if (value) {
       // value here is an instance of Person
       console.log(value);
-      $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: JSON.stringify(value)}, function (data) {
+      Services.PostProfile(JSON.stringify(value)).then(function (data) {
+        console.log(data);
       });
     }
   },

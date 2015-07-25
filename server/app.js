@@ -302,6 +302,9 @@ var userHasRole = function(user, roleName) {
 }
 
 function success (res, data) {
+  if (res.success) {
+    return res.success(data);
+  }
   if (typeof data !== 'object') {
     data = {msg: data};
   }
@@ -309,6 +312,9 @@ function success (res, data) {
 }
 
 function fail (res, data) {
+  if (res.error) {
+    return res.error(data);
+  }
   if (typeof data !== 'object') {
     data = {msg: data};
   }
@@ -323,68 +329,107 @@ function writeResponse (res, statusCode, contentType, data) {
   return res;
 }
 
-app.get('/parseLICV', function(request, response) {
-  Parse.User.become(request.query.sessionToken).then(function (user) {
-    if (!user) {
-      return fail(response, 'Must be logged in.');
-    }
-    var url = request.query.url;
-    var query = querystring.stringify({
-      'file_url': url
-    });
-    Parse.Cloud.httpRequest(
-    {
-      method:'GET',
-      url: herokuMuleUploadLICVService+'?'+query,
-    }).then(function (data) {
-      var formattedCV = data.data;
-      getUserProfile(user).then(function (userProfile) {
-        userProfile.set('education', formattedCV.education);
-        userProfile.set('experience', formattedCV.experience);
-        userProfile.save(null, {useMasterKey: true});
-        success(response, userProfile.attributes);
-      });
-    });
+var ParseLICV = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  var url;
+  if (!Array.isArray(request.params) && typeof request.params === "object") {
+    url = request.params.url;
+  } else {
+    url = request.query.url;
+  }
+  var query = querystring.stringify({
+    'file_url': url
   });
-});
-
-app.get('/profile', function(request, response) {
-  Parse.User.become(request.query.sessionToken).then(function (user) {
-    if (!user) {
-      return fail(response, 'Must be logged in.');
-    }
-    getUserProfile(user).then(function(userDataResponse) {
-      var userData = userDataResponse;
-      success(response, {
-        formDef: formConfig.formDefinition,
-        userProfileData: userData.attributes
-      });
-    }, function(error) {
-      fail(response, error);
+  Parse.Cloud.httpRequest({
+    method:'GET',
+    url: herokuMuleUploadLICVService+'?'+query,
+  }).then(function (data) {
+    var formattedCV = data.data;
+    getUserProfile(user).then(function (userProfile) {
+      userProfile.set('education', formattedCV.education);
+      userProfile.set('experience', formattedCV.experience);
+      userProfile.save(null, {useMasterKey: true});
+      success(response, userProfile.attributes);
     });
   }, function (error) {
+    console.log(error);
+  });
+}
+
+Parse.Cloud.define('ParseLICV', function (request, response) {
+  ParseLICV(request.user, request, response);
+});
+
+app.get('/parseLICV', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    ParseLICV(user, request, response);
+  }, function(error) {
     fail(response, error);
   });
 });
 
+var GetProfile = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  getUserProfile(user).then(function(userDataResponse) {
+    var userData = userDataResponse;
+    success(response, {
+      formDef: formConfig.formDefinition,
+      userProfileData: userData.attributes
+    });
+  }, function(error) {
+    fail(response, error);
+  });
+};
+
+Parse.Cloud.define('GetProfile', function (request, response) {
+  GetProfile(request.user, request, response);
+});
+
+app.get('/profile', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    GetProfile(user, request, response);
+  }, function(error) {
+      fail(response, error);
+  });
+});
+
+var PostProfile = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  getUserProfile(user).then(function(userDataResponse) {
+    var formData;
+    if (request.params) {
+      formData = request.params.data;
+    } else {
+      formData = request.body.data;
+    }
+    var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(formData));
+      return userDataResponse.save(validatedForm, { useMasterKey: true });
+  }).then(function(userDataResponse) {
+    success(response, {msg: 'All good!'});
+  }, function(error) {
+    fail(response, error);
+  });
+};
+
+Parse.Cloud.define('PostProfile', function (request, response) {
+  PostProfile(request.user, request, response);
+});
+
 app.post('/profile', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    if (!user) {
-      return fail(response, 'Must be logged in.');
-    }
-    getUserProfile(user).then(function(userDataResponse) {
-      var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(request.body.data));
-      return userDataResponse.save(validatedForm, { useMasterKey: true });
-    }).then(function(userDataResponse) {
-      success(response, {});
-    }, function(error) {
-      fail(response, error);
-    });
+    PostProfile(user, request, response);
+  }, function(error) {
+    fail(response, error);
   });
 });
 
 app.get('/pprofile/:id', function(request, response) {
-  
   var publicProfileId = request.params.id;
   var publicProfileQuery = new Parse.Query(PublicProfile);
   publicProfileQuery.equalTo('objectId', publicProfileId);
@@ -426,31 +471,44 @@ app.get('/pprofile/:id', function(request, response) {
   });
 });
 
+var PostPProfile = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+    if (isAdmin) {
+      var userId;
+      if (request.body) {
+        userId = request.body.userId;
+      } else {
+        userId = request.params.userId;
+      }
+      var publicProfile = new PublicProfile();
+      publicProfile.set('userProfileId', userId);
+      publicProfile.set('visible', true);
+      publicProfile.set('expireDate', new Date(Date.now()+86400000));
+      publicProfile.save(null, {
+        useMasterKey: true,
+        success: function (publicProfile) {
+          success(response, {publicProfileId: publicProfile.id});
+        },
+        error: function (object, error) {
+          fail(response, {msg: error});
+        }
+      })
+    } else {
+      fail(response, {msg: 'Admin permission needed'});
+    }
+  });
+};
+
+Parse.Cloud.define('PostPProfile', function (request, response) {
+  PostPProfile(request.user, request, response);
+});
+
 app.post('/pprofile', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    if (!user) {
-      return fail(response, 'Must be logged in.');
-    }
-    userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
-      if (isAdmin) {
-        var userId = request.body.userId;
-        var publicProfile = new PublicProfile();
-        publicProfile.set('userProfileId', userId);
-        publicProfile.set('visible', true);
-        publicProfile.set('expireDate', new Date(Date.now()+86400000));
-        publicProfile.save(null, {
-          useMasterKey: true,
-          success: function (publicProfile) {
-            success(response, {publicProfileId: publicProfile.id});
-          },
-          error: function (object, error) {
-            fail(response, {msg: error});
-          }
-        })
-      } else {
-        fail(response, {msg: 'Admin permission needed'});
-      }
-    });
+    PostPProfile(user, request, response);
   }, function (error) {
     fail(response, error);
   });

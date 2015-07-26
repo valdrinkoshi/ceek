@@ -484,6 +484,7 @@ var PostPProfile = function (user, request, response) {
         userId = request.params.userId;
       }
       var publicProfile = new PublicProfile();
+      publicProfile.setACL(restrictedAcl);
       publicProfile.set('userProfileId', userId);
       publicProfile.set('visible', true);
       publicProfile.set('expireDate', new Date(Date.now()+86400000));

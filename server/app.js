@@ -37,10 +37,11 @@ if (process && process.env && process.env.CEEK_LOCAL === '1') {
  *   disallow public access for Get/Find/Create/Update/Delete operations.
  * Only the master key should be able to query or write to these classes.
  */
-var TokenRequest = Parse.Object.extend("TokenRequest");
-var TokenStorage = Parse.Object.extend("TokenStorage");
-var UserProfile = Parse.Object.extend("UserProfile");
-var PublicProfile = Parse.Object.extend("PublicProfile");
+var TokenRequest = Parse.Object.extend('TokenRequest');
+var TokenStorage = Parse.Object.extend('TokenStorage');
+var UserProfile = Parse.Object.extend('UserProfile');
+var PublicProfile = Parse.Object.extend('PublicProfile');
+var MatchesPage = Parse.Object.extend('MatchesPage');
 
 var restrictedAcl = new Parse.ACL();
 restrictedAcl.setPublicReadAccess(false);
@@ -154,7 +155,6 @@ var getLinkedInUserDetails = function(accessToken) {
   var data = {
     method: 'GET',
     url: linkedInUserEndpoint,
-    //params: { access_token: accessToken },
     headers: {
       'User-Agent': 'Parse.com Cloud Code',
       'Authorization': 'Bearer ' + accessToken
@@ -254,32 +254,52 @@ var newLinkedInUser = function(accessToken, linkedInData) {
   });
 }
 
+var getObjectById = function(className, objectId) {
+  return getObjectWithProperties(className, {'objectId': objectId});
+};
+
+var getObjectWithProperties = function(className, properties) {
+  console.log('>getObjectWithProperties:', properties);
+  var objectQuery = new Parse.Query(className);
+  var ascendingAction = false;
+  for (var i = 0; i < properties.length; i++) {
+    var property = properties[i];
+    var operator = 'equalTo';
+    if (property.operator) {
+      operator = property.operator;
+    }
+    if (property.name === 'ascending') {
+      ascendingAction = true;
+    }
+    objectQuery[operator](property.name, property.value)
+  }
+  if (!ascendingAction) {
+    objectQuery.ascending('createdAt');
+  }
+  return objectQuery.first({ useMasterKey: true });
+};
+
+var getUser = function(userId) {
+  return getObjectById(Parse.User, userId);
+}
+
 var getUserProfile = function(user) {
-  var query = new Parse.Query(TokenStorage);
-  query.equalTo('user', user);
-  query.ascending('createdAt');
-  
   return Parse.Promise.as().then(function() {
-    return query.first({ useMasterKey: true });
+    return getObjectWithProperties(TokenStorage, [{name: 'user', value: user}]);
   }).then(function(tokenData) {
     var linkedInId = tokenData.get('linkedInId');
     if (!linkedInId) {
       return Parse.Promise.error('No linkedInId data found.');
     }
-    var userProfileQuery = new Parse.Query(UserProfile);
-    userProfileQuery.equalTo('linkedInId', linkedInId);
-    userProfileQuery.ascending('createdAt');
-    return userProfileQuery.first({ useMasterKey: true });
+    return getObjectWithProperties(UserProfile, [{name: 'linkedInId', value: linkedInId}]);
   }).then(function (userDataProfile) {
+    //TODO: trim data?
     return Parse.Promise.as(userDataProfile);
   });
 }
 
 var getRole = function(roleName) {
-  var roleQuery = new Parse.Query(Parse.Role);
-  roleQuery.equalTo('name', roleName);
-  roleQuery.ascending('createdAt');
-  return roleQuery.first({ useMasterKey: true });
+  return getObjectWithProperties(Parse.Role, [{name: 'name', value: roleName}]);
 }
 
 var userHasRole = function(user, roleName) {
@@ -431,14 +451,11 @@ app.post('/profile', function(request, response) {
 
 app.get('/pprofile/:id', function(request, response) {
   var publicProfileId = request.params.id;
-  var publicProfileQuery = new Parse.Query(PublicProfile);
-  publicProfileQuery.equalTo('objectId', publicProfileId);
-  publicProfileQuery.greaterThan('expireDate', new Date());
-  publicProfileQuery.equalTo('visible', true);
-  publicProfileQuery.ascending('createdAt');
-  Parse.Promise.as().then(function() {
-    return publicProfileQuery.first({ useMasterKey: true });
-  }).then(function(publicProfileData) {
+  getObjectWithProperties(PublicProfile, [
+      {name: 'objectId', value: publicProfileId},
+      {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+      {name: 'visible', value: true}
+  ]).then(function(publicProfileData) {
     if (publicProfileData) {
       var userProfileQuery = new Parse.Query(UserProfile);
       userProfileQuery.equalTo('objectId', publicProfileData.get('userProfileId'));
@@ -471,6 +488,16 @@ app.get('/pprofile/:id', function(request, response) {
   });
 });
 
+var createPublicProfile = function (userId) {
+  var publicProfile = new PublicProfile();
+  publicProfile.setACL(restrictedAcl);
+  publicProfile.set('userProfileId', userId);
+  publicProfile.set('publicProfileId', undefined);
+  publicProfile.set('visible', true);
+  publicProfile.set('expireDate', new Date(Date.now()+86400000));
+  return publicProfile.save(null, {useMasterKey: true});
+};
+
 var PostPProfile = function (user, request, response) {
   if (!user) {
     return fail(response, 'Must be logged in.');
@@ -483,20 +510,14 @@ var PostPProfile = function (user, request, response) {
       } else {
         userId = request.params.userId;
       }
-      var publicProfile = new PublicProfile();
-      publicProfile.setACL(restrictedAcl);
-      publicProfile.set('userProfileId', userId);
-      publicProfile.set('visible', true);
-      publicProfile.set('expireDate', new Date(Date.now()+86400000));
-      publicProfile.save(null, {
-        useMasterKey: true,
-        success: function (publicProfile) {
+      createPublicProfile(userId).then(
+        function (publicProfile) {
           success(response, {publicProfileId: publicProfile.id});
         },
-        error: function (object, error) {
+        function (object, error) {
           fail(response, {msg: error});
         }
-      })
+      );
     } else {
       fail(response, {msg: 'Admin permission needed'});
     }
@@ -510,6 +531,92 @@ Parse.Cloud.define('PostPProfile', function (request, response) {
 app.post('/pprofile', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
     PostPProfile(user, request, response);
+  }, function (error) {
+    fail(response, error);
+  });
+});
+
+app.get('/matches/:id', function(request, response) {
+  var matchesPageId = request.params.id;
+  getObjectWithProperties(MatchesPage, [
+    {name: 'objectId', value: matchesPageId},
+    {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+    {name: 'visible', value: true},
+  ]).then(function(matchesPage) {
+    if (matchesPage) {
+      if (request.accepts('html')) {
+        response.render('matches', matchesPage.attributes);
+      } else {
+        success(response, matchesPage.attributes);
+      }
+    } else {
+      var errorMessage = {errorMessage: 'Page lost'};
+      if (request.accepts('html')) {
+        response.render('error', errorMessage);
+      } else {
+        fail(response, errorMessage);
+      }
+    }
+  });
+});
+
+var PostMatches = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+    if (isAdmin) {
+      var userIds;
+      if (request.body) {
+        userIds = request.body.userIds;
+      } else {
+        userIds = request.params.userIds;
+      }
+      userIds = JSON.parse(userIds);
+      var userProfilePromises = [];
+      for (var i = 0; i < userIds.length; i++) {
+        userProfilePromises.push(createPublicProfile(userIds[i]));
+      }
+      Parse.Promise.when(userProfilePromises).then(
+        function () {
+          if (arguments.length > 0) {
+            var userProfileIds = [];
+            for (var i = 0; i < arguments.length; i++) {
+              userProfileIds.push(arguments[i].id);
+            }
+          var matchesPage = new MatchesPage();
+          matchesPage.setACL(restrictedAcl);
+          matchesPage.set('publicProfileIds', JSON.stringify(userProfileIds));
+          matchesPage.set('visible', true);
+          matchesPage.set('matchesPageId', undefined);
+          matchesPage.set('expireDate', new Date(Date.now()+86400000));
+          matchesPage.save(null, {
+            useMasterKey: true,
+            success: function (matchesPage) {
+              success(response, {matchesPageId: matchesPage.id});
+            },
+            error: function (object, error) {
+              fail(response, {msg: error});
+            }
+          });
+          }
+        },
+        function (error) {
+        }
+      );
+    } else {
+      fail(response, {msg: 'Admin permission needed'});
+    }
+  });
+};
+
+Parse.Cloud.define('PostMatches', function (request, response) {
+  PostPProfile(request.user, request, response);
+});
+
+app.post('/matches', function(request, response) {
+  Parse.User.become(request.body.sessionToken).then(function (user) {
+    PostMatches(user, request, response);
   }, function (error) {
     fail(response, error);
   });

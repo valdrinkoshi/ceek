@@ -403,10 +403,10 @@ var PostProfile = function (user, request, response) {
   }
   getUserProfile(user).then(function(userDataResponse) {
     var formData;
-    if (request.params) {
-      formData = request.params.data;
-    } else {
+    if (request.body.data) {
       formData = request.body.data;
+    } else {
+      formData = request.params.data;
     }
     var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(formData));
       return userDataResponse.save(validatedForm, { useMasterKey: true });

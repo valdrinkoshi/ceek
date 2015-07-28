@@ -23,7 +23,7 @@ Services.PostProfile = function (value) {
       postProfilePromise.resolve(data);
     });
   } else {
-    $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: JSON.stringify(value)}, function (data) {
+    $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: value}, function (data) {
       postProfilePromise.resolve(data);
     });
   }

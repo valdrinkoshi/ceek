@@ -265,7 +265,7 @@ var getObjectWithProperties = function(className, properties) {
     properties = [];
   }
   if (properties.length == 0) {
-    return Parse.Promise.as().then(function () {return null;});
+    return Parse.Promise.as(null);
   }
   var objectQuery = new Parse.Query(className);
   var ascendingAction = false;

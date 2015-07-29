@@ -255,11 +255,18 @@ var newLinkedInUser = function(accessToken, linkedInData) {
 }
 
 var getObjectById = function(className, objectId) {
-  return getObjectWithProperties(className, {'objectId': objectId});
+  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}]);
 };
 
 var getObjectWithProperties = function(className, properties) {
   console.log('>getObjectWithProperties:', properties);
+  //a little security checks to make sure we don't run empty queries
+  if (!Array.isArray(properties)) {
+    properties = [];
+  }
+  if (properties.length == 0) {
+    return Parse.Promise.as().then(function () {return null;});
+  }
   var objectQuery = new Parse.Query(className);
   var ascendingAction = false;
   for (var i = 0; i < properties.length; i++) {
@@ -271,7 +278,7 @@ var getObjectWithProperties = function(className, properties) {
     if (property.name === 'ascending') {
       ascendingAction = true;
     }
-    objectQuery[operator](property.name, property.value)
+    objectQuery[operator](property.name || null, property.value || null)
   }
   if (!ascendingAction) {
     objectQuery.ascending('createdAt');
@@ -544,11 +551,40 @@ app.get('/matches/:id', function(request, response) {
     {name: 'visible', value: true},
   ]).then(function(matchesPage) {
     if (matchesPage) {
-      if (request.accepts('html')) {
-        response.render('matches', matchesPage.attributes);
-      } else {
-        success(response, matchesPage.attributes);
+      matchesPage = matchesPage.attributes;
+      var userProfilePromises = [];
+      var userProfileIds = matchesPage.userProfileIds;
+      for (var i = 0; i < userProfileIds.length; i++) {
+        var userProfileId = userProfileIds[i];
+        userProfilePromises.push(getObjectById(UserProfile, userProfileId));
       }
+      Parse.Promise.when(userProfilePromises).then(
+        function () {
+          if (arguments.length > 0) {
+            var userProfiles = [];
+            for (var i = 0; i < arguments.length; i++) {
+              if (arguments[i]) {
+                //TODO: trim data?
+                userProfiles.push(arguments[i].attributes);
+              }
+            }
+            matchesPage.userProfiles = userProfiles;
+            if (request.accepts('html')) {
+              response.render('matches', matchesPage);
+            } else {
+              success(response, matchesPage);
+            }
+          }
+        },
+        function (error) {
+          var errorMessage = {errorMessage: 'Something with this page went wrong'};
+          if (request.accepts('html')) {
+            response.render('error', errorMessage);
+          } else {
+            fail(response, errorMessage);
+          }
+        }
+      );
     } else {
       var errorMessage = {errorMessage: 'Page lost'};
       if (request.accepts('html')) {
@@ -566,27 +602,31 @@ var PostMatches = function (user, request, response) {
   }
   userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
     if (isAdmin) {
-      var userIds;
+      var userProfileIds;
       if (request.body) {
-        userIds = request.body.userIds;
+        userProfileIds = request.body.userProfileIds;
       } else {
-        userIds = request.params.userIds;
+        userProfileIds = request.params.userProfileIds;
       }
-      userIds = JSON.parse(userIds);
-      var userProfilePromises = [];
-      for (var i = 0; i < userIds.length; i++) {
-        userProfilePromises.push(createPublicProfile(userIds[i]));
+      if (!userProfileIds) {
+        return fail(response, 'Parameters missing.');
       }
-      Parse.Promise.when(userProfilePromises).then(
+      userProfileIds = JSON.parse(userProfileIds);
+      var userPProfilePromises = [];
+      for (var i = 0; i < userProfileIds.length; i++) {
+        userPProfilePromises.push(createPublicProfile(userProfileIds[i]));
+      }
+      Parse.Promise.when(userPProfilePromises).then(
         function () {
           if (arguments.length > 0) {
-            var userProfileIds = [];
+            var userPProfileIds = [];
             for (var i = 0; i < arguments.length; i++) {
-              userProfileIds.push(arguments[i].id);
+              userPProfileIds.push(arguments[i].id);
             }
           var matchesPage = new MatchesPage();
           matchesPage.setACL(restrictedAcl);
-          matchesPage.set('publicProfileIds', JSON.stringify(userProfileIds));
+          matchesPage.set('publicProfileIds', userPProfileIds);
+          matchesPage.set('userProfileIds', userProfileIds);
           matchesPage.set('visible', true);
           matchesPage.set('matchesPageId', undefined);
           matchesPage.set('expireDate', new Date(Date.now()+86400000));

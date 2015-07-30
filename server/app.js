@@ -8,6 +8,8 @@ var http = require('http');
 var formConfig = require('cloud/formConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
+var Mailgun = require('mailgun');
+Mailgun.initialize('myDomainName', 'pubkey-bf02f4a5fa13b4dfdce8838c801bf274');
 
 var ADMIN_ROLE_NAME = 'admin';
 
@@ -328,6 +330,54 @@ var userHasRole = function(user, roleName) {
   });
 }
 
+var userHasAdminPermission = function (user, response) {
+  if (!user) {
+    fail(response, 'Must be logged in.');
+    return false;
+  }
+  return userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+    if (isAdmin) {
+      return true;
+    } else {
+      fail(response, {msg: 'Admin permission needed'});
+      return false;
+    }
+  });
+}
+
+function checkParams (request, response, requiredParams) {
+  var receivedParams = {};
+  if (request.method === 'GET') {
+    if (request.query) {
+      receivedParams = request.query;
+    } else if (request.params) {
+      receivedParams = request.params;
+    }
+  } else if (request.method === 'POST') {
+    if (request.body) {
+      receivedParams = request.body;
+    } else if (request.params) {
+      receivedParams = request.params;
+    }
+  }
+  console.log('>checkParams', request.method);
+  return checkActualParams(response, requiredParams, receivedParams);
+}
+
+function checkActualParams (response, requiredParams, receivedParams) {
+  console.log('>checkActualParams', receivedParams);
+  for (var i = 0; i < requiredParams.length; i++) {
+    var requireParam = requiredParams[i];
+    //TODO validate parameter type (and convert?) requireParam.type
+    if (!receivedParams.hasOwnProperty(requireParam.key)) {
+      console.log('>checkActualParams', requireParam.key, 'missing.');
+      fail(response, {msg: 'Missing required params'});
+      return null;
+    }
+  }
+  return receivedParams;
+}
+
 function success (res, data) {
   if (res.success) {
     return res.success(data);
@@ -425,16 +475,16 @@ app.get('/profile', function(request, response) {
 });
 
 var PostProfile = function (user, request, response) {
+  var requiredParams = [{key: 'data', type: 'json'}];
+  var receivedParams = checkParams(request, response, requiredParams);
+  if (!receivedParams) {
+    return;
+  }
   if (!user) {
     return fail(response, 'Must be logged in.');
   }
   getUserProfile(user).then(function(userDataResponse) {
-    var formData;
-    if (request.body.data) {
-      formData = request.body.data;
-    } else {
-      formData = request.params.data;
-    }
+    var formData = receivedParams.data;
     var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(formData));
       return userDataResponse.save(validatedForm, { useMasterKey: true });
   }).then(function(userDataResponse) {
@@ -506,17 +556,14 @@ var createPublicProfile = function (userId) {
 };
 
 var PostPProfile = function (user, request, response) {
-  if (!user) {
-    return fail(response, 'Must be logged in.');
+  var requiredParams = [{key: 'userId', type: 'string'}];
+  var receivedParams = checkParams(request, response, requiredParams);
+  if (!receivedParams) {
+    return;
   }
-  userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+  userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      var userId;
-      if (request.body) {
-        userId = request.body.userId;
-      } else {
-        userId = request.params.userId;
-      }
+      var userId = requiredParams.userId;
       createPublicProfile(userId).then(
         function (publicProfile) {
           success(response, {publicProfileId: publicProfile.id});
@@ -525,8 +572,6 @@ var PostPProfile = function (user, request, response) {
           fail(response, {msg: error});
         }
       );
-    } else {
-      fail(response, {msg: 'Admin permission needed'});
     }
   });
 };
@@ -597,21 +642,14 @@ app.get('/matches/:id', function(request, response) {
 });
 
 var PostMatches = function (user, request, response) {
-  if (!user) {
-    return fail(response, 'Must be logged in.');
+  var requiredParams = [{key: 'userProfileIds', type: 'json'}];
+  var receivedParams = checkParams(request, response, requiredParams);
+  if (!receivedParams) {
+    return;
   }
-  userHasRole(user, ADMIN_ROLE_NAME).then(function (isAdmin) {
+  userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      var userProfileIds;
-      if (request.body) {
-        userProfileIds = request.body.userProfileIds;
-      } else {
-        userProfileIds = request.params.userProfileIds;
-      }
-      if (!userProfileIds) {
-        return fail(response, 'Parameters missing.');
-      }
-      userProfileIds = JSON.parse(userProfileIds);
+      var userProfileIds = JSON.parse(receivedParams.userProfileIds);
       var userPProfilePromises = [];
       for (var i = 0; i < userProfileIds.length; i++) {
         userPProfilePromises.push(createPublicProfile(userProfileIds[i]));
@@ -644,8 +682,6 @@ var PostMatches = function (user, request, response) {
         function (error) {
         }
       );
-    } else {
-      fail(response, {msg: 'Admin permission needed'});
     }
   });
 };
@@ -657,6 +693,45 @@ Parse.Cloud.define('PostMatches', function (request, response) {
 app.post('/matches', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
     PostMatches(user, request, response);
+  }, function (error) {
+    fail(response, error);
+  });
+});
+
+var PostMail = function (user, request, response) {
+  var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}];
+  console.log(request.body);
+  var receivedParams = checkParams(request, response, requiredParams);
+  if (!receivedParams) {
+    return;
+  }
+  userHasAdminPermission(user, response).then(function (isAdmin) {
+    if (isAdmin) {
+      Mailgun.sendEmail({
+        to: requiredParams.to,
+        from: requiredParams.from,
+        subject: requiredParams.subject,
+        text: requiredParams.text
+      }, {
+        success: function() {
+          success(response, {msg: 'You\'re good!'});
+        },
+        error: function(error) {
+          fail(response, {msg: error});
+        }
+      });
+      return;
+    }
+  });
+};
+
+Parse.Cloud.define('PostMail', function (request, response) {
+  PostPProfile(request.user, request, response);
+});
+
+app.post('/mail', function(request, response) {
+  Parse.User.become(request.body.sessionToken).then(function (user) {
+    PostMail(user, request, response);
   }, function (error) {
     fail(response, error);
   });

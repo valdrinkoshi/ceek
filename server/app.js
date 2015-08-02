@@ -684,7 +684,7 @@ app.post('/matches', function(request, response) {
 });
 
 var PostMail = function (user, request, response, params) {
-  var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}];
+  var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}, {key: 'html', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
@@ -695,7 +695,8 @@ var PostMail = function (user, request, response, params) {
         to: receivedParams.to,
         from: receivedParams.from,
         subject: receivedParams.subject,
-        text: receivedParams.text
+        text: receivedParams.text,
+        html: receivedParams.html
       }, {
         success: function() {
           success(response, {msg: 'Message Sent!'});

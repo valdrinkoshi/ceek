@@ -9,7 +9,7 @@ var formConfig = require('cloud/formConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 var Mailgun = require('mailgun');
-Mailgun.initialize('myDomainName', 'pubkey-bf02f4a5fa13b4dfdce8838c801bf274');
+Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
 
@@ -345,22 +345,8 @@ var userHasAdminPermission = function (user, response) {
   });
 }
 
-function checkParams (request, response, requiredParams) {
-  var receivedParams = {};
-  if (request.method === 'GET') {
-    if (request.query) {
-      receivedParams = request.query;
-    } else if (request.params) {
-      receivedParams = request.params;
-    }
-  } else if (request.method === 'POST') {
-    if (request.body) {
-      receivedParams = request.body;
-    } else if (request.params) {
-      receivedParams = request.params;
-    }
-  }
-  console.log('>checkParams', request.method);
+function checkParams (request, response, params, requiredParams) {
+  var receivedParams = params || {};
   return checkActualParams(response, requiredParams, receivedParams);
 }
 
@@ -370,7 +356,6 @@ function checkActualParams (response, requiredParams, receivedParams) {
     var requireParam = requiredParams[i];
     //TODO validate parameter type (and convert?) requireParam.type
     if (!receivedParams.hasOwnProperty(requireParam.key)) {
-      console.log('>checkActualParams', requireParam.key, 'missing.');
       fail(response, {msg: 'Missing required params'});
       return null;
     }
@@ -474,9 +459,9 @@ app.get('/profile', function(request, response) {
   });
 });
 
-var PostProfile = function (user, request, response) {
+var PostProfile = function (user, request, response, params) {
   var requiredParams = [{key: 'data', type: 'json'}];
-  var receivedParams = checkParams(request, response, requiredParams);
+  var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
   }
@@ -495,12 +480,12 @@ var PostProfile = function (user, request, response) {
 };
 
 Parse.Cloud.define('PostProfile', function (request, response) {
-  PostProfile(request.user, request, response);
+  PostProfile(request.user, request, response, request.params);
 });
 
 app.post('/profile', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    PostProfile(user, request, response);
+    PostProfile(user, request, response, request.body);
   }, function(error) {
     fail(response, error);
   });
@@ -555,15 +540,15 @@ var createPublicProfile = function (userId) {
   return publicProfile.save(null, {useMasterKey: true});
 };
 
-var PostPProfile = function (user, request, response) {
+var PostPProfile = function (user, request, response, params) {
   var requiredParams = [{key: 'userId', type: 'string'}];
-  var receivedParams = checkParams(request, response, requiredParams);
+  var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
   }
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      var userId = requiredParams.userId;
+      var userId = receivedParams.userId;
       createPublicProfile(userId).then(
         function (publicProfile) {
           success(response, {publicProfileId: publicProfile.id});
@@ -577,12 +562,12 @@ var PostPProfile = function (user, request, response) {
 };
 
 Parse.Cloud.define('PostPProfile', function (request, response) {
-  PostPProfile(request.user, request, response);
+  PostPProfile(request.user, request, response, request.params);
 });
 
 app.post('/pprofile', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    PostPProfile(user, request, response);
+    PostPProfile(user, request, response, request.body);
   }, function (error) {
     fail(response, error);
   });
@@ -641,9 +626,9 @@ app.get('/matches/:id', function(request, response) {
   });
 });
 
-var PostMatches = function (user, request, response) {
+var PostMatches = function (user, request, response, params) {
   var requiredParams = [{key: 'userProfileIds', type: 'json'}];
-  var receivedParams = checkParams(request, response, requiredParams);
+  var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
   }
@@ -687,34 +672,33 @@ var PostMatches = function (user, request, response) {
 };
 
 Parse.Cloud.define('PostMatches', function (request, response) {
-  PostPProfile(request.user, request, response);
+  PostMatches(request.user, request, response, request.params);
 });
 
 app.post('/matches', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    PostMatches(user, request, response);
+    PostMatches(user, request, response, request.body);
   }, function (error) {
     fail(response, error);
   });
 });
 
-var PostMail = function (user, request, response) {
+var PostMail = function (user, request, response, params) {
   var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}];
-  console.log(request.body);
-  var receivedParams = checkParams(request, response, requiredParams);
+  var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
   }
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
       Mailgun.sendEmail({
-        to: requiredParams.to,
-        from: requiredParams.from,
-        subject: requiredParams.subject,
-        text: requiredParams.text
+        to: receivedParams.to,
+        from: receivedParams.from,
+        subject: receivedParams.subject,
+        text: receivedParams.text
       }, {
         success: function() {
-          success(response, {msg: 'You\'re good!'});
+          success(response, {msg: 'Message Sent!'});
         },
         error: function(error) {
           fail(response, {msg: error});
@@ -726,12 +710,12 @@ var PostMail = function (user, request, response) {
 };
 
 Parse.Cloud.define('PostMail', function (request, response) {
-  PostPProfile(request.user, request, response);
+  PostMail(request.user, request, response, request.params);
 });
 
 app.post('/mail', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
-    PostMail(user, request, response);
+    PostMail(user, request, response, request.body);
   }, function (error) {
     fail(response, error);
   });

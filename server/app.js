@@ -412,6 +412,7 @@ var ParseLICV = function (user, request, response) {
     getUserProfile(user).then(function (userProfile) {
       userProfile.set('education', formattedCV.education);
       userProfile.set('experience', formattedCV.experience);
+      userProfile.set('skills', formattedCV.skills);
       userProfile.save(null, {useMasterKey: true});
       success(response, userProfile.attributes);
     });

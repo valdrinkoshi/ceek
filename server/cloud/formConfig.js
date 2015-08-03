@@ -1,6 +1,6 @@
 var formDef = {
   "meta": {
-    "options": {"order": ["firstName", "lastName", "emailAddress", "summary", "employmentType", "roleType", "experience", "education"]},
+    "options": {"order": ["firstName", "lastName", "emailAddress", "summary", "employmentType", "roleType", "experience", "education", "skills"]},
     "kind": "struct",
     "props": {
       "education": {
@@ -76,7 +76,22 @@ var formDef = {
           }
         }
       },
-      "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}}
+      "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}},
+      "skills": {
+        "meta": {
+          "kind": "maybe",
+          "type": {
+            "meta": {
+              "kind": "list",
+              "type": {
+                "meta": {
+                  "kind": "irreducible", "name": "Str"
+                }
+              }
+            }
+          }
+        }
+      },
     }
   }
 };

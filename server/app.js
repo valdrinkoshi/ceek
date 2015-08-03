@@ -8,6 +8,8 @@ var http = require('http');
 var formConfig = require('cloud/formConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
+var parseExpressHttpsRedirect = require('parse-express-https-redirect');
+var parseExpressCookieSession = require('parse-express-cookie-session');
 var Mailgun = require('mailgun');
 Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
@@ -17,6 +19,9 @@ var ADMIN_ROLE_NAME = 'admin';
 app.set('views', 'cloud/views');  // Specify the folder to find templates
 app.set('view engine', 'ejs');    // Set the template engine
 app.use(express.bodyParser());    // Middleware for reading request body
+app.use(parseExpressHttpsRedirect());  // Require user to be on HTTPS.
+app.use(express.cookieParser('ceek_cookie_sign'));
+app.use(parseExpressCookieSession({ cookie: { maxAge: 3600000 } }))
 
 var linkedInClientId = '756jhxy8catk44';
 var linkedInClientSecret = 'BPdKzczERTAvfusd';
@@ -44,6 +49,7 @@ var TokenStorage = Parse.Object.extend('TokenStorage');
 var UserProfile = Parse.Object.extend('UserProfile');
 var PublicProfile = Parse.Object.extend('PublicProfile');
 var MatchesPage = Parse.Object.extend('MatchesPage');
+var Job = Parse.Object.extend('Job');
 
 var restrictedAcl = new Parse.ACL();
 restrictedAcl.setPublicReadAccess(false);
@@ -575,6 +581,7 @@ app.post('/pprofile', function(request, response) {
 });
 
 app.get('/matches/:id', function(request, response) {
+  var errorMessage = {errorMessage: 'Something with this page went wrong'};
   var matchesPageId = request.params.id;
   getObjectWithProperties(MatchesPage, [
     {name: 'objectId', value: matchesPageId},
@@ -605,10 +612,12 @@ app.get('/matches/:id', function(request, response) {
             } else {
               success(response, matchesPage);
             }
+          } else {
+            fail(response, errorMessage);
           }
         },
         function (error) {
-          var errorMessage = {errorMessage: 'Something with this page went wrong'};
+          
           if (request.accepts('html')) {
             response.render('error', errorMessage);
           } else {
@@ -721,6 +730,30 @@ app.post('/mail', function(request, response) {
   }, function (error) {
     fail(response, error);
   });
+});
+
+app.get('/admin', function(request, response) {
+  if (Parse.User.current()) {
+    Parse.User.current().fetch().then(function(user) {
+        userHasAdminPermission(user, response).then(
+        function (isAdmin) {
+            var userProfilesQuery = new Parse.Query(UserProfile);
+            userProfilesQuery.ascending('createdAt');
+            var jobsQuery = new Parse.Query(Job);
+            jobsQuery.ascending('createdAt');
+            Parse.Promise.when(userProfilesQuery.find({useMasterKey: true}), jobsQuery.find({useMasterKey: true})).then(function (userProfiles, jobs) {
+              if (userProfiles, jobs) {
+                response.render('admin', {userProfiles: userProfiles, jobs: jobs});
+              }
+            });
+        },
+        function(error) {
+          fail(reponse, {msg: 'Must be logged in!'})
+        });
+    });
+  } else {
+      fail(reponse, {msg: 'Must be logged in!'});
+  }
 });
 
 // // Example reading from the request query string of an HTTP get request.

@@ -575,6 +575,7 @@ app.post('/pprofile', function(request, response) {
 });
 
 app.get('/matches/:id', function(request, response) {
+  var errorMessage = {errorMessage: 'Something with this page went wrong'};
   var matchesPageId = request.params.id;
   getObjectWithProperties(MatchesPage, [
     {name: 'objectId', value: matchesPageId},
@@ -605,10 +606,11 @@ app.get('/matches/:id', function(request, response) {
             } else {
               success(response, matchesPage);
             }
+          } else {
+            fail(response, errorMessage);
           }
         },
         function (error) {
-          var errorMessage = {errorMessage: 'Something with this page went wrong'};
           if (request.accepts('html')) {
             response.render('error', errorMessage);
           } else {

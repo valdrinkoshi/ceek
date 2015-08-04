@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+    <script src="scripts/vendor.js"></script>
+    <script>
+      var React = require('react');
+    </script>
+    <script src="scripts/adminbundle.js"></script>
     <title>Admin Page</title>
   </head>
   <body>
     <h1>Admin Page</h1>
     <h3>Users</h3>
-    <table border="1">
-      <% for(var i=0; i<userProfiles.length; i++) { %>
-        <% userProfile = userProfiles[i].attributes %>
-        <tr>
-          <td>
-            <%= userProfile.firstName %>
-          </td>
-          <td>
-            <%= userProfile.lastName %>
-          </td>
-        </tr>
-      <% } %>
-    </table>
+    <div id='usersTable'></div>
     <h3>Jobs</h3>
     <table border="1">
       <% for(var i=0; i<jobs.length; i++) { %>
@@ -35,4 +30,19 @@
     </table>
 
   </body>
+  <script>
+    Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
+    var UsersTable = require('UsersTable');
+    var columns = ['firstName', 'lastName', 'emailAddress'];
+    React.render(
+      React.createElement(UsersTable, null),
+      document.getElementById('usersTable')
+    );
+    /*AdminServices.GetUsers({}).then(function (data) {
+      React.render(
+        React.createElement(FilterableTable, {data: data, columns: columns}),
+        document.getElementById('usersTable')
+      );
+    });*/
+  </script>
 </html>

@@ -13,7 +13,7 @@ module.exports = function (grunt) {
                 src: [],
                 dest: 'parse/public/scripts/vendor.js',
                 options: {
-                  require: ['jquery', 'bootstrap', 'react', 'classnames', 'react-bootstrap', 'react-router','tcomb-form', './client/scripts/formGenerationUtils.js', './client/scripts/Services.js'],
+                  require: ['jquery', 'bootstrap', 'react', 'classnames', 'react-bootstrap', 'react-router','tcomb-form', './client/scripts/formGenerationUtils.js', './client/scripts/Services.js', './client/scripts/AdminServices.js'],
                   transform: ['reactify'],
                 }
               },
@@ -25,7 +25,22 @@ module.exports = function (grunt) {
                   alias: [
                     './client/scripts/app.js:App',
                     './client/scripts/signup.js:SignUp',
-                    './client/scripts/user.js:User',
+                    './client/scripts/user.js:User'
+                  ],
+                  external: ['react'],
+                  browserifyOptions: {
+                    debug: true
+                  }
+                }
+              },
+            ceekadmin: {
+                src: ['client/scripts/admin/*.js'],
+                dest: 'parse/public/scripts/adminbundle.js',
+                options: {
+                  transform: ['reactify'],
+                  alias: [
+                    './client/scripts/admin/filterabletable.js:FilterableTable',
+                    './client/scripts/admin/userstable.js:UsersTable'
                   ],
                   external: ['react'],
                   browserifyOptions: {
@@ -41,7 +56,7 @@ module.exports = function (grunt) {
             },
             parse: {
                 files: ['client/**/*', 'server/**/*'],
-                tasks: ['jshint', 'browserify:ceek', 'copy:client', 'copy:server']
+                tasks: ['jshint', 'browserify:ceek', 'browserify:ceekadmin', 'copy:client', 'copy:server']
             }
         },
         copy: {

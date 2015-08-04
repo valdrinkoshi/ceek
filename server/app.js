@@ -267,12 +267,16 @@ var getObjectById = function(className, objectId) {
 };
 
 var getObjectWithProperties = function(className, properties) {
-  console.log('>getObjectWithProperties:', properties);
+  return getObjectsWithProperties(className, properties, false);
+};
+
+var getObjectsWithProperties = function(className, properties, all) {
+  console.log('>getObjectsWithProperties:', properties);
   //a little security checks to make sure we don't run empty queries
   if (!Array.isArray(properties)) {
     properties = [];
   }
-  if (properties.length == 0) {
+  if (properties.length === 0 && !all) {
     return Parse.Promise.as(null);
   }
   var objectQuery = new Parse.Query(className);
@@ -291,7 +295,11 @@ var getObjectWithProperties = function(className, properties) {
   if (!ascendingAction) {
     objectQuery.ascending('createdAt');
   }
-  return objectQuery.first({ useMasterKey: true });
+  if (all) {
+    return objectQuery.find({ useMasterKey: true });
+  } else {
+    return objectQuery.first({ useMasterKey: true });
+  }
 };
 
 var getUser = function(userId) {
@@ -727,6 +735,47 @@ Parse.Cloud.define('PostMail', function (request, response) {
 app.post('/mail', function(request, response) {
   Parse.User.become(request.body.sessionToken).then(function (user) {
     PostMail(user, request, response, request.body);
+  }, function (error) {
+    fail(response, error);
+  });
+});
+
+/*admin*/
+
+var GetUsers = function (user, request, response, params) {
+  userHasAdminPermission(user, response).then(function (isAdmin) {
+    if (isAdmin) {
+      var properties = [];
+      if (params) {
+        for (var param in params) {
+          properties.push({
+            name: param,
+            value: params[param],
+            operator: 'contains'
+          });
+        }
+      }
+      getObjectsWithProperties(UserProfile, properties, true).then(function (users) {
+        if (users) {
+          success(response, users);
+        } else {
+          success(response, []);
+        }
+      }, function (object, error) {
+        fail(reponse, error);
+      });
+    }
+  });
+};
+
+Parse.Cloud.define('GetUsers', function (request, response) {
+  GetUsers(request.user, request, response, request.params);
+});
+
+app.get('/users', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    delete request.query.sessionToken
+    GetUsers(user, request, response, request.query);
   }, function (error) {
     fail(response, error);
   });

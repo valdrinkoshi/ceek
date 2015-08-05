@@ -625,7 +625,6 @@ app.get('/matches/:id', function(request, response) {
           }
         },
         function (error) {
-          
           if (request.accepts('html')) {
             response.render('error', errorMessage);
           } else {

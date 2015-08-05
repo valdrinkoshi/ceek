@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Matches Page</title>
+  </head>
+  <body>
+    <h1>Matches Page</h1>
+    <p><%= expireDate %></p>
+    <ul>
+    <% for(var i=0; i<userProfiles.length; i++) { %>
+        <li>
+                <%= userProfiles[i].firstName %>
+        </li>
+    <% } %>
+</ul>
+  </body>
+</html>

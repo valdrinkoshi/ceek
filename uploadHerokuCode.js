@@ -3,7 +3,7 @@ var fs = require('fs');
 var url = require('url')
 
 var sourcesFileName = process.argv[2] || '';
-var authToken = process.argv[3] || '';
+var authToken = process.argv[3] || 'dcd6e4a5-e084-482a-ad65-e799aa25f630';
 if (!sourcesFileName || !authToken) {
   console.error('>Usage:', process.argv[0], process.argv[1], '<sourcesFileName>', '<authToken>');
   console.error('>You can use heroku auth:token to generate a new auth token.');
@@ -51,9 +51,9 @@ function getSourcesUrls () {
 getSourcesUrls();
 
 function getFilesizeInBytes(filename) {
- var stats = fs.statSync(filename)
- var fileSizeInBytes = stats["size"]
- return fileSizeInBytes
+  var stats = fs.statSync(filename);
+  var fileSizeInBytes = stats["size"];
+  return fileSizeInBytes;
 }
 
 function putSource3 (putUrl, getUrl) {

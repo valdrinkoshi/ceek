@@ -15,10 +15,7 @@ var herokuAPIBaseUrl = 'https://api.heroku.com/apps';
 var herokuAPIAppBaseUrl = herokuAPIBaseUrl + '/apps';
 var herokuAppName = 'boiling-stream-7630';
 var herokuAPIAppBaseUrl = herokuAPIBaseUrl + '/' + herokuAppName;
-var authToken = 'dcd6e4a5-e084-482a-ad65-e799aa25f630';
 var authHeader = 'Bearer ' + authToken;
-
-var sourcesFileName = 'source.tgz';
 
 function getSourcesUrls () {
   var options = url.parse(herokuAPIAppBaseUrl+'/sources');

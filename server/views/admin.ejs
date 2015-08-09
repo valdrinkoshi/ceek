@@ -35,18 +35,12 @@
 
   </body>
   <script>
-    Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
+    Parse.initialize('9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT', '8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1');
     var UsersTable = require('UsersTable');
     var columns = ['firstName', 'lastName', 'emailAddress'];
     React.render(
       React.createElement(UsersTable, null),
       document.getElementById('usersTable')
     );
-    /*AdminServices.GetUsers({}).then(function (data) {
-      React.render(
-        React.createElement(FilterableTable, {data: data, columns: columns}),
-        document.getElementById('usersTable')
-      );
-    });*/
   </script>
 </html>

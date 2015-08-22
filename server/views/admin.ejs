@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Optional theme 
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+    <script src="scripts/vendor.js"></script>
+    <script>
+      var React = require('react');
+    </script>
+    <script src="scripts/adminbundle.js"></script>
+    <title>Admin Page</title>
+  </head>
+  <body>
+    <h1>Admin Page</h1>
+    <h3>Users</h3>
+    <div id='usersTable'></div>
+    <h3>Jobs</h3>
+    <table border="1">
+      <% for(var i=0; i<jobs.length; i++) { %>
+        <% job = jobs[i].attributes %>
+        <tr>
+          <td>
+            <%= job.companyName %>
+          </td>
+          <td>
+            <%= job.contact %>
+          </td>
+        </tr>
+      <% } %>
+    </table>
+
+  </body>
+  <script>
+    Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
+    var UsersTable = require('UsersTable');
+    var columns = ['firstName', 'lastName', 'emailAddress'];
+    React.render(
+      React.createElement(UsersTable, null),
+      document.getElementById('usersTable')
+    );
+    /*AdminServices.GetUsers({}).then(function (data) {
+      React.render(
+        React.createElement(FilterableTable, {data: data, columns: columns}),
+        document.getElementById('usersTable')
+      );
+    });*/
+  </script>
+</html>

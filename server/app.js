@@ -34,9 +34,10 @@ var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,s
 var ceekOAuth2RedirecUri = 'https://ceek.parseapp.com/oauthCallback';
 var herokuMuleBaseUrl = 'https://stormy-cliffs-8651.herokuapp.com';
 var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
+
 if (process && process.env && process.env.CEEK_LOCAL === '1') {
   ceekOAuth2RedirecUri = 'http://localhost:3000/oauthCallback';
-  herokuMuleBaseUrl = 'http://localhost:5000/';
+  herokuMuleBaseUrl = 'http://localhost:5000';
 }
 
 /**

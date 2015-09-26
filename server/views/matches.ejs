@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Matches Page</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   </head>
   <body>
     <h1>Matches Page</h1>
@@ -10,8 +11,17 @@
     <% for(var i=0; i<userProfiles.length; i++) { %>
         <li>
                 <%= userProfiles[i].firstName %>
+                <button onclick="like('<%=userProfiles[i].id%>')">like</button>
         </li>
     <% } %>
 </ul>
   </body>
+  <script>
+    var matchesPageId = "<%= id %>";
+    function like (likeId) {
+      $.get('/likeu/'+likeId, {matchId: matchesPageId}, function (data) {
+        console.log(data);
+      });
+    }
+  </script>
 </html>

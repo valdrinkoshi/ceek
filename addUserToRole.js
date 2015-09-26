@@ -2,7 +2,7 @@ var Parse = require('parse').Parse;
 
 var userId = process.argv[2] || '';
 var roleName = process.argv[3] || '';
-var masterKey = process.argv[4] || '';
+var masterKey = process.argv[4] || 'QgS7kRdgVFtKjhu8ltGLS0fCZPWeqSczdOss8sQE';
 
 if (!userId || !roleName) {
   console.error('>Usage:', process.argv[0], process.argv[1], '<userId>', '<roleName>');

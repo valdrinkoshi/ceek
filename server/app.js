@@ -292,7 +292,11 @@ var getObjectsWithProperties = function(className, properties, all) {
     if (property.name === 'ascending') {
       ascendingAction = true;
     }
-    objectQuery[operator](property.name || null, property.value || null)
+    var value = property.value;
+    if (typeof value === "undefined") {
+      value = null;
+    }
+    objectQuery[operator](property.name || null, value)
   }
   if (!ascendingAction) {
     objectQuery.ascending('createdAt');
@@ -599,44 +603,56 @@ app.get('/matches/:id', function(request, response) {
     {name: 'visible', value: true},
   ]).then(function(matchesPage) {
     if (matchesPage) {
-      matchesPage = matchesPage.attributes;
-      matchesPage.id = matchesPageId;
-      var userProfilePromises = [];
-      var userProfileIds = matchesPage.userProfileIds;
-      for (var i = 0; i < userProfileIds.length; i++) {
-        var userProfileId = userProfileIds[i];
-        userProfilePromises.push(getObjectById(UserProfile, userProfileId));
-      }
-      Parse.Promise.when(userProfilePromises).then(
-        function () {
-          if (arguments.length > 0) {
-            var userProfiles = [];
-            for (var i = 0; i < arguments.length; i++) {
-              if (arguments[i]) {
-                //TODO: trim data?
-                var userProfile = arguments[i].attributes;
-                userProfile.id = arguments[i].id;
-                userProfiles.push(userProfile);
-              }
-            }
-            matchesPage.userProfiles = userProfiles;
-            if (request.accepts('html')) {
-              response.render('matches', matchesPage);
-            } else {
-              success(response, matchesPage);
-            }
-          } else {
-            fail(response, errorMessage);
-          }
-        },
-        function (error) {
-          if (request.accepts('html')) {
-            response.render('error', errorMessage);
-          } else {
-            fail(response, errorMessage);
-          }
+      getObjectsWithProperties(Like, [
+        {name: 'matchesPageId', value: matchesPage.id},
+      ], true).then (function (likes) {
+        console.log(likes);
+        matchesPage = matchesPage.attributes;
+        matchesPage.id = matchesPageId;
+        var userProfilePromises = [];
+        var userProfileIds = matchesPage.userProfileIds;
+        for (var i = 0; i < userProfileIds.length; i++) {
+          var userProfileId = userProfileIds[i];
+          userProfilePromises.push(getObjectById(UserProfile, userProfileId));
         }
-      );
+        Parse.Promise.when(userProfilePromises).then(
+          function () {
+            if (arguments.length > 0) {
+              var userProfiles = [];
+              for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i]) {
+                  //TODO: trim data?
+                  var userProfile = arguments[i].attributes;
+                  userProfile.id = arguments[i].id;
+                  var like = _.find(likes, function (like) {
+                    return like.get('userProfileId') === userProfile.id;
+                  });
+                  if (like) {
+                    userProfile.like = true;
+                    userProfile.mutualLike = like.get('mutual') || false;
+                    userProfile.negativeLike = like.get('negative') || false;
+                  }
+                  userProfiles.push(userProfile);
+                }
+              }
+              matchesPage.userProfiles = userProfiles;
+              if (request.accepts('html')) {
+                response.render('matches', matchesPage);
+              } else {
+                success(response, matchesPage);
+              }
+            } else {
+              fail(response, errorMessage);
+            }
+          },
+          function (error) {
+            if (request.accepts('html')) {
+              response.render('error', errorMessage);
+            } else {
+              fail(response, errorMessage);
+            }
+          });
+      });
     } else {
       var errorMessage = {errorMessage: 'Page lost'};
       if (request.accepts('html')) {
@@ -766,6 +782,7 @@ app.post('/mail', function(request, response) {
 app.get('/likeu/:id', function(request, response) {
   var userProfileId = request.params.id;
   var matchId = request.query.matchId;
+  var negative = request.query.negative === "true" ? true : false;
   getObjectWithProperties(Like, [
     {name: 'userProfileId', value: userProfileId},
     {name: 'matchesPageId', value: matchId}
@@ -786,6 +803,7 @@ app.get('/likeu/:id', function(request, response) {
           like.set('matchesPageId', matchId);
           like.set('jobId', matchPageData.get('jobId'));
           like.set('expireDate', new Date(Date.now()+86400000));
+          like.set('negative', negative);
           like.save(null, {useMasterKey: true}).then(function () {
             //TODO send email
             success(response, {msg: 'You liked the user!'});
@@ -838,8 +856,10 @@ var GetLikes = function (user, request, response) {
   getUserProfile(user).then(function (userProfile) {
     getObjectsWithProperties(Like, [
       {name: 'userProfileId', value: userProfile.id},
-      {name: 'expireDate', value: new Date(), operator: 'greaterThan'}
+      {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+      {name: 'negative', value: false}
     ], true).then(function(likes) {
+      console.log('>>>>likes', likes);
       var outLikes = [];
       for (var i = 0; i < likes.length; i++) {
         var like = likes[i].attributes;

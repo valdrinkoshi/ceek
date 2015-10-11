@@ -11,15 +11,28 @@
     <% for(var i=0; i<userProfiles.length; i++) { %>
         <li>
                 <%= userProfiles[i].firstName %>
+                <% if (userProfiles[i].mutualLike) {%>
+                  <p>Mutually interested</p>
+                <% } else if (userProfiles[i].like && !userProfiles[i].negativeLike) {%>
+                  <p>Awaiting response</p>
+                <% } else if (userProfiles[i].like && userProfiles[i].negativeLike) {%>
+                  <p>You don't like this user</p>
+                <% } else {%>
                 <button onclick="like('<%=userProfiles[i].id%>')">like</button>
+                <button onclick="dislike('<%=userProfiles[i].id%>')">no, thanks</button>
+                <%}%>
         </li>
     <% } %>
 </ul>
   </body>
   <script>
     var matchesPageId = "<%= id %>";
-    function like (likeId) {
-      $.get('/likeu/'+likeId, {matchId: matchesPageId}, function (data) {
+    function dislike (likeId) {
+      like(likeId, true);
+    }
+    function like (likeId, dislike) {
+      dislike = dislike === undefined ? false : dislike;
+      $.get('/likeu/'+likeId, {matchId: matchesPageId, negative: dislike}, function (data) {
         console.log(data);
       });
     }

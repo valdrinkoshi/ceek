@@ -14,6 +14,7 @@ var Mailgun = require('mailgun');
 Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
+var DEFAULT_CEEK_MAIL_ADDRESS = 'do-not-reply@ceek.cc';
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -35,9 +36,11 @@ var ceekOAuth2RedirecUri = 'https://ceek.parseapp.com/oauthCallback';
 var herokuMuleBaseUrl = 'https://stormy-cliffs-8651.herokuapp.com';
 var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
 
+var isLocal = false;
 if (process && process.env && process.env.CEEK_LOCAL === '1') {
   ceekOAuth2RedirecUri = 'http://localhost:3000/oauthCallback';
   herokuMuleBaseUrl = 'http://localhost:5000';
+  isLocal = true;
 }
 
 /**
@@ -698,7 +701,6 @@ var PostMatches = function (user, request, response, params) {
                 matchesPage.save(null, {
                   useMasterKey: true,
                   success: function (matchesPage) {
-                    //sendEmail(job.contact, 'do-not-reply@ceek.cc', matchesPage.id, matchesPage.id);
                     success(response, {matchesPageId: matchesPage.id});
                   },
                   error: function (object, error) {
@@ -733,6 +735,9 @@ app.post('/matches', function(request, response) {
 });
 
 var sendEmail = function (to, from, subject, text, html, successCallback, errorCallback) {
+  if (!from) {
+    from = DEFAULT_CEEK_MAIL_ADDRESS;
+  }
   Mailgun.sendEmail({
     to: to,
     from: from,
@@ -797,17 +802,23 @@ app.get('/likeu/:id', function(request, response) {
         {name: 'visible', value: true}
       ]).then(function(matchPageData) {
         if (matchPageData) {
-          var like = new Like();
-          like.setACL(restrictedAcl);
-          like.set('userProfileId', userProfileId);
-          like.set('matchesPageId', matchId);
-          like.set('jobId', matchPageData.get('jobId'));
-          like.set('expireDate', new Date(Date.now()+86400000));
-          like.set('negative', negative);
-          like.save(null, {useMasterKey: true}).then(function () {
-            //TODO send email
-            success(response, {msg: 'You liked the user!'});
-          });
+          getObjectById(UserProfile, userProfileId)
+          .then(function (userProfile) {
+            var like = new Like();
+            like.setACL(restrictedAcl);
+            like.set('userProfileId', userProfileId);
+            like.set('matchesPageId', matchId);
+            like.set('jobId', matchPageData.get('jobId'));
+            like.set('expireDate', new Date(Date.now()+86400000));
+            like.set('negative', negative);
+            like.save(null, {useMasterKey: true}).then(function () {
+              //TODO send email
+              if (!isLocal && userProfile.get('emailAddress') && !negative) {
+                sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
+              }
+              success(response, {msg: 'You liked the user!'});
+            });
+          })
         } else {
           var errorMessage = {errorMessage: 'Match expired or this match does not exist'};
           fail(response, errorMessage);

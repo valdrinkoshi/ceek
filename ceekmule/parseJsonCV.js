@@ -48,7 +48,8 @@ var PROJECTS_SECTION = 2;
 var LANGUAGES_SECTION = 3;
 var SKILLS_AND_EXPERTISE_SECTION = 4;
 var PATENTS_SECTION = 5;
-var EXPERTISE_SECTION = 5;
+var EXPERTISE_SECTION = 6;
+var PROJECTS_SECTION = 7;
 var NONE_SECTION = -1;
 
 var matchSectionTitle = function (sectionTitle) {
@@ -66,6 +67,8 @@ var matchSectionTitle = function (sectionTitle) {
     return EXPERTISE_SECTION;
   } else if (/education/i.test(sectionTitle)) {
     return EDUCATION_SECTION;
+  } else if (/projects/i.test(sectionTitle)) {
+    return PROJECTS_SECTION;
   }
 };
 
@@ -195,6 +198,29 @@ var formatJsonCV = function (jsonCV) {
         skillsInfo.push(subsection.subsectionHeaderT);
       }
       formattedData['skills'] = skillsInfo;
+    } else if (section.sectionType === PROJECTS_SECTION) {
+      console.log('>sectionType PROJECTS found');
+      var projectsInfo = [];
+      for (var j = 0; j < section.subsections.length; j++) {
+        var subsection = section.subsections[j];
+        var projectInfo = {
+          title: subsection.subsectionHeaderT,
+          description: '',
+        }
+        for (var k = 0; k < subsection.subsectionContent.length; k++) {
+          var subsectionContent = subsection.subsectionContent[k];
+          if (subsectionContent.type === DATE_TYPE) {
+            projectInfo.startDate = subsectionContent.dates[0];
+            projectInfo.endDate = subsectionContent.dates[1];
+          }
+          //TODO: what to do with members?
+          if (subsectionContent.type === TEXT_TYPE) {
+            projectInfo.description += subsectionContent.content;
+          }
+        }
+        projectsInfo.push(projectInfo);
+      }
+      formattedData['projects'] = projectsInfo;
     }
   }
   return formattedData;

@@ -32,7 +32,7 @@ var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
 var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
 var ceekOAuth2RedirecUri = 'https://ceek.parseapp.com/oauthCallback';
-var herokuMuleBaseUrl = 'https://stormy-cliffs-8651.herokuapp.com';
+var herokuMuleBaseUrl = 'https://boiling-stream-7630.herokuapp.com';
 var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
 
 if (process && process.env && process.env.CEEK_LOCAL === '1') {
@@ -428,6 +428,7 @@ var ParseLICV = function (user, request, response) {
       userProfile.set('education', formattedCV.education);
       userProfile.set('experience', formattedCV.experience);
       userProfile.set('skills', formattedCV.skills);
+      userProfile.set('projects', formattedCV.projects);
       userProfile.save(null, {useMasterKey: true});
       success(response, userProfile.attributes);
     });

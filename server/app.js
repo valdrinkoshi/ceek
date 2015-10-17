@@ -609,7 +609,6 @@ app.get('/matches/:id', function(request, response) {
       getObjectsWithProperties(Like, [
         {name: 'matchesPageId', value: matchesPage.id},
       ], true).then (function (likes) {
-        console.log(likes);
         matchesPage = matchesPage.attributes;
         matchesPage.id = matchesPageId;
         var userProfilePromises = [];
@@ -870,7 +869,6 @@ var GetLikes = function (user, request, response) {
       {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
       {name: 'negative', value: false}
     ], true).then(function(likes) {
-      console.log('>>>>likes', likes);
       var outLikes = [];
       for (var i = 0; i < likes.length; i++) {
         var like = likes[i].attributes;

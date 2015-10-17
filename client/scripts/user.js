@@ -28,6 +28,11 @@ var User = React.createClass({
           value: userProfileData
         });
       });
+      Services.GetLikes().then(function (response) {
+        _this.setState({
+          likes: response.likes
+        });
+      });
     } else {
       this.transitionTo("/");
     }
@@ -62,11 +67,26 @@ var User = React.createClass({
     }
   },
 
+  likeBack(likeId, event) {
+    Services.GetLikeJ(likeId).then(function (data) {
+      console.log(data);
+    });
+  },
+
   render() {
     var output;
+    var likes;
+    var _this = this;
+    if (this.state.likes) {
+      likes = this.state.likes.map(function (like) {
+        return <p key={like.id}>{like.jobId}<Button onClick={_this.likeBack.bind(_this, like.id)}>like back</Button></p>
+      });
+    }
     if (this.state.formDef) {
       output =
         <div>
+          <h6>Likes</h6>
+          {likes}
           <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
             <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
             <input type='submit' value='upload cv' />

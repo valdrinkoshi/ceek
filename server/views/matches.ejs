@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Matches Page</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   </head>
   <body>
     <h1>Matches Page</h1>
@@ -10,8 +11,30 @@
     <% for(var i=0; i<userProfiles.length; i++) { %>
         <li>
                 <%= userProfiles[i].firstName %>
+                <% if (userProfiles[i].mutualLike) {%>
+                  <p>Mutually interested</p>
+                <% } else if (userProfiles[i].like && !userProfiles[i].negativeLike) {%>
+                  <p>Awaiting response</p>
+                <% } else if (userProfiles[i].like && userProfiles[i].negativeLike) {%>
+                  <p>You don't like this user</p>
+                <% } else {%>
+                <button onclick="like('<%=userProfiles[i].id%>')">like</button>
+                <button onclick="dislike('<%=userProfiles[i].id%>')">no, thanks</button>
+                <%}%>
         </li>
     <% } %>
 </ul>
   </body>
+  <script>
+    var matchesPageId = "<%= id %>";
+    function dislike (likeId) {
+      like(likeId, true);
+    }
+    function like (likeId, dislike) {
+      dislike = dislike === undefined ? false : dislike;
+      $.get('/likeu/'+likeId, {matchId: matchesPageId, negative: dislike}, function (data) {
+        console.log(data);
+      });
+    }
+  </script>
 </html>

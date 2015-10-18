@@ -64,7 +64,7 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'client',
                 dest: 'parse/public/',
-                src: ['**/*.css', '**/*.html']
+                src: ['**/*.css', '**/*.html', '**/*.png', '**/*.jpg', '**/*.ttf']
             },
             server: {
                 expand: true,

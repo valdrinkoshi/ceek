@@ -1,0 +1,263 @@
+@font-face {
+  font-family: SourceSansPro-Regular;
+  src: url('../fonts/SourceSansPro-Regular.ttf');
+}
+
+@font-face {
+  font-family: SourceSansPro-Bold;
+  src: url('../fonts/SourceSansPro-Bold.ttf');
+}
+
+@font-face {
+  font-family: SourceSansPro-Light;
+  src: url('../fonts/SourceSansPro-Light.ttf');
+}
+
+html {
+  font-size: 12px;
+}
+
+@media (min-width: 1044px) {
+ html {
+    font-size: 16px;
+ }
+}
+html {
+  font-family: SourceSansPro-Regular;
+}
+body {
+  margin: 0;
+}
+a {
+  text-decoration: none;
+}
+/*
+General
+*/
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.sectitle {
+  font-family: SourceSansPro-Bold;
+  margin-top: 6.25rem;
+  color: #4b4c4c;
+  font-size: 2.25rem;
+  text-align: center;
+}
+
+/*
+Header
+*/
+
+header {
+  background-color: black;
+  height: 45rem;
+  width: 100%;
+  color: #fff;
+  background-image: url('../imgs/index-img-slogan.jpg');
+  background-position: center;
+  background-size: cover;
+}
+
+.navcontainer {
+  overflow: hidden;
+  padding: 1rem 2.25rem 0 2.25rem;
+}
+
+.logo {
+  display: inline-block;
+  width: 54px;
+  height: 23px;
+  background-image: url('../imgs/index-img-ceek.png');
+  background-size: contain;
+}
+
+.navlinks {
+  float: right;
+}
+
+.navlink {
+  color: #fff;
+  font-size: 0.75rem;
+  margin-left: 2.5rem;
+  display: inline-block;
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  background-size: contain;
+}
+
+.icon-linkedin-signin {
+  width: 16px;
+  height: 16px;
+  background-image: url('../imgs/index-icon-signin.png');
+  margin-right: 0.5rem;
+}
+
+.text-linkedin-signin {
+  line-height: 1rem;
+  vertical-align: middle;
+}
+
+.signin {
+  border: 0.125rem solid white;
+  padding: 0.5rem 1.25rem 0.5rem 1.25rem;
+}
+
+/*
+Main
+*/
+
+.main {
+  clear: both;
+  text-align: center;
+}
+
+.maintitle {
+  font-family: SourceSansPro-Bold;
+  margin-top: 15.125rem;
+  font-size: 4.5rem;
+}
+
+.mainsubtitle {
+  margin-top: 1.125rem;
+  font-size: 1.875rem;
+}
+
+.getstarted {
+  display: inline-block;
+  margin-top: 3.375rem;
+  color: #fbfbfb;
+  font-size: 1.125rem;
+  background-color: #fc7070;
+  padding: 0.75rem 4.125rem 0.75rem 4.125rem;
+}
+
+.getstarteddesc {
+  margin-top: 0.625rem;
+  color: #fbfbfb;
+  font-size: 1rem;
+}
+
+/*
+How it works
+*/
+
+.how {
+  background-color: #fff;
+}
+
+.steps {
+  overflow: hidden;
+  margin: 3.125rem auto 3.125rem auto;
+  max-width: 65rem; /*to center this content horizontally: it's (margin-right + width + margin-left)*number_of_steps*/
+}
+
+.step {
+  width: 10rem;
+  float: left;
+  margin: 0 3.125rem 0 3.125rem; /*right+left margin will be 6.25rem as desired*/
+  font-family: SourceSansPro-Light;
+}
+
+.stepicon {
+  width: 10rem;
+  height: 10rem;
+  background-color: #fc7070;
+  border-radius: 160px;
+  background-size: contain;
+}
+
+.step-icon-profile {
+  background-image: url('../imgs/index-icon-profile.png');
+}
+
+.step-icon-match {
+  background-image: url('../imgs/index-icon-match.png');
+}
+
+.step-icon-offers {
+  background-image: url('../imgs/index-icon-offers.png');
+}
+
+.step-icon-hired {
+  background-image: url('../imgs/index-icon-hired.png');
+}
+
+.steptext {
+  color: #4b4c4c;
+}
+
+.steptitle {
+  font-size: 1.125rem;
+  margin: 1.875rem 0 1rem 0;
+}
+
+.stepdesc {
+  font-size: 0.875rem;
+}
+
+/*
+About us
+*/
+
+.about {
+  overflow: hidden;
+  background-color: #fafafa;
+  clear: both;
+  padding-bottom: 6.25rem;
+  text-align: center;
+}
+
+.quote {
+  margin-top: 1.875rem;
+  font-family: SourceSansPro-Light;
+  color: #4b4c4c;
+}
+
+.quote > span {
+  font-style: italic;
+}
+
+.aboutdescription {
+  font-family: SourceSansPro-Light;
+  color: #4b4c4c;
+  margin-top: 1rem;
+}
+
+/*
+Footer
+*/
+
+footer {
+  background-color: #2b2b2b;
+  padding: 3.75rem 0 3.75rem 0;
+}
+
+.footer-navlink {
+  margin: 0 0.9375rem 0 0.9375rem;
+  font-size: 0.875rem;
+  color: #bebebe;
+}
+
+.icon-social {
+  width: 30px;
+  height: 30px;
+  margin: 0 0.625rem 0 0.625rem;
+}
+
+.icon-social-fb {
+  background-image: url('../imgs/index-icon-facebook.png');
+}
+
+.icon-social-twitter {
+  background-image: url('../imgs/index-icon-twitter.png');
+}
+
+.icon-social-linkedin {
+  background-image: url('../imgs/index-icon-linkedin.png');
+}

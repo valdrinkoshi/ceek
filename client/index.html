@@ -3,44 +3,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-  <title>LinkedIn Authentication</title>
-
-  <script src="scripts/vendor.js"></script>
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
-  <script type="text/javascript">
-    Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
-  </script>
-  <script src="https://www.parsecdn.com/js/parse-react.js"></script>
-
-  <script type="text/javascript">
-    var React = require('react');
-    var ReactBootstrap = require('react-bootstrap');
-    var ReactRouter = require('react-router');
-
-    var Button = ReactBootstrap.Button;
-    var Panel = ReactBootstrap.Panel;
-    var Navbar = ReactBootstrap.Navbar;
-    var ListGroup = ReactBootstrap.ListGroup;
-    var ListGroupItem = ReactBootstrap.ListGroupItem;
-    var CollapsibleNav = ReactBootstrap.CollapsibleNav;
-    var NavItem = ReactBootstrap.NavItem;
-    var Nav = ReactBootstrap.Nav;
-    var Route = ReactRouter.Route;
-    var Link = ReactRouter.Link;
-    var RouteHandler = ReactRouter.RouteHandler;
-  </script>
-
-
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <!-- Optional theme 
-  <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-  -->
+  <link rel="stylesheet" type="text/css" href="css/index.css" />
 </head>
 <body>
-  <!--bundle.js START-->
-  <script src="scripts/bundle.js"></script>
-  <!--bundle.js END-->
+<header>
+<div class="navcontainer">
+  <div class="logo"></div>
+  <div class="navlinks">
+    <a class="uppercase navlink" href="#">for companies</a>
+    <a class="uppercase navlink" href="#">help</a>
+    <a class="uppercase navlink signin" href="/authorize"><span class="icon icon-linkedin-signin"></span><span class="text-linkedin-signin">sign in</span></a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="uppercase maintitle">let the job apply for you</div>
+  <div class="mainsubtitle">And get $2,000 signing bonus from CEEK once you get hired</div>
+  <a class="uppercase getstarted" href="/authorize">get started</a>
+  <div class="getstarteddesc">Easily sign up with LinkedIn</div>
+</div>
+</header>
+<div class="how">
+  <div class="sectitle uppercase">how it works</div>
+  <div class="steps">
+    <div class="step">
+      <div class="stepicon step-icon-profile"></div>
+      <div class="steptitle steptext uppercase">create profile</div>
+      <div class="stepdesc steptext">Save time by importing your LinkedIn profile</div>
+    </div>
+    <div class="step">
+      <div class="stepicon step-icon-match"></div>
+      <div class="steptitle steptext uppercase">intelligent match</div>
+      <div class="stepdesc steptext">Answer a few questions, we will pair you with your dream jobs</div>
+    </div>
+    <div class="step">
+      <div class="stepicon step-icon-offers"></div>
+      <div class="steptitle steptext uppercase">review interview offers</div>
+      <div class="stepdesc steptext">Top tech companies compete for you with upfront compensation details</div>
+    </div>
+    <div class="step">
+      <div class="stepicon step-icon-hired"></div>
+      <div class="steptitle steptext uppercase">get hired</div>
+      <div class="stepdesc steptext">Select the company you want</div>
+    </div>
+  </div>
+</div>
+<div class="about">
+  <div class="sectitle uppercase">about us</div>
+  <div class="quote"><span>"What you see is seeking you"</span> - Rumi</div>
+  <div class="aboutdescription">Ceek is a matchmaking platform for hiring. Our mission is to build world’s best hiring experience for both the candidates and the companies.</div>
+</div>
+<footer>
+<a class="uppercase navlink footer-navlink" href="#">home</a>
+<a class="uppercase navlink footer-navlink" href="#">about</a>
+<a class="uppercase navlink footer-navlink" href="#">for companies</a>
+<a class="uppercase navlink footer-navlink" href="#">help</a>
+<a class="uppercase navlink footer-navlink" href="#">terms</a>
+<a class="uppercase navlink footer-navlink" href="#">privacy</a>
+<span class="uppercase navlink footer-navlink">2015 ceek, all rights reserved</span>
+<a><span class="icon icon-social icon-social-fb"></span></a>
+<a><span class="icon icon-social icon-social-twitter"></span></a>
+<a><span class="icon icon-social icon-social-linkedin"></span></a>
+</footer>
 </body>
 </html>

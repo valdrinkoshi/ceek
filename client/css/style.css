@@ -56,9 +56,16 @@ header {
   height: 45rem;
   width: 100%;
   color: #fff;
-  background-image: url('../imgs/index-img-slogan.jpg');
   background-position: center;
   background-size: cover;
+}
+
+.header-index-bg {
+  background-image: url('../imgs/index-img-slogan.jpg');
+}
+
+.header-companies-bg {
+  background-image: url('../imgs/companies-img-slogan.jpg');
 }
 
 .navcontainer {
@@ -186,6 +193,18 @@ How it works
 
 .step-icon-hired {
   background-image: url('../imgs/index-icon-hired.png');
+}
+
+.step-icon-meet {
+  background-image: url('../imgs/companies-icon-meet.png');
+}
+
+.step-icon-timer {
+  background-image: url('../imgs/companies-icon-timer.png');
+}
+
+.step-icon-lowcost {
+  background-image: url('../imgs/companies-icon-lowcost.png');
 }
 
 .steptext {

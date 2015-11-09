@@ -3,8 +3,17 @@ var customLayouts = require('./customLayout.js');
 
 var i18n = {
   'firstName': 'Name',
-  'employmentType': 'This Employment Type',
-  'employmentType.permanent': 'Permanent (full time)'
+  'locationPreference': 'In which locations would you like to work?',
+  'roleType': 'What are your ideal roles?',
+  'employmentType': 'Employment type?',
+  'employmentType.permanent': 'Permanent (full time)',
+  'dontContact': "Don't contact these companies",
+  'summary': "More about you",
+  'experience': 'Work experience',
+  'experience.companyName': 'Company',
+  'experience.role': 'Title',
+  'education.collegeName': 'University',
+  'education.degree': 'Major'
 };
 
 function generateForm (formDefinition) {
@@ -69,7 +78,9 @@ function generateFieldOptions (fieldMeta) {
       return generateFieldOptions(fieldMeta.type.meta);
       break;
     case 'list':
-      return {item: generateFieldOptions(fieldMeta.type.meta)};
+      var listOptions = getOptions(fieldMeta) || {};
+      listOptions.item = generateFieldOptions(fieldMeta.type.meta);
+      return listOptions;
       break;
   }
 };
@@ -90,6 +101,9 @@ function generateField (fieldMeta) {
       break;
     case 'list':
       return t.list(generateField(fieldMeta.type.meta));
+      break;
+    case 'enums':
+      return t.enums(fieldMeta.props);
       break;
   }
 };

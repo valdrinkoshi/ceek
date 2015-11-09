@@ -16,14 +16,14 @@ Services.GetProfile = function () {
   return getProfilePromise;
 };
 
-Services.PostProfile = function (value) {
+Services.PostProfile = function (value, stepId) {
   var postProfilePromise = jQuery.Deferred();
   if (useCloudCode) {
-    Parse.Cloud.run('PostProfile', {data: value}).then(function (data) {
+    Parse.Cloud.run('PostProfile', {data: value, stepId: stepId}).then(function (data) {
       postProfilePromise.resolve(data);
     });
   } else {
-    $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: value}, function (data) {
+    $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: value, stepId: stepId}, function (data) {
       postProfilePromise.resolve(data);
     });
   }

@@ -395,6 +395,7 @@ var ParseLICV = function (user, request, response) {
       userProfile.set('experience', formattedCV.experience);
       userProfile.set('skills', formattedCV.skills);
       userProfile.set('projects', formattedCV.projects);
+      userProfile.set('linkedInCVFileUrl', url);
       userProfile.save(null, {useMasterKey: true});
       success(response, userProfile.attributes);
     });
@@ -443,7 +444,7 @@ app.get('/profile', function(request, response) {
 });
 
 var PostProfile = function (user, request, response, params) {
-  var requiredParams = [{key: 'data', type: 'json'}];
+  var requiredParams = [{key: 'data', type: 'json'}, {key: 'stepId', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
@@ -453,7 +454,12 @@ var PostProfile = function (user, request, response, params) {
   }
   getUserProfile(user).then(function(userDataResponse) {
     var formData = receivedParams.data;
-    var validatedForm = formValidationUtils.validateForm(formConfig.formDefinition, JSON.parse(formData));
+    var stepId = receivedParams.stepId;
+    var formDef = formConfig.formDefinition[stepId.replace('step', '')];
+    if (!formDef) {
+      fail(repsonse, {errorMessage: 'Invalid'})
+    }
+    var validatedForm = formValidationUtils.validateForm(formDef, JSON.parse(formData));
       return userDataResponse.save(validatedForm, { useMasterKey: true });
   }).then(function(userDataResponse) {
     success(response, {msg: 'All good!'});

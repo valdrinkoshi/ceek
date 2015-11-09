@@ -26,6 +26,7 @@ var providers = {
             title: 'title',
             url: 'url',
             type: 'type',
+            description: 'description',
             postedAt: 'created_at',
             companyName: 'company',
             companyUrl: 'company_url'
@@ -141,6 +142,7 @@ function parseJob(job, provider) {
             url: getValue(job, provider, 'url'),
             title: getValue(job, provider, 'title'),
             type: getValue(job, provider, 'type'),
+            description: getValue(job, provider, 'description'),
             postedAt: getValue(job, provider, 'postedAt'),
             companyName: getValue(job, provider, 'companyName'),
             companyUrl: getValue(job, provider, 'companyUrl'),

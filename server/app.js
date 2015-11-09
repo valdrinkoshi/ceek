@@ -10,7 +10,13 @@ var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 var parseExpressHttpsRedirect = require('parse-express-https-redirect');
 var parseExpressCookieSession = require('parse-express-cookie-session');
+var parseUtils = require('cloud/parseUtils.js');
+var getObjectById = parseUtils.getObjectById;
+var getObjectWithProperties = parseUtils.getObjectWithProperties;
+var getObjectsWithProperties = parseUtils.getObjectsWithProperties;
+
 var Mailgun = require('mailgun');
+var url = require('url');
 Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
@@ -262,46 +268,6 @@ var newLinkedInUser = function(accessToken, linkedInData) {
     return upsertLinkedInUser(accessToken, linkedInData);
   });
 }
-
-var getObjectById = function(className, objectId) {
-  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}]);
-};
-
-var getObjectWithProperties = function(className, properties) {
-  return getObjectsWithProperties(className, properties, false);
-};
-
-var getObjectsWithProperties = function(className, properties, all) {
-  console.log('>getObjectsWithProperties:', properties);
-  //a little security checks to make sure we don't run empty queries
-  if (!Array.isArray(properties)) {
-    properties = [];
-  }
-  if (properties.length === 0 && !all) {
-    return Parse.Promise.as(null);
-  }
-  var objectQuery = new Parse.Query(className);
-  var ascendingAction = false;
-  for (var i = 0; i < properties.length; i++) {
-    var property = properties[i];
-    var operator = 'equalTo';
-    if (property.operator) {
-      operator = property.operator;
-    }
-    if (property.name === 'ascending') {
-      ascendingAction = true;
-    }
-    objectQuery[operator](property.name || null, property.value || null)
-  }
-  if (!ascendingAction) {
-    objectQuery.ascending('createdAt');
-  }
-  if (all) {
-    return objectQuery.find({ useMasterKey: true });
-  } else {
-    return objectQuery.first({ useMasterKey: true });
-  }
-};
 
 var getUser = function(userId) {
   return getObjectById(Parse.User, userId);
@@ -749,11 +715,19 @@ var GetUsers = function (user, request, response, params) {
       var properties = [];
       if (params) {
         for (var param in params) {
-          properties.push({
-            name: param,
-            value: params[param],
-            operator: 'contains'
-          });
+          if (param === 'simpleTags') {
+            properties.push({
+              name: param,
+              value: [params[param]],
+              operator: 'containsAll'
+            });
+          } else {
+            properties.push({
+              name: param,
+              value: params[param],
+              operator: 'contains'
+            });
+          }
         }
       }
       getObjectsWithProperties(UserProfile, properties, true).then(function (users) {
@@ -763,7 +737,7 @@ var GetUsers = function (user, request, response, params) {
           success(response, []);
         }
       }, function (object, error) {
-        fail(reponse, error);
+        fail(response, error);
       });
     }
   });
@@ -798,11 +772,11 @@ app.get('/admin', function(request, response) {
             });
         },
         function(error) {
-          fail(reponse, {msg: 'Must be logged in!'})
+          fail(response, {msg: 'Must be logged in!'})
         });
     });
   } else {
-      fail(reponse, {msg: 'Must be logged in!'});
+      fail(response, {msg: 'Must be logged in!'});
   }
 });
 

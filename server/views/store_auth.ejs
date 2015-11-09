@@ -2,7 +2,7 @@
 <p>Saving your LinkedIn session...</p>
 <script type="text/javascript">
 Parse.User.become('<%= sessionToken %>').then(function (user) {
-  window.location.href='/index.html';
+  window.location.href='/profile.html';
 },
 function (error) {
 console.log(error)

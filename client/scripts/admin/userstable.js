@@ -51,8 +51,8 @@ var UsersTable = React.createClass({
       _this.setState({
         showUserDetails: false,
         data: data,
-        columns: ['firstName', 'lastName'],
-        filters: ['firstName', 'emailAddress']
+        columns: ['firstName', 'lastName', 'simpleTags'],
+        filters: ['firstName', 'emailAddress', 'simpleTags']
       });
     });
   },

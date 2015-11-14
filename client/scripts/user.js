@@ -109,6 +109,7 @@ var User = React.createClass({
       Services.PostProfile(JSON.stringify(value), stepId).then(function (data) {
         newState.formDef[stepIndex].status = 'success';
         newState.activeKey = stepIndex + 2;
+        newState.value = value;
         _this.setState(newState);
         console.log(data);
       },

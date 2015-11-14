@@ -21,6 +21,8 @@ function validateField (fieldMeta, fieldValue) {
       return struct;
     case 'maybe':
       return validateField(fieldMeta.type.meta, fieldValue);
+    case 'enums':
+      return validateFieldByName(fieldMeta.kind, fieldValue);
     case 'list':
       var listValues = [];
       for (var i = 0; i < fieldValue.length; i++) {

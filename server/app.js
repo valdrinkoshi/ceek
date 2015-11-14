@@ -462,7 +462,7 @@ var PostProfile = function (user, request, response, params) {
     var validatedForm = formValidationUtils.validateForm(formDef, JSON.parse(formData));
       return userDataResponse.save(validatedForm, { useMasterKey: true });
   }).then(function(userDataResponse) {
-    success(response, {msg: 'All good!'});
+    success(response, {msg: 'All good!', userProfileData: userDataResponse.attributes});
   }, function(error) {
     fail(response, error);
   });

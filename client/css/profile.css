@@ -19,6 +19,13 @@ html {
 body {
   margin: 0;
   font-family: SourceSansPro-Regular;
+  background-color: #fafafa;
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: 940px;
+  }
 }
 
 /* header */
@@ -60,6 +67,10 @@ body {
 }
 
 /* panel */
+.panel-default > .panel-heading {
+  background-color: #fff;
+}
+
 .panel-title {
   font-size: 1.125rem;
   font-family: SourceSansPro-Light;
@@ -69,7 +80,35 @@ body {
   font-family: SourceSansPro-Regular;
 }
 
+.panel-title > a:hover {
+  text-decoration: none;
+}
+
 /* forms */
+
+.btn-grey-icon {
+  color: #b2b2b2;
+}
+
+.form-textarea-small {
+  width: 37.5rem;
+}
+
+.form-input-small {
+  width: 18.75rem;
+}
+
+.row.list-form-row {
+  background-color: #eee;
+  max-width: 900px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.row.list-form-row textarea {
+  height: 120px;
+}
+
 .form-group > label,
 fieldset > legend {
   font-size: 1rem;

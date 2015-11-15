@@ -43,9 +43,10 @@ var formDef = [
           }
         }
       },
-      "expcetedSalary": {"meta": {"kind": "irreducible", "name": "Str"}},
+      "expcetedSalary": {"meta": {"kind": "irreducible", "name": "Str", "options": {"config": {"addonBefore": "$", "addonAfter": "/year"}, "attrs": {"className": "form-input-small"}}}},
       "workAuthorization": {
         "meta": {
+          "options": {"attrs": {"className": "form-input-small"}},
           "kind": "enums",
           "props": {
             "L1": "L1",
@@ -55,7 +56,7 @@ var formDef = [
           }
         }
       },
-      "dontContact": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "dontContact", "attrs": {"className": "myClassName"}}}}}},
+      "dontContact": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "dontContact", "attrs": {"className": "form-input-small"}}}}}},
     }
   }
 },
@@ -64,10 +65,10 @@ var formDef = [
   "meta": {
     "kind": "struct",
     "props": {
-      "phoneNumber": {"meta": {"kind": "irreducible", "name": "Num"}},
-      "currentLocation": {"meta": {"kind": "irreducible", "name": "Str"}},
-      "github": {"meta": {"kind": "irreducible", "name": "Str"}},
-      "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"summary"}}},
+      "phoneNumber": {"meta": {"kind": "irreducible", "name": "Num", "options": {"attrs": {"className": "form-input-small"}},}},
+      "currentLocation": {"meta": {"kind": "irreducible", "name": "Str", "options": {"attrs": {"className": "form-input-small"}},}},
+      "github": {"meta": {"kind": "irreducible", "name": "Str", "options": {"attrs": {"className": "form-input-small"}},}},
+      "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"summary", "attrs": {"className": "form-textarea-small"}}}},
       "skills": {
         "meta": {
           "kind": "maybe",
@@ -77,7 +78,7 @@ var formDef = [
               "kind": "list",
               "type": {
                 "meta": {
-                  "kind": "irreducible", "name": "Str", "options": {"attrs": {"className": "mycls"}}
+                  "kind": "irreducible", "name": "Str"
                 }
               }
             }
@@ -90,8 +91,10 @@ var formDef = [
           "type": {
             "meta": {
               "kind": "list",
+              "options": {"disableOrder": true, "template": ["getListLayout"]},
               "type": {
                 "meta": {
+                  "options": {"template": ["getExperienceLayout"]},
                   "kind": "struct",
                   "props": {
                     "companyName": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "experience.companyName"}}},
@@ -99,6 +102,7 @@ var formDef = [
                     "description": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}}}},
                     "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                     "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
+                    "current": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Bool"}}}},
                   }
                 }
               }
@@ -112,15 +116,17 @@ var formDef = [
           "type": {
             "meta": {
               "kind": "list",
+              "options": {"disableOrder": true, "template": ["getListLayout"]},
               "type": {
                 "meta": {
                   "kind": "struct",
+                  "options": {"template": ["getEducationLayout"]},
                   "props": {
                     "collegeName": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "education.collegeName"}}},
                     "degree": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "education.degree"}}},
-                    "description": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}},
                     "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
                     "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
+                    "current": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Bool"}}}}
                   }
                 }
               }

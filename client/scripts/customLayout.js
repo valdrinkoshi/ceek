@@ -11,20 +11,30 @@ var LayoutRow = React.createClass({
   }
 });
 
+function getBootStrapClassName (screenSize, columnValue) {
+  return ['col', screenSize, columnValue].join('-');
+}
+
+function getBootStrapClassSet (config) {
+  var classes = {};
+  for (var screenSize in config) {
+    classes[getBootStrapClassName(screenSize, config[screenSize])] = true;
+  }
+  return classNames(classes);
+};
+
+function getRemoveButton (clickFn) {
+  return <Button className="btn-grey-icon" onClick={clickFn}><Glyphicon glyph="remove" /></Button>;
+};
+
+function getAddButton (clickFn) {
+  return <Button className="btn-grey-icon" onClick={clickFn}><Glyphicon glyph="plus" /></Button>;
+};
+
 var LayoutColumn = React.createClass({
-  getBootStrapClassName (screenSize, columnValue) {
-    return ['col', screenSize, columnValue].join('-');
-  },
-  getBootStrapClassSet (config) {
-    var classes = {};
-    for (var screenSize in config) {
-      classes[this.getBootStrapClassName(screenSize, config[screenSize])] = true;
-    }
-    return classNames(classes);
-  },
   render () {
     var columnSpan = this.props.columnSpan || 6;
-    var bootstrapClasses = this.getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnSpan, 'lg': columnSpan});
+    var bootstrapClasses = getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnSpan, 'lg': columnSpan});
     return (
       <div className={bootstrapClasses}>{this.props.children}</div>
     );
@@ -44,7 +54,7 @@ var getMultiColumnsLayout = function(totColumns){
         var item = locals.items[i];
         if (item.input && item.buttons) {
           var button = item.buttons[0];
-          var removeButton = <Button onClick={button.click}><Glyphicon glyph="remove" /></Button>
+          var removeButton = getRemoveButton(button.click);
           var extendedProps = jQuery.extend(true, {}, item.input.props);
           if (extendedProps.options) {
             if (!extendedProps.options.config) {
@@ -92,6 +102,96 @@ var getMultiColumnsLayout = function(totColumns){
   };
 };
 
+function getBootstrapColumn (element, config) {
+  return (
+    <div className={getBootStrapClassSet(config)}>
+      {element}
+    </div>);
+}
+
+var getHistoryLayout = function(title1, title2, startDate, endDate, current, description, baseClassName){
+  return function(locals){
+    var title1El;
+    var title2El;
+    var startDateEl;
+    var endDateEl;
+    var currentEl;
+    var descriptionEl;
+    if (title1) {
+      title1El = getBootstrapColumn(locals.inputs[title1], {'xs': 12, 'sm': 12, 'md': 6, 'lg': 6});
+    }
+    if (title2) {
+      title2El = getBootstrapColumn(locals.inputs[title2], {'xs': 12, 'sm': 12, 'md': 6, 'lg': 6});
+    }
+    if (startDate) {
+      startDateEl = getBootstrapColumn(locals.inputs[startDate], {'xs': 12, 'sm': 12, 'md': 4, 'lg': 4});
+    }
+    if (endDate) {
+      endDateEl = getBootstrapColumn(locals.inputs[endDate], {'xs': 12, 'sm': 12, 'md': 4, 'lg': 4});
+    }
+    if (current) {
+      currentEl = getBootstrapColumn(locals.inputs[current], {'xs': 12, 'sm': 12, 'md': 4, 'lg': 4});
+    }
+    if (description) {
+      descriptionEl = (
+        <div className={classNames('row', baseClassName+'-description')}>
+          {getBootstrapColumn(locals.inputs[description], {'xs': 12, 'sm': 12, 'md': 12, 'lg': 12})}
+        </div>);
+    }
+    return (
+      <div>
+        <fieldset>
+          <div className="row">
+            {title1El}
+            {title2El}
+          </div>
+          <div className="row">
+            {startDateEl}
+            {endDateEl}
+            {currentEl}
+          </div>
+          {descriptionEl}
+        </fieldset>
+      </div>
+    );
+  };
+};
+
+var getExperienceLayout = function(){
+  return getHistoryLayout('companyName', 'role', 'startDate', 'endDate', 'current', 'description', 'experience');
+};
+
+var getEducationLayout = function(){
+  return getHistoryLayout('collegeName', 'degree', 'startDate', 'endDate', 'current', null, 'education');
+};
+
+var getListLayout = function(){
+  return function(locals){
+    var items = locals.items.map(function (item) {
+      return (
+          <div className='row list-form-row' key={item.key}>
+            <div className={getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': 11, 'lg': 11})}>
+              {item.input}
+            </div>
+            <div className={getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': 1, 'lg': 1})}>
+              {getRemoveButton(item.buttons[0].click)}
+            </div>
+          </div>
+      );
+    });
+    return (
+      <fieldset>
+        <legend>{locals.label}</legend>
+        {items}
+        {getAddButton(locals.add.click)}
+      </fieldset>
+    );
+  };
+};
+
 module.exports = {
-  getMultiColumnsLayout: getMultiColumnsLayout
+  getMultiColumnsLayout: getMultiColumnsLayout,
+  getListLayout: getListLayout,
+  getExperienceLayout: getExperienceLayout,
+  getEducationLayout: getEducationLayout
 }

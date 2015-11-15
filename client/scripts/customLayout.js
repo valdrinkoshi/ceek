@@ -24,7 +24,7 @@ var LayoutColumn = React.createClass({
   },
   render () {
     var columnSpan = this.props.columnSpan || 6;
-    var bootstrapClasses = this.getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnSpan, 'lg': columnSpan}); 
+    var bootstrapClasses = this.getBootStrapClassSet({'xs': 12, 'sm': 12, 'md': columnSpan, 'lg': columnSpan});
     return (
       <div className={bootstrapClasses}>{this.props.children}</div>
     );
@@ -37,14 +37,36 @@ var getMultiColumnsLayout = function(totColumns){
     //layouts in two columns
     var bootstrapColumnWidth = 12;
     var columnSpan = bootstrapColumnWidth/totColumns;
-    var order = locals.order || Object.keys(locals.inputs);
+    var inputs = locals.inputs;
+    if (!inputs && locals.items) {
+      inputs = {};
+      for (var i = 0; i < locals.items.length; i++) {
+        var item = locals.items[i];
+        if (item.input && item.buttons) {
+          var button = item.buttons[0];
+          var removeButton = <Button onClick={button.click}><Glyphicon glyph="remove" /></Button>
+          var extendedProps = jQuery.extend(true, {}, item.input.props);
+          if (extendedProps.options) {
+            if (!extendedProps.options.config) {
+              extendedProps.options.config = {};
+            }
+          } else {
+            extendedProps.options = {config: {}};
+          }
+          extendedProps.options.config.buttonAfter = removeButton;
+          item.input = React.cloneElement(item.input, extendedProps);
+        }
+        inputs[i] = item.input;
+      }
+    }
+    var order = locals.order || Object.keys(inputs);
     var totInputs = order.length;
     var totRows = totInputs/totColumns;
     var inputPerColumn = totInputs/totRows;
     var inputInCurrentColumn = 0;
     var groupedControls = [[]];
     for (var i = 0; i < order.length; i++) {
-      var currentChild = (<LayoutColumn key={i} columnSpan={columnSpan}>{locals.inputs[order[i]]}</LayoutColumn>);
+      var currentChild = (<LayoutColumn key={i} columnSpan={columnSpan}>{inputs[order[i]]}</LayoutColumn>);
       if (inputInCurrentColumn == inputPerColumn) {
         groupedControls.push([]);
         inputInCurrentColumn = 0;

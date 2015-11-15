@@ -146,7 +146,7 @@ var User = React.createClass({
         );
       });
       output =
-        <div>
+        <div className="container">
           <div className='profile-header'>
             <img className='profile-header-pic' src={this.state.value.pictureUrl} />
             <div className='profile-header-basic-info'>

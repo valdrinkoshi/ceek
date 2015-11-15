@@ -64,7 +64,7 @@ var formDef = [
   "meta": {
     "kind": "struct",
     "props": {
-      "phoneNumber": {"meta": {"kind": "irreducible", "name": "Str"}},
+      "phoneNumber": {"meta": {"kind": "irreducible", "name": "Num"}},
       "currentLocation": {"meta": {"kind": "irreducible", "name": "Str"}},
       "github": {"meta": {"kind": "irreducible", "name": "Str"}},
       "summary": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"summary"}}},
@@ -73,7 +73,7 @@ var formDef = [
           "kind": "maybe",
           "type": {
             "meta": {
-              "options": {"disableOrder": true},
+              "options": {"disableOrder": true, "template": ["getMultiColumnsLayout", 4]},
               "kind": "list",
               "type": {
                 "meta": {

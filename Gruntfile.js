@@ -66,6 +66,10 @@ module.exports = function (grunt) {
                 dest: 'parse/public/',
                 src: ['**/*.css', '**/*.html', '**/*.png', '**/*.jpg', '**/*.ttf']
             },
+            ceekmock: {
+                src: ['client/scripts/mock.js'],
+                dest: 'parse/public/scripts/mock.js'
+            },
             server: {
                 expand: true,
                 cwd: 'server',

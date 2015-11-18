@@ -7,14 +7,14 @@
 
   <script src="scripts/vendor.js"></script>
   <!-- Latest compiled and minified JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
   <script type="text/javascript">
     Parse.initialize("9PZPCDHudfXlMLExqMmEMlP9oKj3xlCXFuP0VQOT", "8D9m7WkarSiIUtYmHN4ZFVgSbL6182j8PfVjOpV1");
   </script>
   <script src="https://www.parsecdn.com/js/parse-react.js"></script>
-
+  <!--script src="scripts/mock.js"></script-->
   <script type="text/javascript">
+    var jQuery = require('jquery');
     var React = require('react');
     var ReactBootstrap = require('react-bootstrap');
     var ReactRouter = require('react-router');
@@ -31,6 +31,8 @@
     var NavItem = ReactBootstrap.NavItem;
     var Nav = ReactBootstrap.Nav;
     var Glyphicon = ReactBootstrap.Glyphicon;
+    var Carousel = ReactBootstrap.Carousel;
+    var CarouselItem = ReactBootstrap.CarouselItem;
     var Route = ReactRouter.Route;
     var Link = ReactRouter.Link;
     var RouteHandler = ReactRouter.RouteHandler;

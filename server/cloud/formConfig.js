@@ -136,6 +136,39 @@ var formDef = [
       }
     }
   }
+},
+{
+  "stepTitle": "Questionnaire",
+  "meta": {
+    "kind": "struct",
+    "options": {"template": ["getCarouselLayout"]},
+    "props": {
+      "questionnaire_question1": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "question1", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "L1": "L1",
+            "H1B": "H1B",
+            "GC": "Green Card",
+            "CTZ": "Citizen"
+          }
+        }
+      },
+      "questionnaire_question2": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "question2", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "L1": "L1",
+            "H1B": "H1B",
+            "GC": "Green Card",
+            "CTZ": "Citizen"
+          }
+        }
+      },
+    }
+  }
 }
 ];  
 

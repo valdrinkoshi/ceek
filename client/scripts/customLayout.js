@@ -189,9 +189,58 @@ var getListLayout = function(){
   };
 };
 
+var ControlledCarousel = React.createClass({
+  getInitialState() {
+    return {
+      index: 0,
+      direction: null
+    };
+  },
+
+  handleSelect(selectedIndex, selectedDirection) {
+    this.setState({
+      index: selectedIndex,
+      direction: selectedDirection
+    });
+  },
+
+  render () {
+    return (
+      <div>
+        <span>The only right answer is the one Ernesto would give.</span>
+        <Carousel className='form-carousel' activeIndex={this.state.index} direction={this.state.direction} onSelect={this.handleSelect}>
+          {this.props.children}
+        </Carousel>
+        <Button>{this.state.index+1}/{React.Children.count(this.props.children)}</Button>
+      </div>
+    );
+  }
+});
+
+var getCarouselLayout = function(){
+  return function(locals){
+    var items = React.Children.map(locals.inputs, function (item) {
+      return (
+        <CarouselItem>
+          {item}
+        </CarouselItem>
+      );
+    });
+    return (
+      <fieldset>
+        <legend>{locals.label}</legend>
+        <ControlledCarousel activeIndex={activeIndex}>
+          {items}
+        </ControlledCarousel>
+      </fieldset>
+    );
+  };
+};
+
 module.exports = {
   getMultiColumnsLayout: getMultiColumnsLayout,
   getListLayout: getListLayout,
   getExperienceLayout: getExperienceLayout,
-  getEducationLayout: getEducationLayout
+  getEducationLayout: getEducationLayout,
+  getCarouselLayout: getCarouselLayout
 }

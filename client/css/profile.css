@@ -121,3 +121,7 @@ fieldset > legend {
 .form-group .form-group-depth-0 > fieldset > div {
   margin-bottom: 1.25rem;
 }
+
+.form-carousel .form-group.form-group-depth-1 {
+  margin: 0 15% 0 15%;
+}

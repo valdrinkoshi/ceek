@@ -13,7 +13,9 @@ var i18n = {
   'experience.companyName': 'Company',
   'experience.role': 'Title',
   'education.collegeName': 'University',
-  'education.degree': 'Major'
+  'education.degree': 'Major',
+  'question1': 'Answer question 1',
+  'question2': 'Answer question 2',
 };
 
 function generateForm (formDefinition) {
@@ -42,6 +44,13 @@ function getOptions (fieldMeta) {
           var functionName = fieldMeta.options[option][0];
           options[option] = customLayouts[functionName].apply(null, fieldMeta.options[option].slice(1));
           break;
+        case 'factory':
+          if (fieldMeta.options[option] === 't.form.Radio') {
+            options[option] = t.form.Radio;
+          } else {
+            throw 'This factory does not exist';
+          }
+          break;
         case 'label':
           options[option] = i18n[fieldMeta.options[option]];
           break;
@@ -56,6 +65,7 @@ function getOptions (fieldMeta) {
 
 function generateFieldOptions (fieldMeta) {
   switch (fieldMeta.kind) {
+    case 'enums':
     case 'irreducible':
       return getOptions(fieldMeta);
     case 'struct':

@@ -229,7 +229,7 @@ var getCarouselLayout = function(){
     return (
       <fieldset>
         <legend>{locals.label}</legend>
-        <ControlledCarousel activeIndex={activeIndex}>
+        <ControlledCarousel>
           {items}
         </ControlledCarousel>
       </fieldset>

@@ -33,6 +33,17 @@ module.exports = function (grunt) {
                   }
                 }
               },
+            ceekmock: {
+                src: [],
+                dest: 'parse/public/scripts/mock.js',
+                options: {
+                  require: ['./server/cloud/formConfig.js', './server/cloud/mock.js'],
+                  alias: [
+                    './server/cloud/formConfig.js:formConfig.js',
+                    './server/cloud/mock.js:Mock'
+                  ]
+                }
+              },
             ceekadmin: {
                 src: ['client/scripts/admin/*.js'],
                 dest: 'parse/public/scripts/adminbundle.js',

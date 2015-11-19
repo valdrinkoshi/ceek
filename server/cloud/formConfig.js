@@ -138,6 +138,50 @@ var formDef = [
   }
 },
 {
+  "stepTitle": "Portfolio",
+  "meta": {
+    "kind": "struct",
+    "props": {
+      "projectLink": {"meta": {"kind": "irreducible", "name": "Str", "options": {"attrs": {"className": "form-input-small"}}}},
+      "description": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"summary", "attrs": {"className": "form-textarea-small"}}}},
+      "why": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "portfolio.why"},
+          "kind": "enums",
+          "props": {
+            "L1": "L1",
+            "H1B": "H1B",
+            "GC": "Green Card",
+            "CTZ": "Citizen"
+          }
+        }
+      },
+      "howMany": {"meta": {"kind": "irreducible", "name": "Num", "options": {"attrs": {"className": "form-input-small"},"label": "portfolio.howMany"}}
+      },
+      "contribution": {
+        "meta": {
+          "kind": "maybe",
+          "type": {
+            "meta": {
+              "kind": "list",
+              "options": {"disableOrder": true, "label": "contribution"},
+              "type": {
+                "meta": {
+                  "kind": "struct",
+                  "props": {
+                    "process": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "contribution.process"}}},
+                    "percentage": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "contribution.percentage"}}},
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+  }
+},
+{
   "stepTitle": "Questionnaire",
   "meta": {
     "kind": "struct",
@@ -145,7 +189,7 @@ var formDef = [
     "props": {
       "questionnaire_question1": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "question1", "factory": "t.form.Radio"},
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question1", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "L1": "L1",
@@ -157,7 +201,7 @@ var formDef = [
       },
       "questionnaire_question2": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "question2", "factory": "t.form.Radio"},
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question2", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "L1": "L1",

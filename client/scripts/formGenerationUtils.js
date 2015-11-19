@@ -14,8 +14,13 @@ var i18n = {
   'experience.role': 'Title',
   'education.collegeName': 'University',
   'education.degree': 'Major',
-  'question1': 'Answer question 1',
-  'question2': 'Answer question 2',
+  'portfolio.why': 'Why did you create this project?',
+  'portfolio.howMany': 'How many team members?',
+  'contribution': 'The process and your contribution',
+  'contribution.process': 'Process (Plan, Architecture, Develop, Test, ...)',
+  'contribution.percentage': 'Contribution %',
+  'questionnaire.question1': 'Answer question 1',
+  'questionnaire.question2': 'Answer question 2'
 };
 
 function generateForm (formDefinition) {

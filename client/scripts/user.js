@@ -124,17 +124,6 @@ var User = React.createClass({
       'panel-selected': evtKey === this.state.activeKey,
     });
   },
-  
-  formChanged (stepId, value, key) {
-    key = key[0];
-    if (key.indexOf('questionnaire_') !== -1 && value[key]) {
-      var dataToSave = {};
-      dataToSave[key] = value[key];
-      Services.PostProfile(JSON.stringify(dataToSave), stepId).then(function (data) {
-        console.log(data);
-      });
-    }
-  },
 
   render() {
     var output;
@@ -151,7 +140,6 @@ var User = React.createClass({
               type={formDef.def}
               options={_this.state.options[index]}
               value={_this.state.value}
-              onChange={_this.formChanged.bind(_this, stepId)}
             />
             <Button onClick={_this.save.bind(_this, stepId)}>Save</Button>
           </Panel>

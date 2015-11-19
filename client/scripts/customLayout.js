@@ -211,7 +211,7 @@ var ControlledCarousel = React.createClass({
         <Carousel className='form-carousel' activeIndex={this.state.index} direction={this.state.direction} onSelect={this.handleSelect}>
           {this.props.children}
         </Carousel>
-        <Button>{this.state.index+1}/{React.Children.count(this.props.children)}</Button>
+        <span>{this.state.index+1}/{React.Children.count(this.props.children)}</span>
       </div>
     );
   }

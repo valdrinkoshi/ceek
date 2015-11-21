@@ -43,7 +43,7 @@ var formDef = [
           }
         }
       },
-      "expcetedSalary": {"meta": {"kind": "irreducible", "name": "Str", "options": {"config": {"addonBefore": "$", "addonAfter": "/year"}, "attrs": {"className": "form-input-small"}}}},
+      "expectedSalary": {"meta": {"kind": "irreducible", "name": "Str", "options": {"template": ["forceCustomClass", "form-input-small"], "config": {"addonBefore": "$", "addonAfter": "/year"}}}},
       "workAuthorization": {
         "meta": {
           "options": {"attrs": {"className": "form-input-small"}},

@@ -1,5 +1,6 @@
 var React = require('react');
 var classNames = require('classnames');
+var t = require('tcomb-form');
 
 var LayoutRow = React.createClass({
   render () {
@@ -91,12 +92,17 @@ var getMultiColumnsLayout = function(totColumns){
         </LayoutRow>
       );
     });
+    var addButton;
+    if (locals.add) {
+      addButton = getAddButton(locals.add.click);
+    }
     return (
       <div>
         <fieldset>
           <legend>{locals.label}</legend>
           {layoutNodes}
         </fieldset>
+        {addButton}
       </div>
     );
   };
@@ -237,10 +243,23 @@ var getCarouselLayout = function(){
   };
 };
 
+var forceCustomClass = function(className) {
+  return function(locals){
+    var options = {
+      attrs: locals.attrs,
+      config: locals.config
+    };
+    var textboxUvdom = t.form.Form.templates['textbox'](locals);
+    textboxUvdom.attrs.className[className] = true;
+    return textboxUvdom;
+  };
+}
+
 module.exports = {
   getMultiColumnsLayout: getMultiColumnsLayout,
   getListLayout: getListLayout,
   getExperienceLayout: getExperienceLayout,
   getEducationLayout: getEducationLayout,
-  getCarouselLayout: getCarouselLayout
+  getCarouselLayout: getCarouselLayout,
+  forceCustomClass: forceCustomClass
 }

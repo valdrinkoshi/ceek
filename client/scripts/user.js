@@ -125,6 +125,16 @@ var User = React.createClass({
     });
   },
 
+  getHeader (title, status) {
+    var glyph = 'minus-sign';
+    if (status === 'success') {
+      glyph = 'ok-sign';
+    } else if (status === 'danger') {
+      glyph = 'remove-sign';
+    }
+    return <div className='step-panel-header-container'><h4 className='step-panel-header-title'>{title}</h4><Glyphicon className='step-panel-header-icon' glyph={glyph}/></div>;
+  },
+
   render() {
     var output;
     if (this.state.formDef) {
@@ -132,16 +142,16 @@ var User = React.createClass({
       var steps = this.state.formDef.map(function (formDef, index) {
         var stepId = 'step' + index;
         var evtKey = index+1;
-        
+        var header = _this.getHeader(formDef.stepTitle, formDef.status);
         return (
-          <Panel className={_this.getCustomPanelClasses(evtKey)} key={stepId} eventKey={evtKey} collapsible bsStyle={formDef.status} header={formDef.stepTitle}>
+          <Panel className={_this.getCustomPanelClasses(evtKey)} key={stepId} eventKey={evtKey} collapsible header={header}>
             <Form
               ref={stepId}
               type={formDef.def}
               options={_this.state.options[index]}
               value={_this.state.value}
             />
-            <Button onClick={_this.save.bind(_this, stepId)}>Save</Button>
+            <button className="step-save-button text-uppercase" onClick={_this.save.bind(_this, stepId)}>Save</button>
           </Panel>
         );
       });
@@ -159,10 +169,11 @@ var User = React.createClass({
           </DropdownButton>
           </div>
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
-            <Panel collapsible eventKey={0} header='LinkedIn Profile PDF' bsStyle={this.state.linkedInCVStepStatus}>
+            <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>
+              <img src='imgs/import_LinkedIn.png' />
               <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
                 <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
-                <input type='submit' value='upload cv' />
+                <input type='submit' value='Upload LinkedIn PDF' />
               </form>
             </Panel>
             {steps}

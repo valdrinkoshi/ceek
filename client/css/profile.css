@@ -71,16 +71,24 @@ body {
   background-color: #fff;
 }
 
-.panel-title {
+.step-panel-header-container {
   font-size: 1.125rem;
+}
+
+.step-panel-header-title {
+  display: inline;
   font-family: SourceSansPro-Light;
 }
 
-.panel-selected .panel-title {
+.step-panel-header-icon {
+  float: right;
+}
+
+.panel-selected .step-panel-header-title {
   font-family: SourceSansPro-Regular;
 }
 
-.panel-title > a:hover {
+.step-panel-header-title > a:hover {
   text-decoration: none;
 }
 
@@ -124,4 +132,14 @@ fieldset > legend {
 
 .form-carousel .form-group.form-group-depth-1 {
   margin: 0 15% 0 15%;
+}
+
+.step-save-button {
+  width: 7.75rem;
+  height: 2.875rem;
+  margin: 1.0625rem 0 1.0625rem 0;
+  background-color: #fc7070;
+  border: none;
+  color: #fbfbfb;
+  font-size: 1.125rem;
 }

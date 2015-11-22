@@ -143,8 +143,8 @@ var formDef = [
     "kind": "struct",
     "props": {
       "projectLink": {"meta": {"kind": "irreducible", "name": "Str", "options": {"attrs": {"className": "form-input-small"}}}},
-      "description": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"summary", "attrs": {"className": "form-textarea-small"}}}},
-      "why": {
+      "projectDescription": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea", "label":"portfolio.description", "attrs": {"className": "form-textarea-small"}}}},
+      "projectWhy": {
         "meta": {
           "options": {"attrs": {"className": "form-input-small"}, "label": "portfolio.why"},
           "kind": "enums",

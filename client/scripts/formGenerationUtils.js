@@ -14,6 +14,7 @@ var i18n = {
   'experience.role': 'Title',
   'education.collegeName': 'University',
   'education.degree': 'Major',
+  'portfolio.description': 'Description',
   'portfolio.why': 'Why did you create this project?',
   'portfolio.howMany': 'How many team members?',
   'contribution': 'The process and your contribution',

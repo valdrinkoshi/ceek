@@ -29,7 +29,7 @@ function getRemoveButton (clickFn) {
 };
 
 function getAddButton (clickFn) {
-  return <Button className="btn-grey-icon" onClick={clickFn}><Glyphicon glyph="plus" /></Button>;
+  return <button className="btn-blue text-uppercase" onClick={clickFn}>add</button>;
 };
 
 var LayoutColumn = React.createClass({
@@ -213,11 +213,10 @@ var ControlledCarousel = React.createClass({
   render () {
     return (
       <div>
-        <span>The only right answer is the one Ernesto would give.</span>
+        <span className='steps-subtletext'>There are no right or wrong answers, being honest will match the right jobs for you.</span>
         <Carousel className='form-carousel' activeIndex={this.state.index} direction={this.state.direction} onSelect={this.handleSelect}>
           {this.props.children}
         </Carousel>
-        <span>{this.state.index+1}/{React.Children.count(this.props.children)}</span>
       </div>
     );
   }

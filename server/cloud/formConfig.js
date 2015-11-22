@@ -149,10 +149,15 @@ var formDef = [
           "options": {"attrs": {"className": "form-input-small"}, "label": "portfolio.why"},
           "kind": "enums",
           "props": {
-            "L1": "L1",
-            "H1B": "H1B",
-            "GC": "Green Card",
-            "CTZ": "Citizen"
+            "1": "For fun",
+            "2": "For my work",
+            "3": "To earn some side income",
+            "4": "To try out new technologies",
+            "5": "To learn something new",
+            "6": "To solve a problem I have",
+            "7": "To test my startup ideas",
+            "8": "To have some projects in my portfolio",
+            "9": "Just for sake of doing something"
           }
         }
       },
@@ -169,7 +174,20 @@ var formDef = [
                 "meta": {
                   "kind": "struct",
                   "props": {
-                    "process": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "contribution.process"}}},
+                    "process": {
+                      "meta": {
+                      "kind": "enums",
+                      "props": {
+                        "1": "Ideation",
+                        "2": "Design",
+                        "3": "Develop",
+                        "4": "Testing",
+                        "5": "Release",
+                        "6": "Maintenance",
+                        "7": "Marketing"
+                      }
+                  }
+                },
                     "percentage": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "contribution.percentage"}}},
                   }
                 }
@@ -192,10 +210,10 @@ var formDef = [
           "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question1", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
-            "L1": "L1",
-            "H1B": "H1B",
-            "GC": "Green Card",
-            "CTZ": "Citizen"
+            "1": "Insightful & big picture oriented",
+            "2": "Detail oriented & craft man like",
+            "3": "Conceptual & intuitive",
+            "4": "Analytical & rigorous"
           }
         }
       },
@@ -204,10 +222,82 @@ var formDef = [
           "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question2", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
-            "L1": "L1",
-            "H1B": "H1B",
-            "GC": "Green Card",
-            "CTZ": "Citizen"
+            "1": "Probing",
+            "2": "Constructing",
+            "3": "Planning",
+            "4": "Innovating"
+          }
+        }
+      },
+      "questionnaire_question3": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question3", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Efficient",
+            "2": "Intuitive",
+            "3": "Skillful",
+            "4": "Thorough"
+          }
+        }
+      },
+      "questionnaire_question4": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question4", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Skill",
+            "2": "Research",
+            "3": "Ability to structure",
+            "4": "Experimentation"
+          }
+        }
+      },
+      "questionnaire_question5": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question5", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Provide written proof",
+            "2": "Use props",
+            "3": "Use imagination",
+            "4": "Use charts and graphs"
+          }
+        }
+      },
+      "questionnaire_question6": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question6", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Spontaneous",
+            "2": "Methodical",
+            "3": "Technical",
+            "4": "Thorough"
+          }
+        }
+      },
+      "questionnaire_question7": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question6", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Do the work myself",
+            "2": "Brainstorming with others",
+            "3": "Be able to delegate",
+            "4": "Have the work flow to me smoothly"
+          }
+        }
+      },
+      "questionnaire_question8": {
+        "meta": {
+          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question8", "factory": "t.form.Radio"},
+          "kind": "enums",
+          "props": {
+            "1": "Craftmanship",
+            "2": "Neatness",
+            "3": "Originality",
+            "4": "Being the most realistic"
           }
         }
       },

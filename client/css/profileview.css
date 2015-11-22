@@ -1,0 +1,30 @@
+/*ProfileProperty*/
+
+.profile-prop-label {
+  font-weight: bold;
+  display: block;
+}
+
+.profile-prop-label-inline {
+  display: inline-block;
+}
+
+.profile-prop-value {
+  color: grey;
+}
+
+.profile-prop-value-inline {
+  display: inline-block;
+}
+
+/*HistoryProfileProperty*/
+.history-profile-property {
+  margin-bottom: 0.5rem;
+}
+
+.boxed-property {
+  display: inline-block;
+  padding: 0.25rem;
+  margin: 0 0.125rem 0.125rem 0;
+  border: 1px solid black;
+}

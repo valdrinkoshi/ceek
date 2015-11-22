@@ -2,6 +2,7 @@ var React = require('react');
 var ReactRouter = require('react-router');
 var SignUp = require('SignUp');
 var User = require('User');
+var UserView = require('UserView');
 
 var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
@@ -45,6 +46,7 @@ var routes = [
 <Route handler={App}>
   <Route name="/" handler={SignUp}/>
   <Route name="/profile" handler={User}/>
+  <Route name="/profileview" handler={UserView}/>
 </Route>
 ];
 

@@ -152,7 +152,7 @@ var User = React.createClass({
               options={_this.state.options[index]}
               value={_this.state.value}
             />
-            <button className="step-save-button text-uppercase" onClick={_this.save.bind(_this, stepId)}>Save</button>
+            <button className='step-save-button text-uppercase' onClick={_this.save.bind(_this, stepId)}>Save</button>
           </Panel>
         );
       });
@@ -161,10 +161,16 @@ var User = React.createClass({
           <UserProfileHeader pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
             <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>
-              <img src='imgs/import_LinkedIn.png' />
+              <span className='steps-subtletext'>Import your LinkedIn profile, and we’ll help fill in your summary, work history, education and skills.</span>
+              <ol className='upload-steps'>
+                <li>Click <span className='upload-steps-important'>Profile</span> at the top of your LinkedIn homepage.</li>
+                <li>Move your cursor over the Down arrow next to the <span className='upload-steps-important'>View profile as button</span>. Select <span className='upload-steps-important'>Save to PDF</span>.</li>
+                <img className='upload-step-img' src='imgs/import_LinkedIn.png' />
+                <li>The PDF file will be downloaded and saved to your computor. Return here and upload the PDF file below.</li>
+              </ol>
               <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
                 <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
-                <input type='submit' value='Upload LinkedIn PDF' />
+                <input className='step-save-button text-uppercase' type='submit' value='upload' />
               </form>
             </Panel>
             {steps}

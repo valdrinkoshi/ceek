@@ -98,6 +98,15 @@ body {
   color: #b2b2b2;
 }
 
+.btn-blue {
+  width: 7.5rem;
+  height: 2.5rem;
+  background-color: #72D0F5;
+  border: none;
+  color: white;
+  
+}
+
 .form-textarea-small {
   width: 37.5rem;
 }
@@ -131,16 +140,90 @@ fieldset > legend {
   margin-bottom: 1.25rem;
 }
 
+/*carousel*/
+
 .form-carousel .form-group.form-group-depth-1 {
-  margin: 0 15% 0 15%;
+  margin: 0 5.875rem 0 5.875rem; /*4rem chevron size + 1.875rem margin by spec*/
+  background-color: #fafafa;
+}
+
+.form-carousel .carousel-control.left,
+.form-carousel .carousel-control.right {
+  width: 4rem;
+  height: 4rem;
+  background-image: none;
+  margin: auto;
+  background-color: #F0F0F0;
+  border-radius: 2rem;
 }
 
 .step-save-button {
-  width: 7.75rem;
-  height: 2.875rem;
   margin: 1.0625rem 0 1.0625rem 0;
+  padding: 0.75rem 1.875rem 0.75rem 1.875rem;
   background-color: #fc7070;
   border: none;
   color: #fbfbfb;
   font-size: 1.125rem;
+}
+
+/*upload linkedin step*/
+.steps-subtletext {
+  color: #999;
+  font-size: 0.875rem;
+  font-family: SourceSansPro-Light;
+  display: inline-block;
+}
+
+.steps-subtletext,
+.upload-steps > li {
+  margin-bottom: 1.25rem;
+}
+
+.upload-steps {
+  color: #333;
+  font-size: 1rem;
+  font-family: SourceSansPro-Light;
+}
+
+.upload-steps-important {
+  font-family: SourceSansPro-Regular;
+}
+
+.upload-step-img {
+  height: 10rem;
+  width: 23.5rem;
+}
+
+.upload-li-pdf {
+  width: 25rem;
+  height: 2.75rem;
+}
+
+.upload-li-pdf  input.upload-li-pdf-upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.file-upload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+}
+.file-upload input.file-upload-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
 }

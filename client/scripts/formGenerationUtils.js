@@ -20,8 +20,15 @@ var i18n = {
   'contribution': 'The process and your contribution',
   'contribution.process': 'Process (Plan, Architecture, Develop, Test, ...)',
   'contribution.percentage': 'Contribution %',
-  'questionnaire.question1': 'Answer question 1',
-  'questionnaire.question2': 'Answer question 2'
+  'questionnaire.question1': '1. Which type fits you the best?',
+  'questionnaire.question2': '2. When I am assigned a new project, I begin with',
+  'questionnaire.question3': '3. Which is your style when working on a project?',
+  'questionnaire.question4': '4. When you are solving a difficult problem, which one do you rely on the most?',
+  'questionnaire.question5': '5. When communicating a new idea, which is do you often use',
+  'questionnaire.question6': '6. When you explain an idea, you are most often being',
+  'questionnaire.question7': '7. Which work situation do you prefer the most?',
+  'questionnaire.question8': '8. If you were to win a contest, it would be for'
+
 };
 
 function generateForm (formDefinition) {

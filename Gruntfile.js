@@ -25,7 +25,8 @@ module.exports = function (grunt) {
                   alias: [
                     './client/scripts/app.js:App',
                     './client/scripts/signup.js:SignUp',
-                    './client/scripts/user.js:User'
+                    './client/scripts/user.js:User',
+                    './client/scripts/userprofileheader.js:UserProfileHeader'
                   ],
                   external: ['react'],
                   browserifyOptions: {

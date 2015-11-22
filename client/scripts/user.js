@@ -4,6 +4,7 @@ var t = require('tcomb-form');
 var Form = t.form.Form;
 var Services = require('./Services.js');
 var formGenerationUtils = require('./formGenerationUtils.js');
+var UserProfileHeader = require('./UserProfileHeader');
 var classNames = require('classnames');
 
 var User = React.createClass({
@@ -157,17 +158,7 @@ var User = React.createClass({
       });
       output =
         <div className="container">
-          <div className='profile-header'>
-            <img className='profile-header-pic' src={this.state.value.pictureUrl} />
-            <div className='profile-header-basic-info'>
-              <span className='profile-header-name'>{this.state.value.firstName} {this.state.value.lastName}</span>
-              <span className='profile-header-email'>{this.state.value.emailAddress}</span>
-            </div>
-            <DropdownButton className='profile-header-mkt-status-btn' bsSize="xsmall" onSelect={this.changeMarketStatus} bsStyle={this.state.marketStatus} title={this.state.marketStatusText}>
-            <MenuItem eventKey="on">On market</MenuItem>
-            <MenuItem eventKey="off">Off market</MenuItem>
-          </DropdownButton>
-          </div>
+          <UserProfileHeader pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
             <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>
               <img src='imgs/import_LinkedIn.png' />

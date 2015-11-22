@@ -1,0 +1,229 @@
+@font-face {
+  font-family: SourceSansPro-Regular;
+  src: url('../fonts/SourceSansPro-Regular.ttf');
+}
+
+@font-face {
+  font-family: SourceSansPro-Bold;
+  src: url('../fonts/SourceSansPro-Bold.ttf');
+}
+
+@font-face {
+  font-family: SourceSansPro-Light;
+  src: url('../fonts/SourceSansPro-Light.ttf');
+}
+
+html {
+  font-size: 16px;
+}
+body {
+  margin: 0;
+  font-family: SourceSansPro-Regular;
+  background-color: #fafafa;
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: 940px;
+  }
+}
+
+/* header */
+
+.profile-header {
+  font-size: 1rem;
+  line-height: 1.25rem;
+  color: #4b4c4c;
+  overlflow: hidden;
+}
+
+.profile-header-basic-info {
+  display: inline-block;
+}
+
+.profile-header-name,
+.profile-header-email {
+  display: block;
+}
+
+.profile-header-name {
+  font-size: 1.25rem;
+  line-height: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-header-email {
+  font-family: SourceSansPro-Light;
+}
+
+.profile-header-pic {
+  width: 5rem;
+  height: 5rem;
+  margin: 1.25rem 1.25rem 1.25rem 0;
+}
+
+.profile-header-mkt-status-btn {
+  float: right;
+}
+
+/* panel */
+.panel-default > .panel-heading {
+  background-color: #fff;
+}
+
+.step-panel-header-container {
+  font-size: 1.125rem;
+}
+
+.step-panel-header-title {
+  display: inline;
+  font-family: SourceSansPro-Light;
+}
+
+.step-panel-header-icon {
+  float: right;
+}
+
+.panel-selected .step-panel-header-title {
+  font-family: SourceSansPro-Regular;
+}
+
+.step-panel-header-title > a:hover {
+  text-decoration: none;
+}
+
+/* forms */
+
+.btn-grey-icon {
+  color: #b2b2b2;
+}
+
+.btn-blue {
+  width: 7.5rem;
+  height: 2.5rem;
+  background-color: #72D0F5;
+  border: none;
+  color: white;
+  
+}
+
+.form-textarea-small {
+  width: 37.5rem;
+}
+
+.form-input-small,
+.form-input-small.with-addons {
+  width: 18.75rem;
+}
+
+.row.list-form-row {
+  background-color: #eee;
+  max-width: 900px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.row.list-form-row textarea {
+  height: 120px;
+}
+
+.form-group > label,
+fieldset > legend {
+  font-size: 1rem;
+  color: #333;
+  font-weight: normal;
+  width: auto;
+  margin: 0 0 0.875rem 0;
+}
+
+.form-group .form-group-depth-0 > fieldset > div {
+  margin-bottom: 1.25rem;
+}
+
+/*carousel*/
+
+.form-carousel .form-group.form-group-depth-1 {
+  margin: 0 5.875rem 0 5.875rem; /*4rem chevron size + 1.875rem margin by spec*/
+  background-color: #fafafa;
+}
+
+.form-carousel .carousel-control.left,
+.form-carousel .carousel-control.right {
+  width: 4rem;
+  height: 4rem;
+  background-image: none;
+  margin: auto;
+  background-color: #F0F0F0;
+  border-radius: 2rem;
+}
+
+.step-save-button {
+  margin: 1.0625rem 0 1.0625rem 0;
+  padding: 0.75rem 1.875rem 0.75rem 1.875rem;
+  background-color: #fc7070;
+  border: none;
+  color: #fbfbfb;
+  font-size: 1.125rem;
+}
+
+/*upload linkedin step*/
+.steps-subtletext {
+  color: #999;
+  font-size: 0.875rem;
+  font-family: SourceSansPro-Light;
+  display: inline-block;
+}
+
+.steps-subtletext,
+.upload-steps > li {
+  margin-bottom: 1.25rem;
+}
+
+.upload-steps {
+  color: #333;
+  font-size: 1rem;
+  font-family: SourceSansPro-Light;
+}
+
+.upload-steps-important {
+  font-family: SourceSansPro-Regular;
+}
+
+.upload-step-img {
+  height: 10rem;
+  width: 23.5rem;
+}
+
+.upload-li-pdf {
+  width: 25rem;
+  height: 2.75rem;
+}
+
+.upload-li-pdf  input.upload-li-pdf-upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.file-upload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+}
+.file-upload input.file-upload-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}

@@ -25,7 +25,8 @@ module.exports = function (grunt) {
                   alias: [
                     './client/scripts/app.js:App',
                     './client/scripts/signup.js:SignUp',
-                    './client/scripts/user.js:User'
+                    './client/scripts/user.js:User',
+                    './client/scripts/userprofileheader.js:UserProfileHeader'
                   ],
                   external: ['react'],
                   browserifyOptions: {
@@ -76,6 +77,10 @@ module.exports = function (grunt) {
                 cwd: 'client',
                 dest: 'parse/public/',
                 src: ['**/*.css', '**/*.html', '**/*.png', '**/*.jpg', '**/*.ttf']
+            },
+            ceekmock: {
+                src: ['client/scripts/mock.js'],
+                dest: 'parse/public/scripts/mock.js'
             },
             server: {
                 expand: true,

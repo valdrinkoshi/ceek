@@ -9,21 +9,21 @@ Services.GetProfile = function () {
       getProfilePromise.resolve(data);
     });
   } else {
-    $.get('profile', {sessionToken: Parse.User.current().getSessionToken()}, function (data) {
+    jQuery.get('profile', {sessionToken: Parse.User.current().getSessionToken()}, function (data) {
       getProfilePromise.resolve(data);
     });
   }
   return getProfilePromise;
 };
 
-Services.PostProfile = function (value) {
+Services.PostProfile = function (value, stepId) {
   var postProfilePromise = jQuery.Deferred();
   if (useCloudCode) {
-    Parse.Cloud.run('PostProfile', {data: value}).then(function (data) {
+    Parse.Cloud.run('PostProfile', {data: value, stepId: stepId}).then(function (data) {
       postProfilePromise.resolve(data);
     });
   } else {
-    $.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: value}, function (data) {
+    jQuery.post('profile', {sessionToken: Parse.User.current().getSessionToken(), data: value, stepId: stepId}, function (data) {
       postProfilePromise.resolve(data);
     });
   }
@@ -37,7 +37,7 @@ Services.ParseLICV = function (url) {
       parseLICVPromise.resolve(data);
     });
   } else {
-    $.get('parseLICV', {sessionToken: Parse.User.current().getSessionToken(), url: url}, function (response) {
+    jQuery.get('parseLICV', {sessionToken: Parse.User.current().getSessionToken(), url: url}, function (response) {
       parseLICVPromise.resolve(response);
     });
   }
@@ -51,7 +51,7 @@ Services.PostPProfile = function (userId) {
       postPProfilePromise.resolve(data);
     });
   } else {
-    $.post('pprofile', {sessionToken: Parse.User.current().getSessionToken(), userId: userId}, function (data) {
+    jQuery.post('pprofile', {sessionToken: Parse.User.current().getSessionToken(), userId: userId}, function (data) {
       postPProfilePromise.resolve(data);
     });
   }

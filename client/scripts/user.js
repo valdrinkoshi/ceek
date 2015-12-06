@@ -55,28 +55,56 @@ var User = React.createClass({
     this.setState(newState);
   },
 
+  uploadFile (file) {
+    if (file) {
+      var fileName = file.name.replace(/[^a-zA-Z0-9_.]/g, '_');
+      var parseFile = new Parse.File(fileName, file);
+      return parseFile.save()
+    }
+  },
+
   uploadLICV (event) {
     event.preventDefault();
     var _this = this;
     var file = React.findDOMNode(this.refs.fileToUpload).files[0];
-    var fileName = file.name.replace(/[^a-zA-Z0-9_.]/g, '_');
-    var parseFile = new Parse.File(fileName, file);
-    parseFile.save().then(function(parseFile) {
-      Services.ParseLICV(parseFile.url()).then(function (response) {
-        console.log(response);
-        _this.setState({
-          activeKey: 1,
-          linkedInCVStepStatus: 'success',
-          value: response
-        });
-      }, function () {
-        _this.setState({
-          linkedInCVStepStatus: 'danger'
+    var uploadFilePromise = this.uploadFile(file);
+    if (uploadFilePromise) {
+      uploadFilePromise.then(function(parseFile) {
+        Services.ParseLICV(parseFile.url()).then(function (response) {
+          console.log(response);
+          _this.setState({
+            activeKey: 1,
+            linkedInCVStepStatus: 'success',
+            value: response
+          });
+        }, function () {
+          _this.setState({
+            linkedInCVStepStatus: 'danger'
+          });
         });
       });
-    });
+    }
   },
 
+  uploadNewProfilePic (file) {
+    event.preventDefault();
+    var _this = this;
+    var uploadFilePromise = this.uploadFile(file);
+    if (uploadFilePromise) {
+      uploadFilePromise.then(function(parseFile) {
+        var data = {pictureUrl: parseFile.url()};
+        Services.PostProfile(JSON.stringify(data), 'newPic').then(function (data) {
+          _this.setState({
+            value: data.userProfileData
+          });
+          console.log(data);
+        },
+        function (error) {
+          newState.formDef[stepIndex].status = 'danger';
+        });
+      });
+    }
+  },
   handlePanelSelect(activeKey) {
     this.setState({activeKey: activeKey});
   },
@@ -158,7 +186,7 @@ var User = React.createClass({
       });
       output =
         <div className="container">
-          <UserProfileHeader pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
+          <UserProfileHeader newPictureUploaded={this.uploadNewProfilePic} pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
             <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>
               <span className='steps-subtletext'>Import your LinkedIn profile, and we’ll help fill in your summary, work history, education and skills.</span>

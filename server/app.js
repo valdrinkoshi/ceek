@@ -454,13 +454,30 @@ var PostProfile = function (user, request, response, params) {
   }
   getUserProfile(user).then(function(userDataResponse) {
     var formData = receivedParams.data;
-    var stepId = receivedParams.stepId;
-    var formDef = formConfig.formDefinition[stepId.replace('step', '')];
-    if (!formDef) {
+    try {
+      formData = JSON.parse(formData);
+    } catch (e) {
       fail(repsonse, {errorMessage: 'Invalid'})
     }
-    var validatedForm = formValidationUtils.validateForm(formDef, JSON.parse(formData));
+    var stepId = receivedParams.stepId;
+    if (stepId === 'newPic') {
+      var newData = {
+        pictureUrl: '' //default pic?
+      };
+      for (var property in newData) {
+        if (formData.hasOwnProperty(property)) { //TODO validate?
+          newData[property] = formData[property];
+        }
+      }
+      return userDataResponse.save(newData, { useMasterKey: true });
+    } else {
+      var formDef = formConfig.formDefinition[stepId.replace('step', '')];
+      if (!formDef) {
+        fail(repsonse, {errorMessage: 'Invalid'})
+      }
+      var validatedForm = formValidationUtils.validateForm(formDef, formData);
       return userDataResponse.save(validatedForm, { useMasterKey: true });
+    }
   }).then(function(userDataResponse) {
     success(response, {msg: 'All good!', userProfileData: userDataResponse.attributes});
   }, function(error) {

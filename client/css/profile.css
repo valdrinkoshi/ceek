@@ -34,11 +34,11 @@ body {
   font-size: 1rem;
   line-height: 1.25rem;
   color: #4b4c4c;
-  overlflow: hidden;
 }
 
 .profile-header-basic-info {
   display: inline-block;
+  vertical-align: middle;
 }
 
 .profile-header-name,
@@ -56,10 +56,31 @@ body {
   font-family: SourceSansPro-Light;
 }
 
-.profile-header-pic {
+.profile-header-pic-container,
+.profile-header-pic-upload input {
   width: 5rem;
   height: 5rem;
   margin: 1.25rem 1.25rem 1.25rem 0;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.profile-header-pic {
+  max-width: 5rem;
+  max-height: 5rem;
+}
+
+.profile-header-pic-upload {
+  position: relative;
+}
+.profile-header-pic-upload input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  opacity: 0;
+  margin: 0;
 }
 
 .profile-header-mkt-status-btn {

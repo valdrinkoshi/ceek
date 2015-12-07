@@ -17,7 +17,8 @@ var User = React.createClass({
       activeKey: 0,
       linkedInCVStepStatus: 'danger',
       marketStatus: 'success',
-      marketStatusText: 'On Market'
+      marketStatusText: 'On Market',
+      showErrorModal: false
     };
   },
 
@@ -145,6 +146,8 @@ var User = React.createClass({
       function (error) {
         newState.formDef[stepIndex].status = 'danger';
       });
+    } else {
+      this.setState({showErrorModal: true});
     }
   },
 
@@ -162,6 +165,10 @@ var User = React.createClass({
       glyph = 'remove-sign';
     }
     return <div className='step-panel-header-container'><h4 className='step-panel-header-title'>{title}</h4><Glyphicon className='step-panel-header-icon' glyph={glyph}/></div>;
+  },
+
+  closeErrorModal() {
+    this.setState({showErrorModal: false});
   },
 
   render() {
@@ -186,6 +193,11 @@ var User = React.createClass({
       });
       output =
         <div className="container">
+          <Modal show={this.state.showErrorModal}>
+            <Modal.Header bsStyle='danger'>Error</Modal.Header>
+            <Modal.Body>Please correct the marked field(s)</Modal.Body>
+            <Modal.Footer><Button onClick={this.closeErrorModal}>Close</Button></Modal.Footer>
+          </Modal>
           <UserProfileHeader newPictureUploaded={this.uploadNewProfilePic} pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
             <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>

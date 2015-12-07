@@ -132,7 +132,6 @@ var UserView = React.createClass({
   },
 
   computeWorkStyle(data) {
-    var questionnaire;
     var totQuestions = 8;
     var questionPropertyNameBase = 'questionnaire_question';
     //default profile types
@@ -214,15 +213,17 @@ var UserView = React.createClass({
           '4': '1'
         }
       }
+
+    data.questionnaire = true;
     var matchingTypes = jQuery.extend(true, {}, profileTypes);
     for (var i = 1; i < totQuestions+1; i++) {
       var question = questionPropertyNameBase+i;
-      if (typeof data[question] === 'string') {
+      if (typeof data[question] === 'string' && data[question]) {
         var typeForQuestion = mappings[i][data[question]];
         matchingTypes[typeForQuestion].value += 1;
       } else {
-        questionnaire = undefined;
-        break;
+        data.questionnaire = false
+        return
       }
     }
 
@@ -295,23 +296,42 @@ var UserView = React.createClass({
       }
 
       this.computeWorkStyle(data);
-      var workStyleTitle = data.firstName + "'s work style";
-      var workStyleDescriptionBase = 'Based on the questionnaire result, ' + data.firstName;
-      var workStyleDescription = '';
-      var workStyleIds = Object.keys(data.mainWorkStyleData);
-      if (workStyleIds.length === 1) {
-        workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label;
-      } else if (workStyleIds.length === 2) {
-        workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label + ", and his supporting work style is " + data.mainWorkStyleData[workStyleIds[1]].label;
-      } else {
-        workStyleDescription = workStyleDescriptionBase + " has a perfectly balanced among all the Ceek working styles"
-      }
+      var questionnaire = <span>Can't determine work style</span>
+      if (data.questionnaire) {
+        var workStyleTitle = data.firstName + "'s work style";
+        var workStyleDescriptionBase = 'Based on the questionnaire result, ' + data.firstName;
+        var workStyleDescription = '';
+        var workStyleIds = Object.keys(data.mainWorkStyleData);
+        if (workStyleIds.length === 1) {
+          workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label;
+        } else if (workStyleIds.length === 2) {
+          workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label + ", and his supporting work style is " + data.mainWorkStyleData[workStyleIds[1]].label;
+        } else {
+          workStyleDescription = workStyleDescriptionBase + " has a perfectly balanced among all the Ceek working styles"
+        }
 
-      var workStylesDetailedDescription = [];
-      for (var workStyleId in data.mainWorkStyleData) {
-        var workStyle = data.mainWorkStyleData[workStyleId]
-        workStylesDetailedDescription.push(<span className='work-style-detail'>{workStyle.description}</span>)
+        var workStylesDetailedDescription = [];
+        for (var workStyleId in data.mainWorkStyleData) {
+          var workStyle = data.mainWorkStyleData[workStyleId]
+          workStylesDetailedDescription.push(<span className='work-style-detail'>{workStyle.description}</span>)
+        }
+        questionnaire = (
+          <div className='row'>
+            <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
+              <Doughnut data={data.workStyleChartData} />
+            </div>
+            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8'>
+              <ProfileProperty name={workStyleTitle} inline={false}>
+                <div>{workStyleDescription}.</div>
+                <div>
+                  {workStylesDetailedDescription}
+                </div>
+              </ProfileProperty>
+            </div>
+          </div>
+          );
       }
+      
 
       output =
         <div className='container'>
@@ -349,19 +369,7 @@ var UserView = React.createClass({
             </ProfileProperty>
           </ProfileSection>
           <ProfileSection title='Questionnaire Result'>
-            <div className='row'>
-            <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
-              <Doughnut data={data.workStyleChartData} />
-            </div>
-            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8'>
-              <ProfileProperty name={workStyleTitle} inline={false}>
-                <div>{workStyleDescription}.</div>
-                <div>
-                  {workStylesDetailedDescription}
-                </div>
-              </ProfileProperty>
-            </div>
-            </div>
+            {questionnaire}
           </ProfileSection>
         </div>;
     } else {

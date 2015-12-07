@@ -26,6 +26,7 @@ h4 {
 
 .profile-prop-label {
   margin-right: 0.25rem;
+  margin-bottom: 0.875rem;
   color: #333;
   display: block;
 }
@@ -41,6 +42,7 @@ h4 {
 
 .profile-prop-label-inline {
   display: inline-block;
+  margin-bottom: 0;
 }
 
 .profile-prop-value-inline {
@@ -52,9 +54,20 @@ h4 {
   margin-bottom: 0.5rem;
 }
 
+.history-profile-property-title {
+  color: #333;
+  margin-bottom: 0.375rem;
+}
+
+.history-profile-property-desc {
+  margin-bottom: 0.875rem;
+  color: #999;
+}
+
 .boxed-property {
   display: inline-block;
-  padding: 0.25rem;
-  margin: 0 0.125rem 0.125rem 0;
-  border: 1px solid black;
+  padding: 0.75rem 0.875rem;
+  margin-right: 1.25rem;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.125rem;
 }

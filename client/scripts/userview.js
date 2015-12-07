@@ -77,7 +77,8 @@ var HistoryProfileProperty = React.createClass({
       'col-xs-12': true,
       'col-sm-12': true,
       'col-md-4': true,
-      'col-lg-4': true
+      'col-lg-4': true,
+      'history-profile-property-title': true
     };
 
     var title1;
@@ -94,7 +95,7 @@ var HistoryProfileProperty = React.createClass({
       title3 = <span className={classNames(rowClasses)}>{this.props.title3}</span>;
     }
     if (this.props.description) {
-      description = <div className={classNames({'col-xs-12': true, 'col-sm-12': true, 'col-md-12': true, 'col-lg-12': true})}>{this.props.description}</div>;
+      description = <div className={classNames({'col-xs-12': true, 'col-sm-12': true, 'col-md-12': true, 'col-lg-12': true, 'history-profile-property-desc': true})}>{this.props.description}</div>;
     }
     return (
       <div className='row history-profile-property'>
@@ -246,6 +247,21 @@ var UserView = React.createClass({
     }
   },
 
+  formatDate(date) {
+    if (!date) {
+      return null;
+    }
+    date = new Date(date);
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[date.getMonth()] + ' ' + date.getFullYear();
+  },
+
+  formatDateRange(date1, date2) {
+    var date1String = this.formatDate(date1);
+    var date2String = this.formatDate(date2) || 'present';
+    return date1String + ' - ' + date2String;
+  },
+
   render() {
     var output;
     if (this.state.formDef) {
@@ -260,15 +276,15 @@ var UserView = React.createClass({
       var education;
       if (data.education) {
         education = data.education.map(function (educationStep, i) {
-          return <HistoryProfileProperty key={i} title1={educationStep.collegeName} title2={educationStep.degree} title3={educationStep.startDate} />;
-        });
+          return <HistoryProfileProperty key={i} title1={educationStep.collegeName} title2={educationStep.degree} title3={this.formatDateRange(educationStep.startDate, educationStep.endDate)} />;
+        }, this);
       }
 
       var experience;
       if (data.experience) {
         experience = data.experience.map(function (experienceStep, i) {
-          return <HistoryProfileProperty key={i} title1={experienceStep.companyName} title2={experienceStep.role} title3={experienceStep.startDate} description={experienceStep.description} />;
-        });
+          return <HistoryProfileProperty key={i} title1={experienceStep.companyName} title2={experienceStep.role} title3={this.formatDateRange(experienceStep.startDate, experienceStep.endDate)} description={experienceStep.description} />;
+        }, this);
       }
 
       var contribution;
@@ -279,6 +295,7 @@ var UserView = React.createClass({
       }
 
       this.computeWorkStyle(data);
+      var workStyleTitle = data.firstName + "'s work style";
       var workStyleDescriptionBase = 'Based on the questionnaire result, ' + data.firstName;
       var workStyleDescription = '';
       var workStyleIds = Object.keys(data.mainWorkStyleData);
@@ -333,15 +350,16 @@ var UserView = React.createClass({
           </ProfileSection>
           <ProfileSection title='Questionnaire Result'>
             <div className='row'>
-            <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4 vcenter'>
+            <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
               <Doughnut data={data.workStyleChartData} />
             </div>
-            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8 vcenter'>
-              <div className='work-style-what'>What's {data.firstName}'s work style?</div>
-              <div className='work-style-main'>{workStyleDescription}.</div>
-              <div>
-              {workStylesDetailedDescription}
-              </div>
+            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8'>
+              <ProfileProperty name={workStyleTitle} inline={false}>
+                <div>{workStyleDescription}.</div>
+                <div>
+                  {workStylesDetailedDescription}
+                </div>
+              </ProfileProperty>
             </div>
             </div>
           </ProfileSection>

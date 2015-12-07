@@ -313,7 +313,7 @@ var UserView = React.createClass({
         var workStylesDetailedDescription = [];
         for (var workStyleId in data.mainWorkStyleData) {
           var workStyle = data.mainWorkStyleData[workStyleId]
-          workStylesDetailedDescription.push(<span className='work-style-detail'>{workStyle.description}</span>)
+          workStylesDetailedDescription.push(<span key={workStyleId} className='work-style-detail'>{workStyle.description}</span>)
         }
         questionnaire = (
           <div className='row'>

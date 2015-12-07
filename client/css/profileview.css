@@ -68,6 +68,7 @@ h4 {
   display: inline-block;
   padding: 0.75rem 0.875rem;
   margin-right: 1.25rem;
+  margin-bottom: 0.875rem;
   border: 0.0625rem solid #ccc;
   border-radius: 0.125rem;
 }

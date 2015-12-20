@@ -2,6 +2,7 @@ var React = require('react');
 var ReactRouter = require('react-router');
 var Services = require('./Services.js');
 var UserProfileHeader = require('./UserProfileHeader.js');
+var i18n = require('./formI18nUtils.js');
 var classNames = require('classnames');
 var Chartjs = require('react-chartjs');
 var Doughnut = Chartjs.Doughnut;
@@ -20,7 +21,8 @@ var ProfileSection = React.createClass({
 var ProfileProperty = React.createClass({
   getDefaultProps() {
     return {
-      inline: true
+      inline: true,
+      i18nPrefix: ''
     };
   },
 
@@ -33,7 +35,12 @@ var ProfileProperty = React.createClass({
       var properties = [];
       for (var propName in value) {
         if (typeof value[propName] === 'boolean' && value[propName]) {
-          properties.push(propName);
+          var localizedPropertyName = i18n.getText(this.props.i18nPrefix + propName);
+          if (!localizedPropertyName) {
+            propName = propName.replace(/[A-Z]/g, function(a) {return ' ' + a});
+            propName = propName[0].toUpperCase() + propName.substring(1);
+          }
+          properties.push(localizedPropertyName || propName);
         }
       }
       return properties.join(', ');
@@ -235,7 +242,6 @@ var UserView = React.createClass({
     }).reverse();
     var maxScore = matchingTypes[rankingTypes[0]].value;
     if (maxScore > 3) {
-      console.log('type', profileTypes[rankingTypes[0]].label)
       data.mainWorkStyleData[rankingTypes[0]] = profileTypes[rankingTypes[0]];
     } else if (maxScore == 3) {
       var nextMaxScore = matchingTypes[rankingTypes[1]].value;
@@ -290,8 +296,16 @@ var UserView = React.createClass({
 
       var contribution;
       if (data.contribution) {
+        //FIXME can do much better than this
+        var contributionOptions;
+        try {
+          contributionOptions = this.state.formDef[2].meta.props.contribution.meta.type.meta.type.meta.props.process.meta.props;
+        } catch (e) {
+          cosole.error('find a better way to get the enums options');
+          contributionOptions = {};
+        }
         contribution = data.contribution.map(function (contrib,i ) {
-          return <span key={i} className='boxed-property'>{contrib.process} {contrib.percentage}%</span>
+          return <span key={i} className='boxed-property'>{contributionOptions[contrib.process]} {contrib.percentage}%</span>
         });
       }
 
@@ -305,7 +319,7 @@ var UserView = React.createClass({
         if (workStyleIds.length === 1) {
           workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label;
         } else if (workStyleIds.length === 2) {
-          workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label + ", and his supporting work style is " + data.mainWorkStyleData[workStyleIds[1]].label;
+          workStyleDescription = workStyleDescriptionBase + "'s  dominant work style is " + data.mainWorkStyleData[workStyleIds[0]].label + ", and the supporting work style is " + data.mainWorkStyleData[workStyleIds[1]].label;
         } else {
           workStyleDescription = workStyleDescriptionBase + " has a perfectly balanced among all the Ceek working styles"
         }
@@ -331,13 +345,21 @@ var UserView = React.createClass({
           </div>
           );
       }
-      
+
+      //FIXME can do much better than this
+      var motivationOptions;
+      try {
+        motivationOptions = this.state.formDef[2].meta.props.projectWhy.meta.props;
+      } catch (e) {
+        cosole.error('find a better way to get the enums options');
+        motivationOptions = {};
+      }
 
       output =
         <div className='container'>
           <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} marketStatus={data.marketStatus} marketStatusText={data.marketStatusText} />
           <ProfileSection title='Job Preferences'>
-            <ProfileProperty name='Preferred working locations'>{data.locationPreference}</ProfileProperty>
+            <ProfileProperty name='Preferred working locations' i18nPrefix='locationPreference.'>{data.locationPreference}</ProfileProperty>
             <ProfileProperty name='Ideal roles'>{data.roleType}</ProfileProperty>
             <ProfileProperty name='Employment type'>{data.employmentType}</ProfileProperty>
             <ProfileProperty name='Expected salary'>{data.expectedSalary}</ProfileProperty>
@@ -362,7 +384,7 @@ var UserView = React.createClass({
           <ProfileSection title='Portfolio'>
             <ProfileProperty name='Project link'>{data.projectLink}</ProfileProperty>
             <ProfileProperty name='Description' inline={false}>{data.projectDescription}</ProfileProperty>
-            <ProfileProperty name='Motivation'>{data.projectWhy}</ProfileProperty>
+            <ProfileProperty name='Motivation'>{motivationOptions[data.projectWhy]}</ProfileProperty>
             <ProfileProperty name='Team members'>{data.howMany}</ProfileProperty>
             <ProfileProperty name='Project process and individual contribution' inline={false}>
               {contribution}

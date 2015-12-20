@@ -29,6 +29,7 @@ h4 {
   margin-bottom: 0.875rem;
   color: #333;
   display: block;
+  text-transform: capitalize;
 }
 .profile-prop-label,
 .profile-prop-value {

@@ -22,7 +22,7 @@ var User = React.createClass({
     };
   },
 
-  componentDidMount() {
+  componentWillMount() {
     var _this = this;
     if (Parse.User.current()) {
       Services.GetProfile().then(function (response) {
@@ -33,24 +33,44 @@ var User = React.createClass({
     }
   },
 
+  getStepId(id) {
+    var stepString = 'step';
+    return stepString + id;
+  },
+
   setFormDef (formDef, userProfileData) {
     var formDefs = [];
     var formOptions = [];
+    //by default, the active key is the last object
+    var activeKey = formDef.length + 1;
     for (var i = 0; i < formDef.length; i++) {
+      var formDefinition = formGenerationUtils.generateForm(formDef[i]);
+      var options = formGenerationUtils.generateOptions(formDef[i]);
+      var status = 'default';
+      var validatedForm = t.validate(userProfileData, formDefinition, options);
+      if (validatedForm.isValid()) {
+        status = 'success';
+      } else {
+        //if the form is not valid and the value hasn't changed, we set the active key as the one of the first non-valid form
+        if (activeKey === formDef.length + 1) {
+          activeKey = i+1;
+        }
+      }
       formDefs.push({
         stepTitle: formDef[i].stepTitle,
-        def: formGenerationUtils.generateForm(formDef[i]),
-        status: 'default'
+        def: formDefinition,
+        status: status
       });
-      formOptions.push(formGenerationUtils.generateOptions(formDef[i]));
+      formOptions.push(options);
     }
     var newState = jQuery.extend({}, this.state);
     newState.formDef = formDefs;
     newState.options = formOptions;
     newState.value = userProfileData;
+    newState.activeKey = activeKey;
     //if a linkedin cv file has been already uploaded
     if (userProfileData.linkedInCVFileUrl) {
-      newState.activeKey = 1;
+      //newState.activeKey = 1;
       newState.linkedInCVStepStatus = 'success';
     }
     this.setState(newState);
@@ -128,10 +148,10 @@ var User = React.createClass({
 
   save(stepId) {
     // call getValue() to get the values of the form
-    var value = this.refs[stepId].getValue();
+    var validationResult = this.refs[stepId].validate();
+    var value = validationResult.value;
     // if validation fails, value will be null
-    if (value) {
-      // value here is an instance of Person
+    if (validationResult && validationResult.errors.length === 0) {
       console.log(value);
       var _this = this;
       var stepIndex = parseInt(stepId.replace('step', ''));
@@ -147,7 +167,10 @@ var User = React.createClass({
         newState.formDef[stepIndex].status = 'danger';
       });
     } else {
-      this.setState({showErrorModal: true});
+      this.setState({
+        showErrorModal: true,
+        value: value
+      });
     }
   },
 
@@ -176,7 +199,7 @@ var User = React.createClass({
     if (this.state.formDef) {
       var _this = this;
       var steps = this.state.formDef.map(function (formDef, index) {
-        var stepId = 'step' + index;
+        var stepId = _this.getStepId(index);
         var evtKey = index+1;
         var header = _this.getHeader(formDef.stepTitle, formDef.status);
         return (

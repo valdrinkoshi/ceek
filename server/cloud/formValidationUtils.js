@@ -25,8 +25,10 @@ function validateField (fieldMeta, fieldValue) {
       return validateFieldByName(fieldMeta.kind, fieldValue);
     case 'list':
       var listValues = [];
-      for (var i = 0; i < fieldValue.length; i++) {
+      if (Array.isArray(fieldValue)) {
+        for (var i = 0; i < fieldValue.length; i++) {
          listValues.push(validateField(fieldMeta.type.meta, fieldValue[i]));
+        }
       }
       return listValues;
   }

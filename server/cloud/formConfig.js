@@ -9,11 +9,11 @@ var formDef = [
           "options": {"template": ["getMultiColumnsLayout", 4], "label": "locationPreference"},
           "kind": "struct",
           "props": {
-            "eastBay": {"meta": {"kind": "irreducible", "name": "Bool"}},
+            "eastBay": {"meta": {"kind": "irreducible", "name": "Bool", "options": {"label": "locationPreference.eastBay"}}},
             "peninsula": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "northBay": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "sanFrancisco": {"meta": {"kind": "irreducible", "name": "Bool"}},
-            "southBay": {"meta": {"kind": "irreducible", "name": "Bool"}}
+            "northBay": {"meta": {"kind": "irreducible", "name": "Bool", "options": {"label": "locationPreference.northBay"}}},
+            "sanFrancisco": {"meta": {"kind": "irreducible", "name": "Bool", "options": {"label": "locationPreference.sanFrancisco"}}},
+            "southBay": {"meta": {"kind": "irreducible", "name": "Bool", "options": {"label": "locationPreference.southBay"}}}
           }
         }
       },
@@ -100,8 +100,10 @@ var formDef = [
                     "companyName": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "experience.companyName"}}},
                     "role": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "experience.role"}}},
                     "description": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Str", "options":{"type":"textarea"}}}}},
-                    "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
+                    "startDate": {
+                      "meta": {
+                        "kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "CeekDate", "options": {"transformer": ["dateTransformer"], "factory": "t.form.Datetime"}}}}},
+                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "CeekDate", "options": {"transformer": ["dateTransformer"], "factory": "t.form.Datetime"}}}}},
                     "current": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Bool"}}}},
                   }
                 }

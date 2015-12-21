@@ -26,21 +26,25 @@
     var Glyphicon = ReactBootstrap.Glyphicon;
     var Carousel = ReactBootstrap.Carousel;
     var CarouselItem = ReactBootstrap.CarouselItem;
+    var Modal = ReactBootstrap.Modal;
     var Route = ReactRouter.Route;
     var Link = ReactRouter.Link;
     var RouteHandler = ReactRouter.RouteHandler;
   </script>
-
-
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/matches.css">
+  <link rel="stylesheet" href="/css/profileview.css">
+  <link rel="stylesheet" href="/css/userprofileheader.css">
 </head>
 <body>
   <!--bundle.js START-->
   <script src="/scripts/matches.js"></script>
   <script>
+    var matchId = '<%-id%>';
+    var expirationDate = new Date('<%-expireDate%>');
     var userProfiles = <%-JSON.stringify(userProfiles)%>;
     var Matches = require('Matches');
-    React.render(React.createElement(Matches, {userData: userProfiles}), document.body);
+    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, expirationDate: expirationDate}), document.body);
   </script>
   <!--bundle.js END-->
 </body>

@@ -126,15 +126,22 @@ var UserView = React.createClass({
 
   componentDidMount() {
     var _this = this;
-    if (Parse.User.current()) {
-      Services.GetProfile().then(function (response) {
-        _this.setState({
-          formDef: response.formDef,
-          profileData: response.userProfileData
+    if (!this.props.userData) {
+      if (Parse.User.current()) {
+        Services.GetProfile().then(function (response) {
+          _this.setState({
+            formDef: response.formDef,
+            profileData: response.userProfileData
+          });
         });
-      });
+      } else {
+        this.transitionTo("/");
+      }
     } else {
-      this.transitionTo("/");
+      this.setState({
+        formDef: {},
+        profileData: this.props.userData
+      });
     }
   },
 
@@ -301,7 +308,7 @@ var UserView = React.createClass({
         try {
           contributionOptions = this.state.formDef[2].meta.props.contribution.meta.type.meta.type.meta.props.process.meta.props;
         } catch (e) {
-          cosole.error('find a better way to get the enums options');
+          console.error('find a better way to get the enums options');
           contributionOptions = {};
         }
         contribution = data.contribution.map(function (contrib,i ) {
@@ -351,12 +358,12 @@ var UserView = React.createClass({
       try {
         motivationOptions = this.state.formDef[2].meta.props.projectWhy.meta.props;
       } catch (e) {
-        cosole.error('find a better way to get the enums options');
+        console.error('find a better way to get the enums options');
         motivationOptions = {};
       }
 
       output =
-        <div className='container'>
+        <div>
           <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} marketStatus={data.marketStatus} marketStatusText={data.marketStatusText} />
           <ProfileSection title='Job Preferences'>
             <ProfileProperty name='Preferred working locations' i18nPrefix='locationPreference.'>{data.locationPreference}</ProfileProperty>

@@ -67,6 +67,7 @@ module.exports = function (grunt) {
                 options: {
                   transform: ['reactify'],
                   alias: [
+                  './client/scripts/userview.js:UserView',
                     './client/scripts/matches.js:Matches'
                   ],
                   external: ['react'],

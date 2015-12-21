@@ -26,7 +26,11 @@ var getObjectsWithProperties = function(className, properties, all) {
     if (property.name === 'ascending') {
       ascendingAction = true;
     }
-    objectQuery[operator](property.name || null, property.value || null)
+    var value = property.value;
+    if (typeof value === "undefined") {
+      value = null;
+    }
+    objectQuery[operator](property.name || null, value)
   }
   if (!ascendingAction) {
     objectQuery.ascending('createdAt');

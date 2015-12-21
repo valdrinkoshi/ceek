@@ -61,6 +61,21 @@ module.exports = function (grunt) {
                   }
                 }
               },
+              matches: {
+                src: ['client/scripts/matches.js'],
+                dest: 'parse/public/scripts/matches.js',
+                options: {
+                  transform: ['reactify'],
+                  alias: [
+                  './client/scripts/userview.js:UserView',
+                    './client/scripts/matches.js:Matches'
+                  ],
+                  external: ['react'],
+                  browserifyOptions: {
+                    debug: true
+                  }
+                }
+              }
         },
         watch: {
             vendor: {
@@ -69,7 +84,7 @@ module.exports = function (grunt) {
             },
             parse: {
                 files: ['client/**/*', 'server/**/*'],
-                tasks: ['jshint', 'browserify:ceek', 'browserify:ceekadmin', 'copy:client', 'copy:server']
+                tasks: ['jshint', 'browserify:ceek', 'browserify:ceekadmin', 'browserify:matches', 'copy:client', 'copy:server']
             }
         },
         copy: {

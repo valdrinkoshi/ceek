@@ -20,6 +20,7 @@ var url = require('url');
 Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
+var DEFAULT_CEEK_MAIL_ADDRESS = 'do-not-reply@ceek.cc';
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -41,9 +42,11 @@ var ceekOAuth2RedirecUri = 'https://ceekdev01.parseapp.com/oauthCallback';
 var herokuMuleBaseUrl = 'https://boiling-stream-7630.herokuapp.com';
 var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
 
+var isLocal = false;
 if (process && process.env && process.env.CEEK_LOCAL === '1') {
   ceekOAuth2RedirecUri = 'http://localhost:3000/oauthCallback';
   herokuMuleBaseUrl = 'http://localhost:5000';
+  isLocal = true;
 }
 
 /**
@@ -57,6 +60,7 @@ var UserProfile = Parse.Object.extend('UserProfile');
 var PublicProfile = Parse.Object.extend('PublicProfile');
 var MatchesPage = Parse.Object.extend('MatchesPage');
 var Job = Parse.Object.extend('Job');
+var Like = Parse.Object.extend('Like');
 
 var restrictedAcl = new Parse.ACL();
 restrictedAcl.setPublicReadAccess(false);
@@ -588,41 +592,54 @@ app.get('/matches/:id', function(request, response) {
     {name: 'visible', value: true},
   ]).then(function(matchesPage) {
     if (matchesPage) {
-      matchesPage = matchesPage.attributes;
-      var userProfilePromises = [];
-      var userProfileIds = matchesPage.userProfileIds;
-      for (var i = 0; i < userProfileIds.length; i++) {
-        var userProfileId = userProfileIds[i];
-        userProfilePromises.push(getObjectById(UserProfile, userProfileId));
-      }
-      Parse.Promise.when(userProfilePromises).then(
-        function () {
-          if (arguments.length > 0) {
-            var userProfiles = [];
-            for (var i = 0; i < arguments.length; i++) {
-              if (arguments[i]) {
-                //TODO: trim data?
-                userProfiles.push(arguments[i].attributes);
-              }
-            }
-            matchesPage.userProfiles = userProfiles;
-            if (request.accepts('html')) {
-              response.render('matches', matchesPage);
-            } else {
-              success(response, matchesPage);
-            }
-          } else {
-            fail(response, errorMessage);
-          }
-        },
-        function (error) {
-          if (request.accepts('html')) {
-            response.render('error', errorMessage);
-          } else {
-            fail(response, errorMessage);
-          }
+      getObjectsWithProperties(Like, [
+        {name: 'matchesPageId', value: matchesPage.id},
+      ], true).then (function (likes) {
+        matchesPage = matchesPage.attributes;
+        matchesPage.id = matchesPageId;
+        var userProfilePromises = [];
+        var userProfileIds = matchesPage.userProfileIds;
+        for (var i = 0; i < userProfileIds.length; i++) {
+          var userProfileId = userProfileIds[i];
+          userProfilePromises.push(getObjectById(UserProfile, userProfileId));
         }
-      );
+        Parse.Promise.when(userProfilePromises).then(
+          function () {
+            if (arguments.length > 0) {
+              var userProfiles = [];
+              for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i]) {
+                  //TODO: trim data?
+                  var userProfile = arguments[i].attributes;
+                  userProfile.id = arguments[i].id;
+                  var like = _.find(likes, function (like) {
+                    return like.get('userProfileId') === userProfile.id;
+                  });
+                  if (like) {
+                    userProfile.like = like.get('like') || false;
+                    userProfile.mutualLike = like.get('mutual') || false;
+                  }
+                  userProfiles.push(userProfile);
+                }
+              }
+              matchesPage.userProfiles = userProfiles;
+              if (request.accepts('html')) {
+                response.render('matches', matchesPage);
+              } else {
+                success(response, matchesPage);
+              }
+            } else {
+              fail(response, errorMessage);
+            }
+          },
+          function (error) {
+            if (request.accepts('html')) {
+              response.render('error', errorMessage);
+            } else {
+              fail(response, errorMessage);
+            }
+          });
+      });
     } else {
       var errorMessage = {errorMessage: 'Page lost'};
       if (request.accepts('html')) {
@@ -635,7 +652,7 @@ app.get('/matches/:id', function(request, response) {
 });
 
 var PostMatches = function (user, request, response, params) {
-  var requiredParams = [{key: 'userProfileIds', type: 'json'}];
+  var requiredParams = [{key: 'userProfileIds', type: 'json'}, {key: 'jobId', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
   if (!receivedParams) {
     return;
@@ -643,6 +660,7 @@ var PostMatches = function (user, request, response, params) {
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
       var userProfileIds = JSON.parse(receivedParams.userProfileIds);
+      var jobId = receivedParams.jobId;
       var userPProfilePromises = [];
       for (var i = 0; i < userProfileIds.length; i++) {
         userPProfilePromises.push(createPublicProfile(userProfileIds[i]));
@@ -650,26 +668,35 @@ var PostMatches = function (user, request, response, params) {
       Parse.Promise.when(userPProfilePromises).then(
         function () {
           if (arguments.length > 0) {
-            var userPProfileIds = [];
-            for (var i = 0; i < arguments.length; i++) {
-              userPProfileIds.push(arguments[i].id);
-            }
-          var matchesPage = new MatchesPage();
-          matchesPage.setACL(restrictedAcl);
-          matchesPage.set('publicProfileIds', userPProfileIds);
-          matchesPage.set('userProfileIds', userProfileIds);
-          matchesPage.set('visible', true);
-          matchesPage.set('matchesPageId', undefined);
-          matchesPage.set('expireDate', new Date(Date.now()+86400000));
-          matchesPage.save(null, {
-            useMasterKey: true,
-            success: function (matchesPage) {
-              success(response, {matchesPageId: matchesPage.id});
-            },
-            error: function (object, error) {
+            getObjectById(Job, jobId).then(function (job) {
+              if (job) {
+                var userPProfileIds = [];
+                for (var i = 0; i < arguments.length; i++) {
+                  userPProfileIds.push(arguments[i].id);
+                }
+                var matchesPage = new MatchesPage();
+                matchesPage.setACL(restrictedAcl);
+                matchesPage.set('publicProfileIds', userPProfileIds);
+                matchesPage.set('userProfileIds', userProfileIds);
+                matchesPage.set('jobId', jobId);
+                matchesPage.set('visible', true);
+                matchesPage.set('matchesPageId', undefined);
+                matchesPage.set('expireDate', new Date(Date.now()+86400000));
+                matchesPage.save(null, {
+                  useMasterKey: true,
+                  success: function (matchesPage) {
+                    success(response, {matchesPageId: matchesPage.id});
+                  },
+                  error: function (object, error) {
+                    fail(response, {msg: error});
+                  }
+                });
+              } else {
+                fail(response, {msg: 'Job lost!'});
+              }
+            }, function (error) {
               fail(response, {msg: error});
-            }
-          });
+            });
           }
         },
         function (error) {
@@ -691,6 +718,22 @@ app.post('/matches', function(request, response) {
   });
 });
 
+var sendEmail = function (to, from, subject, text, html, successCallback, errorCallback) {
+  if (!from) {
+    from = DEFAULT_CEEK_MAIL_ADDRESS;
+  }
+  Mailgun.sendEmail({
+    to: to,
+    from: from,
+    subject: subject,
+    text: text,
+    html: html
+  }, {
+    success: successCallback,
+    error: errorCallback
+  });
+};
+
 var PostMail = function (user, request, response, params) {
   var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}, {key: 'html', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
@@ -699,20 +742,13 @@ var PostMail = function (user, request, response, params) {
   }
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      Mailgun.sendEmail({
-        to: receivedParams.to,
-        from: receivedParams.from,
-        subject: receivedParams.subject,
-        text: receivedParams.text,
-        html: receivedParams.html
-      }, {
-        success: function() {
+      sendEmail(receivedParams.to, receivedParams.from, receivedParams.subject, receivedParams.text, receivedParams.html,
+        function() {
           success(response, {msg: 'Message Sent!'});
         },
-        error: function(error) {
+        function(error) {
           fail(response, {msg: error});
-        }
-      });
+        });
       return;
     }
   });
@@ -727,6 +763,123 @@ app.post('/mail', function(request, response) {
     PostMail(user, request, response, request.body);
   }, function (error) {
     fail(response, error);
+  });
+});
+
+/* liking */
+
+app.get('/likeu/:id', function(request, response) {
+  var userProfileId = request.params.id;
+  var matchId = request.query.matchId;
+  var likeResp = request.query.like === "true" ? true : false;
+  getObjectWithProperties(Like, [
+    {name: 'userProfileId', value: userProfileId},
+    {name: 'matchesPageId', value: matchId}
+  ]).then(function (like) {
+    if (like) {
+      success(response, {msg: 'Already liked!'});
+    } else {
+      getObjectWithProperties(MatchesPage, [
+        {name: 'objectId', value: matchId},
+        {name: 'userProfileIds', value: [userProfileId], operator: 'containedIn'},
+        {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+        {name: 'visible', value: true}
+      ]).then(function(matchPageData) {
+        if (matchPageData) {
+          getObjectById(UserProfile, userProfileId)
+          .then(function (userProfile) {
+            var likeObj = new Like();
+            likeObj.setACL(restrictedAcl);
+            likeObj.set('userProfileId', userProfileId);
+            likeObj.set('matchesPageId', matchId);
+            likeObj.set('jobId', matchPageData.get('jobId'));
+            likeObj.set('expireDate', new Date(Date.now()+86400000));
+            likeObj.set('like', likeResp);
+            likeObj.save(null, {useMasterKey: true}).then(function () {
+              //TODO send email
+              if (!isLocal && userProfile.get('emailAddress') && likeResp) {
+                sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
+              }
+              success(response, {msg: 'You liked the user!'});
+            });
+          })
+        } else {
+          var errorMessage = {errorMessage: 'Match expired or this match does not exist'};
+          fail(response, errorMessage);
+        }
+      });
+    }
+  })
+});
+
+var GetLikeJ = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  var likeId = request.params.id;
+  getObjectById(Like, likeId).then(function(like) {
+    if (like) {
+      like.save({'mutual': true}, {useMasterKey: true}).then(
+      function () {
+        success(response, {msg:'You liked the job!'});
+      },
+      function (error) {
+        fail(response, error);
+      });
+    }
+  }, function(error) {
+    fail(response, error);
+  });
+};
+
+Parse.Cloud.define('GetLikeJ', function (request, response) {
+  GetLikes(request.user, request, response);
+});
+
+app.get('/likej/:id', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    GetLikeJ(user, request, response);
+  }, function(error) {
+      fail(response, error);
+  });
+});
+
+var GetLikes = function (user, request, response) {
+  if (!user) {
+    return fail(response, 'Must be logged in.');
+  }
+  getUserProfile(user).then(function (userProfile) {
+    getObjectsWithProperties(Like, [
+      {name: 'userProfileId', value: userProfile.id},
+      {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+      {name: 'like', value: true}
+    ], true).then(function(likes) {
+      var outLikes = [];
+      for (var i = 0; i < likes.length; i++) {
+        var like = likes[i].attributes;
+        like.id = likes[i].id;
+        outLikes.push(like);
+      }
+      success(response, {
+        likes: outLikes
+      });
+    }, function(error) {
+      fail(response, error);
+    });
+  }, function(error) {
+      fail(response, error);
+  });
+};
+
+Parse.Cloud.define('GetLikes', function (request, response) {
+  GetLikes(request.user, request, response);
+});
+
+app.get('/likes', function(request, response) {
+  Parse.User.become(request.query.sessionToken).then(function (user) {
+    GetLikes(user, request, response);
+  }, function(error) {
+      fail(response, error);
   });
 });
 

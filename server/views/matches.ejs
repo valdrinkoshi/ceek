@@ -1,17 +1,51 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Matches Page</title>
-  </head>
-  <body>
-    <h1>Matches Page</h1>
-    <p><%= expireDate %></p>
-    <ul>
-    <% for(var i=0; i<userProfiles.length; i++) { %>
-        <li>
-                <%= userProfiles[i].firstName %>
-        </li>
-    <% } %>
-</ul>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+  <title>Matches page</title>
+  <script src="/scripts/vendor.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script type="text/javascript">
+    var jQuery = require('jquery');
+    var React = require('react');
+    var ReactBootstrap = require('react-bootstrap');
+    var ReactRouter = require('react-router');
+
+    var Button = ReactBootstrap.Button;
+    var DropdownButton = ReactBootstrap.DropdownButton;
+    var MenuItem = ReactBootstrap.MenuItem;
+    var PanelGroup = ReactBootstrap.PanelGroup;
+    var Panel = ReactBootstrap.Panel;
+    var Navbar = ReactBootstrap.Navbar;
+    var ListGroup = ReactBootstrap.ListGroup;
+    var ListGroupItem = ReactBootstrap.ListGroupItem;
+    var CollapsibleNav = ReactBootstrap.CollapsibleNav;
+    var NavItem = ReactBootstrap.NavItem;
+    var Nav = ReactBootstrap.Nav;
+    var Glyphicon = ReactBootstrap.Glyphicon;
+    var Carousel = ReactBootstrap.Carousel;
+    var CarouselItem = ReactBootstrap.CarouselItem;
+    var Modal = ReactBootstrap.Modal;
+    var Route = ReactRouter.Route;
+    var Link = ReactRouter.Link;
+    var RouteHandler = ReactRouter.RouteHandler;
+  </script>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/matches.css">
+  <link rel="stylesheet" href="/css/profileview.css">
+  <link rel="stylesheet" href="/css/userprofileheader.css">
+</head>
+<body>
+  <!--bundle.js START-->
+  <script src="/scripts/matches.js"></script>
+  <script>
+    var matchId = '<%-id%>';
+    var expirationDate = new Date('<%-expireDate%>');
+    var userProfiles = <%-JSON.stringify(userProfiles)%>;
+    var Matches = require('Matches');
+    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, expirationDate: expirationDate}), document.body);
+  </script>
+  <!--bundle.js END-->
+</body>
 </html>

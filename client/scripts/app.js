@@ -34,7 +34,9 @@ var App = React.createClass({
         <Navbar brand='Ceek' toggleNavKey={0}>
           {navbarContent}
         </Navbar>
-        <RouteHandler/>
+        <div className='container'>
+          <RouteHandler/>
+        </div>
       </div>
     )
   }

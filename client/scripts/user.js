@@ -215,7 +215,7 @@ var User = React.createClass({
         );
       });
       output =
-        <div className="container">
+        <div>
           <Modal show={this.state.showErrorModal}>
             <Modal.Header bsStyle='danger'>Error</Modal.Header>
             <Modal.Body>Please correct the marked field(s)</Modal.Body>

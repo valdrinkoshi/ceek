@@ -823,7 +823,7 @@ app.get('/likeu/:id', function(request, response) {
             likeObj.save(null, {useMasterKey: true}).then(function () {
               //TODO send email
               if (!isLocal && userProfile.get('emailAddress') && likeResp) {
-                sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
+                //sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
               }
               success(response, {msg: 'You liked the user!'});
             });

@@ -16,10 +16,38 @@
 html {
   font-size: 16px;
 }
+
 body {
   margin: 0;
   font-family: SourceSansPro-Regular;
   background-color: #fafafa;
+}
+
+.matches-page ul.nav-tabs > li {
+  float: right;
+}
+
+.matches-page ul.nav-tabs > li > a {
+  color: #4b4c4c;
+}
+
+.matches-page ul.nav-tabs > li.active > a {
+  font-family: SourceSansPro-Bold;
+}
+
+.user-card-main-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.match-header {
+  width: 100%;
+  margin-top: 1.875rem;
+  text-align: center;
+  color: #4B4C4C;
+  font-size: 1.5rem;
 }
 
 /*MatchesCard*/
@@ -28,14 +56,6 @@ body {
   .user-card-dialog > .modal-dialog {
     width: 80%;
   }
-}
-
-.match-header {
-  width: 100%;
-  text-align: center;
-  color: #4B4C4C;
-  font-size: 1.5rem;
-  font-family: SourceSansPro-Regular;
 }
 
 .match-header .job-title {
@@ -51,9 +71,8 @@ body {
   max-width: 23.375rem;
   max-height: 70rem;
   display: block;
-  float: left;
   padding: 1.875rem 2.375rem 1.875rem 2.375rem;
-  margin: 1.25rem;
+  margin: 1.875rem 1.25rem;
   border-radius:0.25rem;
   box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.12);
   font-family: SourceSansPro-Regular;
@@ -77,12 +96,10 @@ body {
 
 .user-card-title {
   margin-bottom: 1.875rem;
+  text-align: center;
   color: #333;
   font-size: 1.25rem;
 }
-
-.user-card-user-first-name {}
-.user-card-user-headline {}
 
 .user-card-skillset {
   margin-bottom: 0.875rem;

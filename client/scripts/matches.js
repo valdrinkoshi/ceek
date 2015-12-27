@@ -75,8 +75,8 @@ var MatchesCard = React.createClass({
     var skillset;
     if (Array.isArray(userInfo.skills) && userInfo.skills.length > 0) {
       userInfo.skills = userInfo.skills.slice(0, 5);
-      skillset = userInfo.skills.map(function (skill) {
-        return <span className='user-card-skill'>{skill}</span>
+      skillset = userInfo.skills.map(function (skill, i) {
+        return <span key={i} className='user-card-skill'>{skill}</span>
       }, this);
     }
     var likeButton;
@@ -130,9 +130,11 @@ var Matches = React.createClass({
     var otherUsers = this.props.otherUserData.map(function (user, i) {
       return <MatchesCard key={user.id} matchId={this.props.matchId} userInfo={user} />
     }, this);
+    /*as tabs will be set to float: right, these tabs will render in the opposite order*/
     return (
-      <div>
+      <div className='matches-page'>
         <TabbedArea defaultActiveKey={1}>
+          <TabPane eventKey={2} tab={'Accepted (' + React.Children.count(otherUsers) + ')'}>{otherUsers}</TabPane>
           <TabPane eventKey={1} tab={'New (' + React.Children.count(users) + ')'}>
             <div className='match-header'>
               <span>New Candidates for </span>
@@ -140,9 +142,10 @@ var Matches = React.createClass({
               <span>, please respond in </span>
               <ExpirationDateCountDown expirationDate={this.props.expirationDate}/>
             </div>
-            {users}
+            <div className='user-card-main-container'>
+              {users}
+            </div>
           </TabPane>
-          <TabPane eventKey={2} tab={'Accepted (' + React.Children.count(otherUsers) + ')'}>{otherUsers}</TabPane>
         </TabbedArea>
       </div>
     );

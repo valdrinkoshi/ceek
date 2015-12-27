@@ -23,6 +23,8 @@
     var CollapsibleNav = ReactBootstrap.CollapsibleNav;
     var NavItem = ReactBootstrap.NavItem;
     var Nav = ReactBootstrap.Nav;
+    var TabPane = ReactBootstrap.TabPane;
+    var TabbedArea = ReactBootstrap.TabbedArea;
     var Glyphicon = ReactBootstrap.Glyphicon;
     var Carousel = ReactBootstrap.Carousel;
     var CarouselItem = ReactBootstrap.CarouselItem;
@@ -43,8 +45,10 @@
     var matchId = '<%-id%>';
     var expirationDate = new Date('<%-expireDate%>');
     var userProfiles = <%-JSON.stringify(userProfiles)%>;
+    var otherUserProfiles = <%-JSON.stringify(otherUserProfiles)%>;
+    var jobInfo = <%-JSON.stringify(job)%>;
     var Matches = require('Matches');
-    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, expirationDate: expirationDate}), document.body);
+    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, otherUserData: otherUserProfiles, jobInfo: jobInfo, expirationDate: expirationDate}), document.body);
   </script>
   <!--bundle.js END-->
 </body>

@@ -16,10 +16,38 @@
 html {
   font-size: 16px;
 }
+
 body {
   margin: 0;
   font-family: SourceSansPro-Regular;
   background-color: #fafafa;
+}
+
+.matches-page ul.nav-tabs > li {
+  float: right;
+}
+
+.matches-page ul.nav-tabs > li > a {
+  color: #4b4c4c;
+}
+
+.matches-page ul.nav-tabs > li.active > a {
+  font-family: SourceSansPro-Bold;
+}
+
+.user-card-main-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.match-header {
+  width: 100%;
+  margin-top: 1.875rem;
+  text-align: center;
+  color: #4B4C4C;
+  font-size: 1.5rem;
 }
 
 /*MatchesCard*/
@@ -30,20 +58,35 @@ body {
   }
 }
 
+.match-header .job-title {
+  font-weight: bold;
+}
+
+.expiration-date-count-down {
+  color: #FC7070;
+  font-weight: bold;
+}
+
 .user-card-container {
-  max-width: 40rem;
+  max-width: 23.375rem;
   max-height: 70rem;
-  border: 1px solid black;
+  display: block;
+  padding: 1.875rem 2.375rem 1.875rem 2.375rem;
+  margin: 1.875rem 1.25rem;
+  border-radius:0.25rem;
+  box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.12);
+  font-family: SourceSansPro-Regular;
 }
 
 .user-card-user-pic-container {
   width: 5rem;
   height: 5rem;
   display: block;
-  border: 1px solid black;
+  border: 0.0625rem solid #ccc;
   border-radius: 5rem;
   overflow: hidden;
   margin: 0 auto;
+  margin-bottom: 1.875rem;
 }
 
 .user-card-user-pic {
@@ -51,41 +94,70 @@ body {
   height: 100%;
 }
 
-.user-card-skill {
-  display: inline-block;
-  padding: 0.125rem;
-  border: 1px solid black;
+.user-card-title {
+  margin-bottom: 1.875rem;
+  text-align: center;
+  color: #333;
+  font-size: 1.25rem;
 }
 
-.user-card-user-first-name {}
-.user-card-user-headline {}
-.user-card-skillset {}
-.user-card-summary {}
+.user-card-skillset {
+  margin-bottom: 0.875rem;
+}
+
+.user-card-skill {
+  display: inline-block;
+  padding: 0.375rem;
+  margin: 0.3125rem;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.125rem;
+  color: #666;
+  font-size: 0.75rem;
+  font-family: SourceSansPro-Light;
+}
+
+.user-card-summary {
+  margin-bottom: 0.625rem;
+  color: #666;
+  font-size: 0.875rem;
+  font-family: SourceSansPro-Light;
+}
+
 .user-card-details-link {
   display: block;
+  margin-bottom: 1.875rem;
+  color: #3CA9F6;
+  font-size: 0.875rem;
 }
-.user-card-details-button {
-  display: inline-block;
+
+.user-card-details-button,
+.user-card-details-button:hover {
   text-decoration: none;
   padding: 0.5rem;
 }
 
-.user-card-details-request {
-  background-color: red;
-}
-.user-card-details-reject {
-  background-color: grey;
+.user-card-details-button {
+  display: inline-block;
 }
 
 .user-card-like-status {
-  width: 100%
+  width: 100%;
   padding: 0.5rem;
+  text-align: center;
 }
 
+.user-card-details-request {
+  margin-right: 1.25rem;
+}
+
+.user-card-details-request,
 .user-card-like-status-requested {
-  background-color: red;
+  background-color: #fc7070;
+  color: #fff;
 }
 
+.user-card-details-reject,
 .user-card-like-status-rejected {
-  background-color: grey;
+  background-color: #f1efef;
+  color: #656262;
 }

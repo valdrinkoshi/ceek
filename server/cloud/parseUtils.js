@@ -2,11 +2,11 @@ var getObjectById = function(className, objectId) {
   return getObjectWithProperties(className, [{name: 'objectId', value: objectId}]);
 };
 
-var getObjectWithProperties = function(className, properties) {
-  return getObjectsWithProperties(className, properties, false);
+var getObjectWithProperties = function(className, properties, include) {
+  return getObjectsWithProperties(className, properties, false, include);
 };
 
-var getObjectsWithProperties = function(className, properties, all) {
+var getObjectsWithProperties = function(className, properties, all, include) {
   console.log('>getObjectsWithProperties:', properties);
   //a little security checks to make sure we don't run empty queries
   if (!Array.isArray(properties)) {
@@ -34,6 +34,11 @@ var getObjectsWithProperties = function(className, properties, all) {
   }
   if (!ascendingAction) {
     objectQuery.ascending('createdAt');
+  }
+  if (Array.isArray(include)) {
+    for (var i = 0; i < include.length; i++) {
+      objectQuery.include(include[i]);
+    }
   }
   if (all) {
     return objectQuery.find({ useMasterKey: true });

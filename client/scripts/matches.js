@@ -39,7 +39,7 @@ var ExpirationDateCountDown = React.createClass({
     clearInterval(this.interval);
   },
   render () {
-    return <div>Expires in {this.state.hours} hours and {this.state.minutes} minutes.</div>;
+    return <span className='expiration-date-count-down'>{this.state.hours} hours {this.state.minutes} minutes.</span>;
   },
 });
 
@@ -75,8 +75,8 @@ var MatchesCard = React.createClass({
     var skillset;
     if (Array.isArray(userInfo.skills) && userInfo.skills.length > 0) {
       userInfo.skills = userInfo.skills.slice(0, 5);
-      skillset = userInfo.skills.map(function (skill) {
-        return <span className='user-card-skill'>{skill}</span>
+      skillset = userInfo.skills.map(function (skill, i) {
+        return <span key={i} className='user-card-skill'>{skill}</span>
       }, this);
     }
     var likeButton;
@@ -88,6 +88,9 @@ var MatchesCard = React.createClass({
       rejectButton = <a onClick={this.like.bind(this, userInfo.id, false)} className='user-card-details-button user-card-details-reject'>No, thanks</a>;
     } else if (userInfo.like === true) {
       likedRibbon = <div className='user-card-like-status user-card-like-status-requested'>Request sent</div>;
+      if (userInfo.mutualLike) {
+        likedRibbon = <div className='user-card-like-status user-card-like-status-requested'>Accepted</div>;
+      }
     } else if (userInfo.like === false) {
       rejectedRibbon = <div className='user-card-like-status user-card-like-status-rejected'>Rejected</div>;
     }
@@ -96,8 +99,10 @@ var MatchesCard = React.createClass({
         <div className='user-card-user-pic-container'>
           <img className='user-card-user-pic' src={userInfo.pictureUrl} />
         </div>
-        <span className='user-card-user-first-name'>{userInfo.firstName}</span>
-        <span className='user-card-user-headline'>{userInfo.headline}</span>
+        <div className='user-card-title'>
+          <span className='user-card-user-first-name'>{userInfo.firstName}, </span>
+          <span className='user-card-user-headline'>{userInfo.headline}</span>
+        </div>
         <div className='user-card-skillset'>
           {skillset}
         </div>
@@ -122,10 +127,26 @@ var Matches = React.createClass({
     var users = this.props.userData.map(function (user, i) {
       return <MatchesCard key={user.id} matchId={this.props.matchId} userInfo={user} />
     }, this);
+    var otherUsers = this.props.otherUserData.map(function (user, i) {
+      return <MatchesCard key={user.id} matchId={this.props.matchId} userInfo={user} />
+    }, this);
+    /*as tabs will be set to float: right, these tabs will render in the opposite order*/
     return (
-      <div>
-        <ExpirationDateCountDown expirationDate={this.props.expirationDate}/>
-        {users}
+      <div className='matches-page'>
+        <TabbedArea defaultActiveKey={1}>
+          <TabPane eventKey={2} tab={'Accepted (' + React.Children.count(otherUsers) + ')'}>{otherUsers}</TabPane>
+          <TabPane eventKey={1} tab={'New (' + React.Children.count(users) + ')'}>
+            <div className='match-header'>
+              <span>New Candidates for </span>
+              <span className='job-title'>{this.props.jobInfo.title}</span>
+              <span>, please respond in </span>
+              <ExpirationDateCountDown expirationDate={this.props.expirationDate}/>
+            </div>
+            <div className='user-card-main-container'>
+              {users}
+            </div>
+          </TabPane>
+        </TabbedArea>
       </div>
     );
   }

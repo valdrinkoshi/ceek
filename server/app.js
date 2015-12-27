@@ -590,23 +590,27 @@ app.get('/matches/:id', function(request, response) {
     {name: 'objectId', value: matchesPageId},
     {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
     {name: 'visible', value: true},
-  ]).then(function(matchesPage) {
+  ], ['job']).then(function(matchesPage) {
     if (matchesPage) {
       getObjectsWithProperties(Like, [
         {name: 'matchesPageId', value: matchesPage.id},
       ], true).then (function (likes) {
         matchesPage = matchesPage.attributes;
         matchesPage.id = matchesPageId;
+        matchesPage.job = matchesPage.job.attributes;
         var userProfilePromises = [];
-        var userProfileIds = matchesPage.userProfileIds;
-        for (var i = 0; i < userProfileIds.length; i++) {
-          var userProfileId = userProfileIds[i];
+        var userProfileIds = matchesPage.userProfileIds || [];
+        var otherUserProfileIds = matchesPage.otherUserProfileIds || [];
+        var allProfileIds = userProfileIds.concat(otherUserProfileIds);
+        for (var i = 0; i < allProfileIds.length; i++) {
+          var userProfileId = allProfileIds[i];
           userProfilePromises.push(getObjectById(UserProfile, userProfileId));
         }
         Parse.Promise.when(userProfilePromises).then(
           function () {
             if (arguments.length > 0) {
               var userProfiles = [];
+              var otherUserProfiles = [];
               for (var i = 0; i < arguments.length; i++) {
                 if (arguments[i]) {
                   //TODO: trim data?
@@ -619,10 +623,15 @@ app.get('/matches/:id', function(request, response) {
                     userProfile.like = like.get('like') || false;
                     userProfile.mutualLike = like.get('mutual') || false;
                   }
-                  userProfiles.push(userProfile);
+                  if (_.contains(userProfileIds, userProfile.id)) {
+                    userProfiles.push(userProfile);
+                  } else if (userProfile.mutualLike) {
+                    otherUserProfiles.push(userProfile);
+                  }
                 }
               }
               matchesPage.userProfiles = userProfiles;
+              matchesPage.otherUserProfiles = otherUserProfiles;
               if (request.accepts('html')) {
                 response.render('matches', matchesPage);
               } else {
@@ -674,22 +683,38 @@ var PostMatches = function (user, request, response, params) {
                 for (var i = 0; i < arguments.length; i++) {
                   userPProfileIds.push(arguments[i].id);
                 }
-                var matchesPage = new MatchesPage();
-                matchesPage.setACL(restrictedAcl);
-                matchesPage.set('publicProfileIds', userPProfileIds);
-                matchesPage.set('userProfileIds', userProfileIds);
-                matchesPage.set('jobId', jobId);
-                matchesPage.set('visible', true);
-                matchesPage.set('matchesPageId', undefined);
-                matchesPage.set('expireDate', new Date(Date.now()+86400000));
-                matchesPage.save(null, {
-                  useMasterKey: true,
-                  success: function (matchesPage) {
-                    success(response, {matchesPageId: matchesPage.id});
-                  },
-                  error: function (object, error) {
-                    fail(response, {msg: error});
+                getObjectWithProperties(MatchesPage, [{name: 'jobId', value: jobId}]).then(
+                function (matchesPage) {
+                  //if a page already exists for this jobId, just update the object with the new profiles
+                  if (matchesPage) {
+                    var today = new Date();
+                    var expirationDate = matchesPage.get('expireDate');
+                    if (!(today > expirationDate)) {
+                      return fail(response, {msg: 'This match has not expired yet.'});
+                    }
+                    matchesPage.set('otherUserProfileIds', matchesPage.get('userProfileIds'));
+                    matchesPage.set('otherPublicProfileIds', matchesPage.get('publicProfileIds'));
+                  } else {
+                    matchesPage = new MatchesPage();
+                    matchesPage.setACL(restrictedAcl);
+                    matchesPage.set('jobId', jobId);
+                    matchesPage.set('job', job);
                   }
+                  matchesPage.set('userProfileIds', userProfileIds);
+                  matchesPage.set('publicProfileIds', userPProfileIds);
+                  matchesPage.set('visible', true);
+                  matchesPage.set('matchesPageId', undefined);
+                  matchesPage.set('expireDate', new Date(Date.now()+86400000));
+                
+                  matchesPage.save(null, {
+                    useMasterKey: true,
+                    success: function (matchesPage) {
+                      success(response, {matchesPageId: matchesPage.id});
+                    },
+                    error: function (object, error) {
+                      fail(response, {msg: error});
+                    }
+                  });
                 });
               } else {
                 fail(response, {msg: 'Job lost!'});
@@ -798,7 +823,7 @@ app.get('/likeu/:id', function(request, response) {
             likeObj.save(null, {useMasterKey: true}).then(function () {
               //TODO send email
               if (!isLocal && userProfile.get('emailAddress') && likeResp) {
-                sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
+                //sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
               }
               success(response, {msg: 'You liked the user!'});
             });

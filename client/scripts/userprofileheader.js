@@ -3,13 +3,21 @@ var classNames = require('classnames');
 
 var UserProfileHeader = React.createClass({
 
-  pictureChanged: function () {
+  pictureChanged() {
     var file = React.findDOMNode(this.refs.profilePicToUpload).files[0];
     this.props.newPictureUploaded(file)
   },
 
+  getDefaultProps() {
+    return {
+      showStatusButton: false,
+      statusOnMarket: false
+    };
+  },
+
   render() {
     var profilePic;
+    var statusButton;
     if (typeof this.props.newPictureUploaded === 'function') {
       profilePic = (
         <div className='profile-header-pic-container profile-header-pic-upload'>
@@ -24,6 +32,17 @@ var UserProfileHeader = React.createClass({
           <img className='profile-header-pic' src={this.props.pictureUrl} />
         </div>
     }
+    if (this.props.showStatusButton) {
+      var statusButtonText = 'start job matching';
+      if (this.props.statusOnMarket) {
+        statusButtonText = 'take me off the market';
+      }
+      statusButton = (
+      <button className='ceek-button profile-header-mkt-status-btn text-uppercase' onClick={this.props.changeMarketStatus}>
+        {statusButtonText}
+        </button>
+        );
+    }
     return (
       <div className='profile-header'>
         {profilePic}
@@ -31,10 +50,7 @@ var UserProfileHeader = React.createClass({
           <span className='profile-header-name'>{this.props.firstName} {this.props.lastName}</span>
           <span className='profile-header-email'>{this.props.emailAddress}</span>
         </div>
-        <DropdownButton className='profile-header-mkt-status-btn' bsSize="xsmall" onSelect={this.props.changeMarketStatus} bsStyle={this.props.marketStatus} title={this.props.marketStatusText}>
-          <MenuItem eventKey="on">On market</MenuItem>
-          <MenuItem eventKey="off">Off market</MenuItem>
-        </DropdownButton>
+        {statusButton}
       </div>
     );
   }

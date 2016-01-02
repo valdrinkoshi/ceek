@@ -114,7 +114,7 @@ var MatchesCard = React.createClass({
         {rejectedRibbon}
         <Modal className='user-card-dialog' show={this.state.showUserDetail}>
           <Modal.Header>User</Modal.Header>
-          <Modal.Body><UserView userData={userInfo} /></Modal.Body>
+          <Modal.Body><UserView userData={userInfo} showStatusButton={false} /></Modal.Body>
           <Modal.Footer><Button onClick={this.toggleUserDetail}>Close</Button></Modal.Footer>
         </Modal>
       </div>

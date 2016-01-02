@@ -193,6 +193,7 @@ var upsertLinkedInUser = function(accessToken, linkedInData) {
       // Secure the object against public access.
       userProfile.setACL(restrictedAcl);
       linkedInData.linkedInId = linkedInData.id;
+      linkedInData.onMarket = false; //by default the user is off the job market.
       delete linkedInData.id;
       userProfile.save(linkedInData, { useMasterKey: true });
       linkedInData.id = linkedInData.linkedInId;
@@ -461,12 +462,13 @@ var PostProfile = function (user, request, response, params) {
     try {
       formData = JSON.parse(formData);
     } catch (e) {
-      fail(repsonse, {errorMessage: 'Invalid'})
+      fail(response, {errorMessage: 'Invalid'})
     }
     var stepId = receivedParams.stepId;
-    if (stepId === 'newPic') {
+    if (stepId === 'static') {
       var newData = {
-        pictureUrl: '' //default pic?
+        pictureUrl: userDataResponse.get('pictureUrl') || '', //default pic?
+        onMarket: userDataResponse.get('onMarket')
       };
       for (var property in newData) {
         if (formData.hasOwnProperty(property)) { //TODO validate?
@@ -477,7 +479,7 @@ var PostProfile = function (user, request, response, params) {
     } else {
       var formDef = formConfig.formDefinition[stepId.replace('step', '')];
       if (!formDef) {
-        fail(repsonse, {errorMessage: 'Invalid'})
+        fail(response, {errorMessage: 'Invalid'})
       }
       var validatedForm = formValidationUtils.validateForm(formDef, formData);
       return userDataResponse.save(validatedForm, { useMasterKey: true });

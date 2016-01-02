@@ -1,0 +1,9 @@
+/*basic css*/
+.ceek-button {
+  margin: 1.0625rem 0 1.0625rem 0;
+  padding: 0.75rem 1.875rem 0.75rem 1.875rem;
+  background-color: #fc7070;
+  border: none;
+  color: #fbfbfb;
+  font-size: 1.125rem;
+}

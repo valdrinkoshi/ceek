@@ -114,7 +114,7 @@ var User = React.createClass({
     if (uploadFilePromise) {
       uploadFilePromise.then(function(parseFile) {
         var data = {pictureUrl: parseFile.url()};
-        Services.PostProfile(JSON.stringify(data), 'newPic').then(function (data) {
+        Services.PostProfile(JSON.stringify(data), 'static').then(function (data) {
           _this.setState({
             value: data.userProfileData
           });
@@ -159,6 +159,14 @@ var User = React.createClass({
       Services.PostProfile(JSON.stringify(value), stepId).then(function (data) {
         newState.formDef[stepIndex].status = 'success';
         newState.activeKey = stepIndex + 2;
+        var formDef = _this.state.formDef || [];
+        for (var i = stepIndex+1; i < formDef.length; i++) {
+          if (formDef[i].status === 'success') {
+            newState.activeKey = i + 2;
+          } else {
+            break;
+          }
+        }
         newState.value = data.userProfileData;
         _this.setState(newState);
         console.log(data);
@@ -194,14 +202,22 @@ var User = React.createClass({
     this.setState({showErrorModal: false});
   },
 
+  goToProfileView() {
+    this.transitionTo('/profileview');
+  },
+
   render() {
     var output;
+    var viewProfileButton = <button className='ceek-button text-uppercase' onClick={this.goToProfileView}>view profile</button>;
     if (this.state.formDef) {
       var _this = this;
       var steps = this.state.formDef.map(function (formDef, index) {
         var stepId = _this.getStepId(index);
         var evtKey = index+1;
         var header = _this.getHeader(formDef.stepTitle, formDef.status);
+        if (formDef.status !== 'success') {
+          viewProfileButton = undefined;
+        }
         return (
           <Panel className={_this.getCustomPanelClasses(evtKey)} key={stepId} eventKey={evtKey} collapsible header={header}>
             <Form
@@ -210,7 +226,7 @@ var User = React.createClass({
               options={_this.state.options[index]}
               value={_this.state.value}
             />
-            <button className='step-save-button text-uppercase' onClick={_this.save.bind(_this, stepId)}>Save</button>
+            <button className='ceek-button text-uppercase' onClick={_this.save.bind(_this, stepId)}>Save</button>
           </Panel>
         );
       });
@@ -233,11 +249,12 @@ var User = React.createClass({
               </ol>
               <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
                 <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />
-                <input className='step-save-button text-uppercase' type='submit' value='upload' />
+                <input className='ceek-button text-uppercase' type='submit' value='upload' />
               </form>
             </Panel>
             {steps}
           </PanelGroup>
+          {viewProfileButton}
         </div>;
     } else {
       output = <div></div>;

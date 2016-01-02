@@ -118,10 +118,26 @@ var HistoryProfileProperty = React.createClass({
 var UserView = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
 
+  getDefaultProps() {
+    return {
+      showStatusButton: true
+    }
+  },
+
   getInitialState() {
     return {
       formDef: null
     };
+  },
+
+  changeMarketStatus() {
+    var _this = this;
+    var newState = !this.state.profileData.onMarket;
+    Services.PostProfile(JSON.stringify({onMarket: newState}), 'static').then(function (response) {
+      _this.setState({
+        profileData: response.userProfileData
+      });
+    });
   },
 
   componentDidMount() {
@@ -339,7 +355,7 @@ var UserView = React.createClass({
         questionnaire = (
           <div className='row'>
             <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
-              <Doughnut data={data.workStyleChartData} />
+              <Doughnut data={data.workStyleChartData} redraw />
             </div>
             <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8'>
               <ProfileProperty name={workStyleTitle} inline={false}>
@@ -364,7 +380,7 @@ var UserView = React.createClass({
 
       output =
         <div>
-          <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} marketStatus={data.marketStatus} marketStatusText={data.marketStatusText} />
+          <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} statusOnMarket={data.onMarket} changeMarketStatus={this.changeMarketStatus} showStatusButton={this.props.showStatusButton} />
           <ProfileSection title='Job Preferences'>
             <ProfileProperty name='Preferred working locations' i18nPrefix='locationPreference.'>{data.locationPreference}</ProfileProperty>
             <ProfileProperty name='Ideal roles'>{data.roleType}</ProfileProperty>

@@ -1,0 +1,86 @@
+/*CardsContainer*/
+
+.matches-page ul.nav-tabs > li {
+  float: right;
+}
+
+.matches-page ul.nav-tabs > li > a {
+  color: #4b4c4c;
+}
+
+.matches-page ul.nav-tabs > li.active > a {
+  font-family: SourceSansPro-Bold;
+}
+
+.cards-container-main-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/*BaseCard*/
+
+.base-card-container {
+  max-width: 23.375rem;
+  max-height: 70rem;
+  display: block;
+  padding: 1.875rem 2.375rem 1.875rem 2.375rem;
+  margin: 1.875rem 1.25rem;
+  border-radius:0.25rem;
+  box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.12);
+  font-family: SourceSansPro-Regular;
+}
+
+.base-card-title {
+  margin-bottom: 1.875rem;
+  text-align: center;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.base-card-details {
+  margin-bottom: 0.625rem;
+  color: #666;
+  font-size: 0.875rem;
+  font-family: SourceSansPro-Light;
+}
+
+.base-card-like-status {
+  width: 100%;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.base-card-details-request {
+  margin-right: 1.25rem;
+}
+
+.base-card-details-request,
+.base-card-like-status-requested {
+  background-color: #fc7070;
+  color: #fff;
+}
+
+.base-card-details-reject,
+.base-card-like-status-rejected {
+  background-color: #f1efef;
+  color: #656262;
+}
+
+.base-card-details-button,
+.base-card-details-button:hover {
+  text-decoration: none;
+  padding: 0.5rem;
+}
+
+.base-card-details-button {
+  display: inline-block;
+}
+
+.base-card-details-link {
+  display: block;
+  margin-bottom: 1.875rem;
+  color: #3CA9F6;
+  font-size: 0.875rem;
+}

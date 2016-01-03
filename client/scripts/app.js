@@ -3,6 +3,7 @@ var ReactRouter = require('react-router');
 var SignUp = require('SignUp');
 var User = require('User');
 var UserView = require('UserView');
+var UserMatches = require('UserMatches').UserMatches;
 
 var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
@@ -49,6 +50,7 @@ var routes = [
   <Route name="/" handler={SignUp}/>
   <Route name="/profile" handler={User}/>
   <Route name="/profileview" handler={UserView}/>
+  <Route name="/likes" handler={UserMatches}/>
 </Route>
 ];
 

@@ -35,9 +35,11 @@
   </script>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/cards.css">
   <link rel="stylesheet" href="/css/matches.css">
   <link rel="stylesheet" href="/css/profileview.css">
   <link rel="stylesheet" href="/css/userprofileheader.css">
+  <link rel="stylesheet" href="/css/expirationdatecountdown.css">
 </head>
 <body>
   <!--bundle.js START-->
@@ -48,7 +50,7 @@
     var userProfiles = <%-JSON.stringify(userProfiles)%>;
     var otherUserProfiles = <%-JSON.stringify(otherUserProfiles)%>;
     var jobInfo = <%-JSON.stringify(job)%>;
-    var Matches = require('Matches');
+    var Matches = require('Matches').CompanyMatches;
     React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, otherUserData: otherUserProfiles, jobInfo: jobInfo, expirationDate: expirationDate}), document.body);
   </script>
   <!--bundle.js END-->

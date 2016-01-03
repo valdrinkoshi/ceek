@@ -623,11 +623,11 @@ app.get('/matches/:id', function(request, response) {
                   });
                   if (like) {
                     userProfile.like = like.get('like') || false;
-                    userProfile.mutualLike = like.get('mutual') || false;
+                    userProfile.mutual = like.get('mutual') || false;
                   }
                   if (_.contains(userProfileIds, userProfile.id)) {
                     userProfiles.push(userProfile);
-                  } else if (userProfile.mutualLike) {
+                  } else if (userProfile.mutual) {
                     otherUserProfiles.push(userProfile);
                   }
                 }
@@ -820,6 +820,7 @@ app.get('/likeu/:id', function(request, response) {
             likeObj.set('userProfileId', userProfileId);
             likeObj.set('matchesPageId', matchId);
             likeObj.set('jobId', matchPageData.get('jobId'));
+            likeObj.set('job', matchPageData.get('job'));
             likeObj.set('expireDate', new Date(Date.now()+86400000));
             likeObj.set('like', likeResp);
             likeObj.save(null, {useMasterKey: true}).then(function () {
@@ -844,9 +845,10 @@ var GetLikeJ = function (user, request, response) {
     return fail(response, 'Must be logged in.');
   }
   var likeId = request.params.id;
+  var likeResp = request.query.like === "true" ? true : false;
   getObjectById(Like, likeId).then(function(like) {
     if (like) {
-      like.save({'mutual': true}, {useMasterKey: true}).then(
+      like.save({'mutual': likeResp}, {useMasterKey: true}).then(
       function () {
         success(response, {msg:'You liked the job!'});
       },
@@ -878,17 +880,27 @@ var GetLikes = function (user, request, response) {
   getUserProfile(user).then(function (userProfile) {
     getObjectsWithProperties(Like, [
       {name: 'userProfileId', value: userProfile.id},
-      {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
+      //{name: 'expireDate', value: new Date(), operator: 'greaterThan'},
       {name: 'like', value: true}
-    ], true).then(function(likes) {
+    ], true, ['job']).then(function(likes) {
       var outLikes = [];
+      var otherOutLikes = [];
       for (var i = 0; i < likes.length; i++) {
         var like = likes[i].attributes;
         like.id = likes[i].id;
-        outLikes.push(like);
+        like.job = likes[i].get('job').attributes;
+        var expirationDate = likes[i].get('expireDate');
+        var today = new Date();
+        if (today > expirationDate && likes[i].get('mutual')) {
+          otherOutLikes.push(like);
+        } else {
+          outLikes.push(like);
+        }
+        
       }
       success(response, {
-        likes: outLikes
+        likes: outLikes,
+        otherLikes: otherOutLikes
       });
     }, function(error) {
       fail(response, error);

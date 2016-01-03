@@ -27,6 +27,9 @@ module.exports = function (grunt) {
                     './client/scripts/signup.js:SignUp',
                     './client/scripts/user.js:User',
                     './client/scripts/userprofileheader.js:UserProfileHeader',
+                    './client/scripts/cards.js:Cards',
+                    './client/scripts/expirationdatecountdown.js:ExpirationDateCountDown',
+                    './client/scripts/usermatches.js:UserMatches',
                     './client/scripts/userview.js:UserView'
                   ],
                   external: ['react'],
@@ -67,6 +70,8 @@ module.exports = function (grunt) {
                 options: {
                   transform: ['reactify'],
                   alias: [
+                  './client/scripts/cards.js:Cards',
+                  './client/scripts/expirationdatecountdown.js:ExpirationDateCountDown',
                   './client/scripts/userview.js:UserView',
                     './client/scripts/matches.js:Matches'
                   ],

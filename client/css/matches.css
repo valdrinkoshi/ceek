@@ -23,25 +23,6 @@ body {
   background-color: #fafafa;
 }
 
-.matches-page ul.nav-tabs > li {
-  float: right;
-}
-
-.matches-page ul.nav-tabs > li > a {
-  color: #4b4c4c;
-}
-
-.matches-page ul.nav-tabs > li.active > a {
-  font-family: SourceSansPro-Bold;
-}
-
-.user-card-main-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
 .match-header {
   width: 100%;
   margin-top: 1.875rem;
@@ -62,22 +43,6 @@ body {
   font-weight: bold;
 }
 
-.expiration-date-count-down {
-  color: #FC7070;
-  font-weight: bold;
-}
-
-.user-card-container {
-  max-width: 23.375rem;
-  max-height: 70rem;
-  display: block;
-  padding: 1.875rem 2.375rem 1.875rem 2.375rem;
-  margin: 1.875rem 1.25rem;
-  border-radius:0.25rem;
-  box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.12);
-  font-family: SourceSansPro-Regular;
-}
-
 .user-card-user-pic-container {
   width: 5rem;
   height: 5rem;
@@ -94,13 +59,6 @@ body {
   height: 100%;
 }
 
-.user-card-title {
-  margin-bottom: 1.875rem;
-  text-align: center;
-  color: #333;
-  font-size: 1.25rem;
-}
-
 .user-card-skillset {
   margin-bottom: 0.875rem;
 }
@@ -114,50 +72,4 @@ body {
   color: #666;
   font-size: 0.75rem;
   font-family: SourceSansPro-Light;
-}
-
-.user-card-summary {
-  margin-bottom: 0.625rem;
-  color: #666;
-  font-size: 0.875rem;
-  font-family: SourceSansPro-Light;
-}
-
-.user-card-details-link {
-  display: block;
-  margin-bottom: 1.875rem;
-  color: #3CA9F6;
-  font-size: 0.875rem;
-}
-
-.user-card-details-button,
-.user-card-details-button:hover {
-  text-decoration: none;
-  padding: 0.5rem;
-}
-
-.user-card-details-button {
-  display: inline-block;
-}
-
-.user-card-like-status {
-  width: 100%;
-  padding: 0.5rem;
-  text-align: center;
-}
-
-.user-card-details-request {
-  margin-right: 1.25rem;
-}
-
-.user-card-details-request,
-.user-card-like-status-requested {
-  background-color: #fc7070;
-  color: #fff;
-}
-
-.user-card-details-reject,
-.user-card-like-status-rejected {
-  background-color: #f1efef;
-  color: #656262;
 }

@@ -58,4 +58,32 @@ Services.PostPProfile = function (userId) {
   return postPProfilePromise;
 };
 
+Services.GetLikes = function (userId) {
+  var likesPromise = jQuery.Deferred();
+  if (useCloudCode) {
+    Parse.Cloud.run('GetLikes', {}).then(function (data) {
+      likesPromise.resolve(data);
+    });
+  } else {
+    jQuery.get('likes', {sessionToken: Parse.User.current().getSessionToken()}, function (data) {
+      likesPromise.resolve(data);
+    });
+  }
+  return likesPromise;
+};
+
+Services.GetLikeJ = function (likeId, like, reason) {
+  var likeJPromise = jQuery.Deferred();
+  if (useCloudCode) {
+    Parse.Cloud.run('GetLikeJ', {}).then(function (data) {
+      likeJPromise.resolve(data);
+    });
+  } else {
+    jQuery.get('likej/'+likeId, {sessionToken: Parse.User.current().getSessionToken(), like: like, reason: reason}, function (data) {
+      likeJPromise.resolve(data);
+    });
+  }
+  return likeJPromise;
+};
+
 module.exports = Services;

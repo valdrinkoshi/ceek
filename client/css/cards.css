@@ -109,3 +109,7 @@
 .base-card-rejection-confirmation-dialog .base-card-rejection-confirm {
   margin-right: 1rem;
 }
+
+.base-card-rejection-confirmation-dialog .base-card-custom-content {
+  font-size: 1.25rem;
+}

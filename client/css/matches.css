@@ -73,3 +73,7 @@ body {
   font-size: 0.75rem;
   font-family: SourceSansPro-Light;
 }
+
+.user-card-rej-confirmation-header-name {
+  font-weight: bold;
+}

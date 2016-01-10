@@ -57,7 +57,7 @@ var UserMatchesCard = React.createClass({
         <span>{likeInfo.job.companyName}</span>
       </span>
     );
-    var rejectionConfirmationHeader = <div>Not interested in {userMatchesCardJob}?</div>;
+    var rejectionConfirmationHeader = <div className='base-card-custom-content'>Not interested in {userMatchesCardJob}?</div>;
     var rejectionConfirmationContent = <div>Please share with us the reason(s) for passing this position. Your feedback helps us to find better matches for you soon.</div>;
     return (
       <BaseCard className='user-matches-card' rejectionConfirmationHeader={rejectionConfirmationHeader} rejectionConfirmationContent={rejectionConfirmationContent} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this position' likeInfo={likeInfo} requestText='Accept request' onLike={this.like.bind(this, likeInfo.id, true)} onReject={this.like.bind(this, likeInfo.id, false)}>

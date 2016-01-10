@@ -45,8 +45,10 @@ var CompanyMatchesCard = React.createClass({
       like: userInfo.like,
       mutual: userInfo.mutual,
     };
+    var rejectionConfirmationHeader = <div className='base-card-custom-content'>Not interested in <span className='user-card-rej-confirmation-header-name'>{userInfo.firstName}</span>?</div>;
+    var rejectionConfirmationContent = <div>Please share with us the reason(s) for passing this candidate. Your feedback helps us to find better matches for you soon.</div>; 
     return (
-      <BaseCard likeInfo={likeInfo} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this candidate' requestText='Request interview' onLike={this.like.bind(this, userInfo.id, true, {})} onReject={this.like.bind(this, userInfo.id, false)}>
+      <BaseCard likeInfo={likeInfo} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionConfirmationHeader={rejectionConfirmationHeader} rejectionConfirmationContent={rejectionConfirmationContent} rejectionDialogConfirmationText='Pass this candidate' requestText='Request interview' onLike={this.like.bind(this, userInfo.id, true, {})} onReject={this.like.bind(this, userInfo.id, false)}>
         <div className='user-card-user-pic-container'>
           <img className='user-card-user-pic' src={userInfo.pictureUrl} />
         </div>

@@ -50,8 +50,9 @@
     var userProfiles = <%-JSON.stringify(userProfiles)%>;
     var otherUserProfiles = <%-JSON.stringify(otherUserProfiles)%>;
     var jobInfo = <%-JSON.stringify(job)%>;
+    var rejectionFormConfig = <%-JSON.stringify(formConfig)%>;
     var Matches = require('Matches').CompanyMatches;
-    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, otherUserData: otherUserProfiles, jobInfo: jobInfo, expirationDate: expirationDate}), document.body);
+    React.render(React.createElement(Matches, {matchId: matchId, userData: userProfiles, otherUserData: otherUserProfiles, jobInfo: jobInfo, expirationDate: expirationDate, rejectionFormConfig: rejectionFormConfig}), document.body);
   </script>
   <!--bundle.js END-->
 </body>

@@ -84,3 +84,28 @@
   color: #3CA9F6;
   font-size: 0.875rem;
 }
+
+.base-card-rejection-confirmation-dialog .modal-header {
+  padding: 1.875rem 5.25rem 0 5.25rem;
+  text-align: center;
+}
+
+.base-card-rejection-confirmation-dialog .modal-body {
+  padding: 1.5rem 5.25rem 1.875rem 5.25rem;
+  color: #666;
+  font-size: 0.875;
+  font-family: SourceSansPro-Light;
+}
+
+.base-card-rejection-confirmation-dialog .modal-footer {
+  padding: 0 5.25rem 1.875rem 5.25rem;
+}
+
+.base-card-rejection-confirmation-dialog .modal-header,
+.base-card-rejection-confirmation-dialog .modal-footer {
+  border: 0;
+}
+
+.base-card-rejection-confirmation-dialog .base-card-rejection-confirm {
+  margin-right: 1rem;
+}

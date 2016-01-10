@@ -72,14 +72,14 @@ Services.GetLikes = function (userId) {
   return likesPromise;
 };
 
-Services.GetLikeJ = function (likeId, like) {
+Services.GetLikeJ = function (likeId, like, reason) {
   var likeJPromise = jQuery.Deferred();
   if (useCloudCode) {
     Parse.Cloud.run('GetLikeJ', {}).then(function (data) {
       likeJPromise.resolve(data);
     });
   } else {
-    jQuery.get('likej/'+likeId, {sessionToken: Parse.User.current().getSessionToken(), like: like}, function (data) {
+    jQuery.get('likej/'+likeId, {sessionToken: Parse.User.current().getSessionToken(), like: like, reason: reason}, function (data) {
       likeJPromise.resolve(data);
     });
   }

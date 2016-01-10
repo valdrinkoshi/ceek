@@ -4,6 +4,7 @@ var Services = require('./Services.js');
 var ExpirationDateCountDown = require('ExpirationDateCountDown');
 var BaseCard = require('Cards').BaseCard;
 var CardsContainer = require('Cards').CardsContainer;
+var t = require('tcomb-form');
 
 var UserMatchesCard = React.createClass({
   getInitialState() {
@@ -21,9 +22,9 @@ var UserMatchesCard = React.createClass({
       likeInfo: this.props.likeInfo
     });
   },
-  like(likeId, like) {
+  like(likeId, like, reason) {
     var _this= this;
-    Services.GetLikeJ(likeId, like).then(function (data) {
+    Services.GetLikeJ(likeId, like, reason).then(function (data) {
       console.log(data);
       var newLikeInfo = jQuery.extend({}, _this.state.likeInfo);
       newLikeInfo.like = like;
@@ -48,13 +49,21 @@ var UserMatchesCard = React.createClass({
     if (likeInfo.mutual || (typeof likeInfo.like === 'boolean' && !likeInfo.like)) {
       expirationInfo = undefined;
     }
+    //rejectionConfirmationHeader,rejectionConfirmationContent,rejectionReasonType
+    var userMatchesCardJob = (
+      <span className='user-matches-card-job'>
+        <span>{likeInfo.job.title}</span>
+          <span> &#124; </span>
+        <span>{likeInfo.job.companyName}</span>
+      </span>
+    );
+    var rejectionConfirmationHeader = <div>Not interested in {userMatchesCardJob}?</div>;
+    var rejectionConfirmationContent = <div>Please share with us the reason(s) for passing this position. Your feedback helps us to find better matches for you soon.</div>;
     return (
-      <BaseCard likeInfo={likeInfo} requestText='Accept request' onLike={this.like.bind(this, likeInfo.id, true)} onReject={this.like.bind(this, likeInfo.id, false)}>
+      <BaseCard className='user-matches-card' rejectionConfirmationHeader={rejectionConfirmationHeader} rejectionConfirmationContent={rejectionConfirmationContent} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this position' likeInfo={likeInfo} requestText='Accept request' onLike={this.like.bind(this, likeInfo.id, true)} onReject={this.like.bind(this, likeInfo.id, false)}>
         {expirationInfo}
         <div className='base-card-title'>
-          <span>{likeInfo.job.title}</span>
-          <span> &#124; </span>
-          <span>{likeInfo.job.companyName}</span>
+          {userMatchesCardJob}
         </div>
         <p className='base-card-details'>
           {description}
@@ -90,7 +99,8 @@ var UserMatches = React.createClass({
     Services.GetLikes().then(function (response) {
       _this.setState({
         likes: response.likes,
-        otherLikes: response.otherLikes
+        otherLikes: response.otherLikes,
+        rejectionFormConfig: response.formConfig
       });
     });
   },
@@ -103,7 +113,7 @@ var UserMatches = React.createClass({
         like.like = like.mutual;
       }
       like.expireDate = new Date(like.expireDate);
-      return <UserMatchesCard key={like.id} likeInfo={like} />;
+      return <UserMatchesCard key={like.id} likeInfo={like} rejectionFormConfig={this.state.rejectionFormConfig} />;
     }, this);
     var otherLikes = this.state.otherLikes.map(function (like, i) {
       like.like = like.mutual;

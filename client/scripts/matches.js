@@ -21,9 +21,9 @@ var CompanyMatchesCard = React.createClass({
       userInfo: this.props.userInfo
     });
   },
-  like(userId, like) {
+  like(userId, like, reason) {
     var _this= this;
-    jQuery.get('/likeu/'+userId, {matchId: this.props.matchId, like: like}, function (data) {
+    jQuery.get('/likeu/'+userId, {matchId: this.props.matchId, like: like, reason: JSON.stringify(reason)}, function (data) {
       var newUserInfo = jQuery.extend({}, _this.state.userInfo);
       newUserInfo.like = like;
       _this.setState({
@@ -46,7 +46,7 @@ var CompanyMatchesCard = React.createClass({
       mutual: userInfo.mutual,
     };
     return (
-      <BaseCard likeInfo={likeInfo} requestText='Request interview' onLike={this.like.bind(this, userInfo.id, true)} onReject={this.like.bind(this, userInfo.id, false)}>
+      <BaseCard likeInfo={likeInfo} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this candidate' requestText='Request interview' onLike={this.like.bind(this, userInfo.id, true, {})} onReject={this.like.bind(this, userInfo.id, false)}>
         <div className='user-card-user-pic-container'>
           <img className='user-card-user-pic' src={userInfo.pictureUrl} />
         </div>
@@ -72,7 +72,7 @@ var CompanyMatchesCard = React.createClass({
 var CompanyMatches = React.createClass({
   render() {
     var users = this.props.userData.map(function (user, i) {
-      return <CompanyMatchesCard key={user.id} matchId={this.props.matchId} userInfo={user} />;
+      return <CompanyMatchesCard key={user.id} matchId={this.props.matchId} rejectionFormConfig={this.props.rejectionFormConfig} userInfo={user} />;
     }, this);
     var otherUsers = this.props.otherUserData.map(function (user, i) {
       return <CompanyMatchesCard key={user.id} matchId={this.props.matchId} userInfo={user} />;

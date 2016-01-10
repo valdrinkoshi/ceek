@@ -1,3 +1,8 @@
+var classNames = require('classnames');
+var t = require('tcomb-form');
+var Form = t.form.Form;
+var formGenerationUtils = require('./formGenerationUtils.js');
+
 /* CardsContainer */
 
 var CardsContainer = React.createClass({
@@ -27,8 +32,24 @@ var BaseCard = React.createClass({
       requestText: 'Accept',
       rejectText: 'No, thanks',
       likedText: 'Accepted',
-      rejectedText: 'Rejected'
+      rejectedText: 'Rejected',
+      rejectionDialogConfirmationText: 'Pass'
     }
+  },
+  getInitialState() {
+    return {
+      showRejectionDialogConfirmation: false
+    };
+  },
+  toggleRejectionDialog() {
+    this.setState({
+      showRejectionDialogConfirmation: !this.state.showRejectionDialogConfirmation
+    });
+  },
+  onRejectionDialogConfirm() {
+    var rejectionReason = this.refs.rejectionForm.getValue();
+    this.props.onReject(rejectionReason);
+    this.toggleRejectionDialog();
   },
   render() {
     var likeButton;
@@ -38,7 +59,7 @@ var BaseCard = React.createClass({
     var likeInfo = this.props.likeInfo;
     if (typeof likeInfo.like === 'undefined') {
       likeButton = <a onClick={this.props.onLike} className='base-card-details-button base-card-details-request'>{this.props.requestText}</a>;
-      rejectButton = <a onClick={this.props.onReject} className='base-card-details-button base-card-details-reject'>{this.props.rejectText}</a>;
+      rejectButton = <a onClick={this.toggleRejectionDialog} className='base-card-details-button base-card-details-reject'>{this.props.rejectText}</a>;
     } else if (likeInfo.like === true) {
       likedRibbon = <div className='base-card-like-status base-card-like-status-requested'>Request sent</div>;
       if (likeInfo.mutual) {
@@ -47,13 +68,33 @@ var BaseCard = React.createClass({
     } else if (likeInfo.like === false) {
       rejectedRibbon = <div className='base-card-like-status base-card-like-status-rejected'>Rejected</div>;
     }
+    var classes = classNames('base-card-container', this.props.className);
+    var rejectionReasonFormConfig;
+    if (this.props.rejectionReasonFormConfig) {
+      rejectionReasonFormConfig = formGenerationUtils.generateForm(this.props.rejectionReasonFormConfig)
+    }
     return (
-      <div className='base-card-container'>
+      <div className={classes}>
         {this.props.children}
         {likeButton}
         {rejectButton}
         {likedRibbon}
         {rejectedRibbon}
+        <Modal className='base-card-rejection-confirmation-dialog' show={this.state.showRejectionDialogConfirmation}>
+          <Modal.Header>
+            {this.props.rejectionConfirmationHeader}
+          </Modal.Header>
+          <Modal.Body>
+            <div className='base-card-rejection-confirmation-dialog-body'>
+              {this.props.rejectionConfirmationContent}
+              <Form
+                ref='rejectionForm'
+                type={rejectionReasonFormConfig}
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer><a className='base-card-details-button base-card-details-reject base-card-rejection-confirm' onClick={this.onRejectionDialogConfirm}>{this.props.rejectionDialogConfirmationText}</a><a className='base-card-details-button base-card-details-reject' onClick={this.toggleRejectionDialog}>Cancel</a></Modal.Footer>
+        </Modal>
       </div>
     );
   }

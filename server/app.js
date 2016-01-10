@@ -6,6 +6,7 @@ var _ = require('underscore');
 var fs = require('fs');
 var http = require('http');
 var formConfig = require('cloud/formConfig.js');
+var rejectionReasonFormConfig = require('cloud/rejectionReasonFormConfig.js');
 var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 var parseExpressHttpsRedirect = require('parse-express-https-redirect');
@@ -28,7 +29,7 @@ app.set('view engine', 'ejs');    // Set the template engine
 app.use(express.bodyParser());    // Middleware for reading request body
 app.use(parseExpressHttpsRedirect());  // Require user to be on HTTPS.
 app.use(express.cookieParser('ceek_cookie_sign'));
-app.use(parseExpressCookieSession({ cookie: { maxAge: 3600000 } }))
+app.use(parseExpressCookieSession({ cookie: { maxAge: 3600000 } }));
 
 var linkedInClientId = '756jhxy8catk44';
 var linkedInClientSecret = 'BPdKzczERTAvfusd';
@@ -634,6 +635,7 @@ app.get('/matches/:id', function(request, response) {
               }
               matchesPage.userProfiles = userProfiles;
               matchesPage.otherUserProfiles = otherUserProfiles;
+              matchesPage.formConfig = rejectionReasonFormConfig.companyRejectionFormConfig || {};
               if (request.accepts('html')) {
                 response.render('matches', matchesPage);
               } else {
@@ -799,6 +801,7 @@ app.get('/likeu/:id', function(request, response) {
   var userProfileId = request.params.id;
   var matchId = request.query.matchId;
   var likeResp = request.query.like === "true" ? true : false;
+  var likeReason = request.query.reason;
   getObjectWithProperties(Like, [
     {name: 'userProfileId', value: userProfileId},
     {name: 'matchesPageId', value: matchId}
@@ -823,6 +826,15 @@ app.get('/likeu/:id', function(request, response) {
             likeObj.set('job', matchPageData.get('job'));
             likeObj.set('expireDate', new Date(Date.now()+86400000));
             likeObj.set('like', likeResp);
+            if (likeReason) {
+              try {
+                likeReason = JSON.parse(likeReason);
+                likeReason = formValidationUtils.validateForm(rejectionReasonFormConfig.companyRejectionFormConfig, likeReason);
+                likeObj.set('companyReason', likeReason);
+              } catch (e) {
+                console.error(e);
+              }
+            }
             likeObj.save(null, {useMasterKey: true}).then(function () {
               //TODO send email
               if (!isLocal && userProfile.get('emailAddress') && likeResp) {
@@ -846,9 +858,21 @@ var GetLikeJ = function (user, request, response) {
   }
   var likeId = request.params.id;
   var likeResp = request.query.like === "true" ? true : false;
+  var likeReason = request.query.reason;
   getObjectById(Like, likeId).then(function(like) {
     if (like) {
-      like.save({'mutual': likeResp}, {useMasterKey: true}).then(
+      if (likeReason) {
+        likeReason = formValidationUtils.validateForm(rejectionReasonFormConfig.candidateRejectionFormConfig, likeReason);
+      }
+      if (likeReason) {
+        try {
+          likeReason = JSON.parse(likeReason);
+          likeReason = formValidationUtils.validateForm(rejectionReasonFormConfig.candidateRejectionFormConfig, likeReason);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      like.save({'mutual': likeResp, candidateReason: likeReason}, {useMasterKey: true}).then(
       function () {
         success(response, {msg:'You liked the job!'});
       },
@@ -900,7 +924,8 @@ var GetLikes = function (user, request, response) {
       }
       success(response, {
         likes: outLikes,
-        otherLikes: otherOutLikes
+        otherLikes: otherOutLikes,
+        formConfig: rejectionReasonFormConfig.candidateRejectionFormConfig || {}
       });
     }, function(error) {
       fail(response, error);

@@ -1,0 +1,10 @@
+.user-matches-card {
+  max-width: 17rem;
+  max-height: 70rem;
+  padding: 1.875rem;
+  margin: 1.875rem 1rem;
+}
+
+.user-matches-card-job {
+  font-weight: bold;
+}

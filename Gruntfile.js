@@ -24,6 +24,7 @@ module.exports = function (grunt) {
                   transform: ['reactify'],
                   alias: [
                     './client/scripts/app.js:App',
+                    './client/scripts/nav.js:CeekNav',
                     './client/scripts/signup.js:SignUp',
                     './client/scripts/user.js:User',
                     './client/scripts/userprofileheader.js:UserProfileHeader',

@@ -1,9 +1,12 @@
 var React = require('react');
 var ReactRouter = require('react-router');
+var CeekNav = require('CeekNav');
 var SignUp = require('SignUp');
 var User = require('User');
 var UserView = require('UserView');
 var UserMatches = require('UserMatches').UserMatches;
+
+var Services = require('./Services.js');
 
 var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
@@ -19,24 +22,42 @@ var App = React.createClass({
       this.transitionTo("/");
     }
   },
+
+  userProfileData: null,
+
+  getProfileData() {
+    if (this.userProfileData) {
+      return jQuery.Deferred().resolve(this.userProfileData);
+    }
+    var _this = this;
+    return Services.GetProfile().then(function (data) {
+      _this.userProfileData = data;
+      return _this.userProfileData;
+    });
+  },
+
+  setProfileData(data, stepId) {
+    var _this = this;
+    return Services.PostProfile(data, stepId).then(function (data) {
+      _this.userProfileData.userProfileData = data.userProfileData;
+      return _this.userProfileData;
+    });
+  },
+
+  getLikesData() {
+    
+  },
+
   render () {
     var navbarContent = null;
     if (this.state.loggedIn) {
-      navbarContent = (<div><Nav navbar onSelect={this.handleSelect}>
-            <NavItem eventKey={1} >Link</NavItem>
-            <NavItem eventKey={2} >Link</NavItem>
-          </Nav>
-          <Nav navbar right onSelect={this.handleSelect}>
-            <NavItem eventKey={3} >Logout</NavItem>
-          </Nav></div>);
+      navbarContent = (<div><CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} /></div>);
     }
     return (
       <div className="application">
-        <Navbar brand='Ceek' toggleNavKey={0}>
-          {navbarContent}
-        </Navbar>
+        <CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} />
         <div className='container'>
-          <RouteHandler/>
+          <RouteHandler getProfileData={this.getProfileData} setProfileData={this.setProfileData}/>
         </div>
       </div>
     )

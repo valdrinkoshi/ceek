@@ -25,7 +25,7 @@ var User = React.createClass({
   componentWillMount() {
     var _this = this;
     if (Parse.User.current()) {
-      Services.GetProfile().then(function (response) {
+      this.props.getProfileData().then(function (response) {
         _this.setFormDef(response.formDef, response.userProfileData);
       });
     } else {
@@ -156,7 +156,7 @@ var User = React.createClass({
       var _this = this;
       var stepIndex = parseInt(stepId.replace('step', ''));
       var newState = jQuery.extend(true, {}, _this.state);
-      Services.PostProfile(JSON.stringify(value), stepId).then(function (data) {
+      this.props.setProfileData(JSON.stringify(value), stepId).then(function (data) {
         newState.formDef[stepIndex].status = 'success';
         newState.activeKey = stepIndex + 2;
         var formDef = _this.state.formDef || [];

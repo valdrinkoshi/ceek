@@ -1,0 +1,15 @@
+.ceek-nav-navbar {
+  background-color: #2B2B2B
+}
+
+.ceek-nav-navbar .ceek-nav-item {
+  font-size: 0.75rem;
+  font-family: SourceSansPro-Regular;
+}
+
+.ceek-nav-navbar li.ceek-nav-item > a,
+.ceek-nav-navbar li.ceek-nav-item > a:active,
+.ceek-nav-navbar li.ceek-nav-item > a:focus,
+.ceek-nav-navbar li.ceek-nav-item > a:hover {
+  color: #fff;
+}

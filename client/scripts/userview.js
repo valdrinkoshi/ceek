@@ -144,7 +144,7 @@ var UserView = React.createClass({
     var _this = this;
     if (!this.props.userData) {
       if (Parse.User.current()) {
-        Services.GetProfile().then(function (response) {
+        this.props.getProfileData().then(function (response) {
           _this.setState({
             formDef: response.formDef,
             profileData: response.userProfileData

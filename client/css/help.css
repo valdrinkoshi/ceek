@@ -1,0 +1,59 @@
+header {
+  height: 4rem;
+}
+
+@media (min-width: 1200px) {
+  .help {
+    width: 940px;
+  }
+}
+
+body {
+  background-color: #fafafa;
+}
+
+.help {
+  margin: 0 auto;
+}
+
+.help-main-title {
+  margin-bottom: 2.875rem;
+  text-align: center;
+  color: #4B4C4C;
+  font-size: 1.875rem;
+  font-family: SourceSansPro-Regular;
+}
+
+.help-faq-section {
+  margin-bottom: 1.875rem;
+  color: #4B4C4C;
+}
+
+.help-faq-section-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+}
+
+.help-faq-question,
+.help-faq-answer {
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+}
+
+.help-faq-answer {
+  font-family: SourceSansPro-light;
+}
+
+.help-faq-more-questions-box {
+  margin-bottom: 6.25rem;
+  text-align: center;
+}
+
+.contact {
+  margin-top: 1.25rem;
+}
+
+.help-faq-more-questions-question {
+  color: #333333;
+  font-size: 1.25rem;
+}

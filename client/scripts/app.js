@@ -12,7 +12,7 @@ var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
     return {
-      loggedIn: Parse.User.current() != null,
+      loggedIn: Parse.User.current() != null
     };
   },
   handleSelect: function (selectedKey) {
@@ -23,17 +23,16 @@ var App = React.createClass({
     }
   },
 
+  userProfileDataPromise: null,
   userProfileData: null,
+  likesPromise: null,
+  likesData: null,
 
   getProfileData() {
     if (this.userProfileData) {
       return jQuery.Deferred().resolve(this.userProfileData);
     }
-    var _this = this;
-    return Services.GetProfile().then(function (data) {
-      _this.userProfileData = data;
-      return _this.userProfileData;
-    });
+    return this.userProfileDataPromise;
   },
 
   setProfileData(data, stepId) {
@@ -45,19 +44,37 @@ var App = React.createClass({
   },
 
   getLikesData() {
-    
+    if (this.likesData) {
+      return jQuery.Deferred().resolve(this.likesData);
+    }
+    return this.likesPromise;
+  },
+
+  setNavItems(navItems) {
+    this.setState({
+      navItems: navItems
+    });
+  },
+
+  componentWillMount() {
+    var _this = this;
+    this.userProfileDataPromise = Services.GetProfile().then(function (data) {
+      _this.userProfileData = data;
+      return _this.userProfileData;
+    });
+    this.likesPromise = Services.GetLikes().then(function (data) {
+      _this.likesData = data;
+      return _this.likesData;
+    });
   },
 
   render () {
     var navbarContent = null;
-    if (this.state.loggedIn) {
-      navbarContent = (<div><CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} /></div>);
-    }
     return (
       <div className="application">
         <CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} />
         <div className='container'>
-          <RouteHandler getProfileData={this.getProfileData} setProfileData={this.setProfileData}/>
+          <RouteHandler getProfileData={this.getProfileData} setProfileData={this.setProfileData} getLikesData={this.getLikesData} setNavItems={this.setNavItems}/>
         </div>
       </div>
     )

@@ -96,7 +96,7 @@ var UserMatches = React.createClass({
   },
   componentWillMount () {
     var _this = this;
-    Services.GetLikes().then(function (response) {
+    this.props.getLikesData().then(function (response) {
       _this.setState({
         likes: response.likes,
         otherLikes: response.otherLikes,

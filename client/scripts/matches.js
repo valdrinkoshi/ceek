@@ -63,7 +63,7 @@ var CompanyMatchesCard = React.createClass({
         <a className='base-card-details-link' onClick={this.toggleUserDetail}>View profile details</a>
         <Modal className='user-card-dialog' show={this.state.showUserDetail}>
           <Modal.Header>User</Modal.Header>
-          <Modal.Body><UserView userData={userInfo} showStatusButton={false} /></Modal.Body>
+          <Modal.Body><UserView userProfileData={userInfo} showStatusButton={false} /></Modal.Body>
           <Modal.Footer><Button onClick={this.toggleUserDetail}>Close</Button></Modal.Footer>
         </Modal>
       </BaseCard>

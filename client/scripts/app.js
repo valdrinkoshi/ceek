@@ -12,7 +12,9 @@ var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
     return {
-      loggedIn: Parse.User.current() != null
+      loggedIn: Parse.User.current() != null,
+      userProfileData: {},
+      formDef: null
     };
   },
   handleSelect: function (selectedKey) {
@@ -22,11 +24,6 @@ var App = React.createClass({
       this.transitionTo("/");
     }
   },
-
-  userProfileDataPromise: null,
-  userProfileData: null,
-  likesPromise: null,
-  likesData: null,
 
   getProfileData() {
     if (this.userProfileData) {
@@ -38,8 +35,7 @@ var App = React.createClass({
   setProfileData(data, stepId) {
     var _this = this;
     return Services.PostProfile(data, stepId).then(function (data) {
-      _this.userProfileData.userProfileData = data.userProfileData;
-      return _this.userProfileData;
+      return _this.setState({userProfileData: data.userProfileData});
     });
   },
 
@@ -50,21 +46,24 @@ var App = React.createClass({
     return this.likesPromise;
   },
 
-  setNavItems(navItems) {
-    this.setState({
-      navItems: navItems
+  changeMarketStatus() {
+    var _this = this;
+    var newMarketStatus = !this.state.userProfileData.onMarket;
+    Services.PostProfile(JSON.stringify({onMarket: newMarketStatus}), 'static').then(function (response) {
+      _this.setState({userProfileData: response.userProfileData});
     });
   },
 
   componentWillMount() {
     var _this = this;
-    this.userProfileDataPromise = Services.GetProfile().then(function (data) {
-      _this.userProfileData = data;
-      return _this.userProfileData;
-    });
-    this.likesPromise = Services.GetLikes().then(function (data) {
-      _this.likesData = data;
-      return _this.likesData;
+    var userProfileDataPromise = Services.GetProfile();
+    var likesPromise = Services.GetLikes();
+    jQuery.when(userProfileDataPromise, likesPromise).then(function (userProfileData, likesData) {
+      _this.setState({
+        userProfileData: userProfileData.userProfileData,
+        formDef: userProfileData.formDef,
+        likesData: likesData
+      });
     });
   },
 
@@ -72,9 +71,9 @@ var App = React.createClass({
     var navbarContent = null;
     return (
       <div className="application">
-        <CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} />
+        <CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} changeMarketStatus={this.changeMarketStatus} statusOnMarket={this.state.userProfileData.onMarket} />
         <div className='container'>
-          <RouteHandler getProfileData={this.getProfileData} setProfileData={this.setProfileData} getLikesData={this.getLikesData} setNavItems={this.setNavItems}/>
+          <RouteHandler userProfileData={this.state.userProfileData} formDef={this.state.formDef} setProfileData={this.setProfileData} likesData={this.state.likesData} changeMarketStatus={this.changeMarketStatus} />
         </div>
       </div>
     )

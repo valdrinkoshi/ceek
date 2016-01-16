@@ -60,7 +60,7 @@ var UserMatchesCard = React.createClass({
     var rejectionConfirmationHeader = <div className='base-card-custom-content'>Not interested in {userMatchesCardJob}?</div>;
     var rejectionConfirmationContent = <div>Please share with us the reason(s) for passing this position. Your feedback helps us to find better matches for you soon.</div>;
     return (
-      <BaseCard className='user-matches-card' rejectionConfirmationHeader={rejectionConfirmationHeader} rejectionConfirmationContent={rejectionConfirmationContent} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this position' likeInfo={likeInfo} requestText='Accept request' onLike={this.like.bind(this, likeInfo.id, true)} onReject={this.like.bind(this, likeInfo.id, false)}>
+      <BaseCard className='user-matches-card' rejectionConfirmationHeader={rejectionConfirmationHeader} rejectionConfirmationContent={rejectionConfirmationContent} rejectionReasonFormConfig={this.props.rejectionFormConfig} rejectionDialogConfirmationText='Pass this position' likeInfo={likeInfo} requestText='Accept request' onLike={this.like.bind(this, likeInfo.id, true, {})} onReject={this.like.bind(this, likeInfo.id, false)}>
         {expirationInfo}
         <div className='base-card-title'>
           {userMatchesCardJob}
@@ -94,15 +94,38 @@ var UserMatches = React.createClass({
       otherLikes: []
     };
   },
-  componentWillMount () {
-    var _this = this;
-    this.props.getLikesData().then(function (response) {
-      _this.setState({
-        likes: response.likes,
-        otherLikes: response.otherLikes,
-        rejectionFormConfig: response.formConfig
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.likesData) {
+      var likesData = nextProps.likesData;
+      this.setState({
+        likes: likesData.likes,
+        otherLikes: likesData.otherLikes,
+        rejectionFormConfig: likesData.formConfig
       });
-    });
+    }
+  },
+
+  componentWillMount () {
+    if (this.props.likesData) {
+      var likesData = this.props.likesData;
+      this.setState({
+        likes: likesData.likes,
+        otherLikes: likesData.otherLikes,
+        rejectionFormConfig: likesData.formConfig
+      });
+    }
+  },
+
+  componentWillMount () {
+    if (this.props.likesData) {
+      var likesData = this.props.likesData;
+      this.setState({
+        likes: likesData.likes,
+        otherLikes: likesData.otherLikes,
+        rejectionFormConfig: likesData.formConfig
+      });
+    }
   },
 
   render() {

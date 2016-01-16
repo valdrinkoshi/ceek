@@ -1,3 +1,5 @@
+var classNames = require('classnames');
+
 /*CeekNav*/
 var CeekNav = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
@@ -18,6 +20,10 @@ var CeekNav = React.createClass({
     if (selectedKey === 3) {
       Parse.User.logOut();
     }
+    if (selectedKey === 99) {
+      this.props.changeMarketStatus();
+      return;
+    }
     this.transitionTo(href);
     if (typeof this.props.onSelect === 'function') {
       this.props.onSelect(selectedKey, href);
@@ -35,13 +41,25 @@ var CeekNav = React.createClass({
     var selectedItem = this.state.selectedItem;
     var navigationItems = this.props.items.map(function (item, i) {
       return (
-        <NavItem className='ceek-nav-item text-uppercase' href={item.href} eventKey={i} >{item.text}</NavItem>
+        <NavItem key={i} className='ceek-nav-item text-uppercase' href={item.href} eventKey={i} >{item.text}</NavItem>
       );
     }, this);
+    var statusButtonText = 'start job matching';
+    if (this.props.statusOnMarket) {
+      statusButtonText = 'take me off the market';
+    }
+    var marketStatusButtonClasses = classNames({
+      'ceek-nav-item': true,
+      'text-uppercase': true,
+      'market-status-nav-item': true,
+      'market-status-off-market': !this.props.statusOnMarket
+    });
+    var marketStatusButton = <NavItem className={marketStatusButtonClasses} eventKey={99}>{statusButtonText}</NavItem>
     return (
       <Navbar className= 'ceek-nav-navbar' brand={ceekLogo} activeKey={selectedItem}>
         <Nav navbar right onSelect={this.handleSelect}>
           {navigationItems}
+          {marketStatusButton}
         </Nav>
       </Navbar>
     );

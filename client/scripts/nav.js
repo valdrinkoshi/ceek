@@ -17,8 +17,9 @@ var CeekNav = React.createClass({
   },
 
   handleSelect (selectedKey, href) {
-    if (selectedKey === 3) {
-      Parse.User.logOut();
+    if (selectedKey === 100) {
+      this.props.logout();
+      return;
     }
     if (selectedKey === 99) {
       this.props.changeMarketStatus();
@@ -54,12 +55,18 @@ var CeekNav = React.createClass({
       'market-status-nav-item': true,
       'market-status-off-market': !this.props.statusOnMarket
     });
-    var marketStatusButton = <NavItem className={marketStatusButtonClasses} eventKey={99}>{statusButtonText}</NavItem>
+    var marketStatusButton = <NavItem className={marketStatusButtonClasses} eventKey={99}>{statusButtonText}</NavItem>;
+    var logoutButton = <NavItem className='ceek-nav-item text-uppercase' href='/' eventKey={100}>logout</NavItem>
+    if (!this.props.loggedIn) {
+      marketStatusButton = undefined;
+      logoutButton = undefined;
+    }
     return (
       <Navbar className= 'ceek-nav-navbar' brand={ceekLogo} activeKey={selectedItem}>
         <Nav navbar right onSelect={this.handleSelect}>
           {navigationItems}
           {marketStatusButton}
+          {logoutButton}
         </Nav>
       </Navbar>
     );

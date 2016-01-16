@@ -12,17 +12,25 @@ var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
     return {
-      loggedIn: Parse.User.current() != null,
+      loggedIn: this.isLoggedIn(),
       userProfileData: {},
       formDef: null
     };
   },
-  handleSelect: function (selectedKey) {
-    console.log(selectedKey);
-    if (selectedKey === 3) {
-      Parse.User.logOut();
-      this.transitionTo("/");
-    }
+
+  isLoggedIn: function () {
+     return Parse.User.current() != null;
+  },
+
+  logout: function (selectedKey) {
+    Parse.User.logOut();
+    this.transitionTo("/");
+    this.setState({
+      loggedIn: this.isLoggedIn(),
+      userProfileData: {},
+      formDef: null,
+      likesData: null
+    });
   },
 
   getProfileData() {
@@ -55,23 +63,28 @@ var App = React.createClass({
   },
 
   componentWillMount() {
-    var _this = this;
-    var userProfileDataPromise = Services.GetProfile();
-    var likesPromise = Services.GetLikes();
-    jQuery.when(userProfileDataPromise, likesPromise).then(function (userProfileData, likesData) {
-      _this.setState({
-        userProfileData: userProfileData.userProfileData,
-        formDef: userProfileData.formDef,
-        likesData: likesData
+    if (Parse.User.current()) {
+      var _this = this;
+      var userProfileDataPromise = Services.GetProfile();
+      var likesPromise = Services.GetLikes();
+      jQuery.when(userProfileDataPromise, likesPromise).then(function (userProfileData, likesData) {
+        _this.setState({
+          userProfileData: userProfileData.userProfileData,
+          formDef: userProfileData.formDef,
+          likesData: likesData
+        });
       });
-    });
+    }
   },
 
   render () {
-    var navbarContent = null;
+    var navbarItems = [{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}];
+    if (!this.state.loggedIn) {
+      navbarItems = [];
+    }
     return (
       <div className="application">
-        <CeekNav brand='Ceek' items={[{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}]} changeMarketStatus={this.changeMarketStatus} statusOnMarket={this.state.userProfileData.onMarket} />
+        <CeekNav brand='Ceek' items={navbarItems} changeMarketStatus={this.changeMarketStatus} statusOnMarket={this.state.userProfileData.onMarket} loggedIn={this.state.loggedIn} logout={this.logout} />
         <div className='container'>
           <RouteHandler userProfileData={this.state.userProfileData} formDef={this.state.formDef} setProfileData={this.setProfileData} likesData={this.state.likesData} changeMarketStatus={this.changeMarketStatus} />
         </div>

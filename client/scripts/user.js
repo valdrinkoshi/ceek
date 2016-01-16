@@ -21,9 +21,7 @@ var User = React.createClass({
   },
 
   componentWillMount() {
-    if (this.props.formDef) {
-      this.setFormDef(this.props.formDef, this.props.userProfileData);
-    }
+    this.setFormDef(this.props.formDef, this.props.userProfileData);
   },
 
   componentWillReceiveProps(nextProps) {
@@ -36,6 +34,9 @@ var User = React.createClass({
   },
 
   setFormDef (formDef, userProfileData) {
+    if (!formDef) {
+      return;
+    }
     var formDefs = [];
     var formOptions = [];
     //by default, the active key is the last object

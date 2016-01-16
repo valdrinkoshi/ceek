@@ -1,42 +1,92 @@
 var React = require('react');
 var ReactRouter = require('react-router');
+var CeekNav = require('CeekNav');
 var SignUp = require('SignUp');
 var User = require('User');
 var UserView = require('UserView');
 var UserMatches = require('UserMatches').UserMatches;
 
+var Services = require('./Services.js');
+
 var App = React.createClass({
   mixins: [ReactRouter.State, ReactRouter.Navigation],
   getInitialState: function() {
     return {
-      loggedIn: Parse.User.current() != null,
+      loggedIn: this.isLoggedIn(),
+      userProfileData: {},
+      formDef: null
     };
   },
-  handleSelect: function (selectedKey) {
-    console.log(selectedKey);
-    if (selectedKey === 3) {
-      Parse.User.logOut();
-      this.transitionTo("/");
+
+  isLoggedIn: function () {
+     return Parse.User.current() != null;
+  },
+
+  logout: function (selectedKey) {
+    Parse.User.logOut();
+    this.transitionTo("/");
+    this.setState({
+      loggedIn: this.isLoggedIn(),
+      userProfileData: {},
+      formDef: null,
+      likesData: null
+    });
+  },
+
+  getProfileData() {
+    if (this.userProfileData) {
+      return jQuery.Deferred().resolve(this.userProfileData);
+    }
+    return this.userProfileDataPromise;
+  },
+
+  setProfileData(data, stepId) {
+    var _this = this;
+    return Services.PostProfile(data, stepId).then(function (data) {
+      return _this.setState({userProfileData: data.userProfileData});
+    });
+  },
+
+  getLikesData() {
+    if (this.likesData) {
+      return jQuery.Deferred().resolve(this.likesData);
+    }
+    return this.likesPromise;
+  },
+
+  changeMarketStatus() {
+    var _this = this;
+    var newMarketStatus = !this.state.userProfileData.onMarket;
+    Services.PostProfile(JSON.stringify({onMarket: newMarketStatus}), 'static').then(function (response) {
+      _this.setState({userProfileData: response.userProfileData});
+    });
+  },
+
+  componentWillMount() {
+    if (Parse.User.current()) {
+      var _this = this;
+      var userProfileDataPromise = Services.GetProfile();
+      var likesPromise = Services.GetLikes();
+      jQuery.when(userProfileDataPromise, likesPromise).then(function (userProfileData, likesData) {
+        _this.setState({
+          userProfileData: userProfileData.userProfileData,
+          formDef: userProfileData.formDef,
+          likesData: likesData
+        });
+      });
     }
   },
+
   render () {
-    var navbarContent = null;
-    if (this.state.loggedIn) {
-      navbarContent = (<div><Nav navbar onSelect={this.handleSelect}>
-            <NavItem eventKey={1} >Link</NavItem>
-            <NavItem eventKey={2} >Link</NavItem>
-          </Nav>
-          <Nav navbar right onSelect={this.handleSelect}>
-            <NavItem eventKey={3} >Logout</NavItem>
-          </Nav></div>);
+    var navbarItems = [{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}];
+    if (!this.state.loggedIn) {
+      navbarItems = [];
     }
     return (
       <div className="application">
-        <Navbar brand='Ceek' toggleNavKey={0}>
-          {navbarContent}
-        </Navbar>
+        <CeekNav brand='Ceek' items={navbarItems} changeMarketStatus={this.changeMarketStatus} statusOnMarket={this.state.userProfileData.onMarket} loggedIn={this.state.loggedIn} logout={this.logout} />
         <div className='container'>
-          <RouteHandler/>
+          <RouteHandler userProfileData={this.state.userProfileData} formDef={this.state.formDef} setProfileData={this.setProfileData} likesData={this.state.likesData} changeMarketStatus={this.changeMarketStatus} />
         </div>
       </div>
     )

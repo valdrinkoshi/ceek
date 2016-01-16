@@ -15,22 +15,17 @@ var User = React.createClass({
       formDef: null,
       value: {},
       activeKey: 0,
-      linkedInCVStepStatus: 'danger',
-      marketStatus: 'success',
-      marketStatusText: 'On Market',
+      linkedInCVStepStatus: 'default',
       showErrorModal: false
     };
   },
 
   componentWillMount() {
-    var _this = this;
-    if (Parse.User.current()) {
-      Services.GetProfile().then(function (response) {
-        _this.setFormDef(response.formDef, response.userProfileData);
-      });
-    } else {
-      this.transitionTo("/");
-    }
+    this.setFormDef(this.props.formDef, this.props.userProfileData);
+  },
+
+  componentWillReceiveProps(nextProps) {
+    this.setFormDef(nextProps.formDef, nextProps.userProfileData);
   },
 
   getStepId(id) {
@@ -39,6 +34,9 @@ var User = React.createClass({
   },
 
   setFormDef (formDef, userProfileData) {
+    if (!formDef) {
+      return;
+    }
     var formDefs = [];
     var formOptions = [];
     //by default, the active key is the last object
@@ -72,6 +70,8 @@ var User = React.createClass({
     if (userProfileData.linkedInCVFileUrl) {
       //newState.activeKey = 1;
       newState.linkedInCVStepStatus = 'success';
+    } else {
+      newState.activeKey = 0;
     }
     this.setState(newState);
   },
@@ -126,24 +126,9 @@ var User = React.createClass({
       });
     }
   },
+
   handlePanelSelect(activeKey) {
     this.setState({activeKey: activeKey});
-  },
-
-  getStatusState (onMarket) {
-    var newState = {
-      marketStatus: 'danger',
-      marketStatusText: 'Off Market'
-    };
-    if (onMarket) {
-      newState.marketStatus = 'success';
-      newState.marketStatusText = 'On Market'
-    }
-    return newState;
-  },
-
-  changeMarketStatus(newStatus) {
-    this.setState(this.getStatusState(newStatus === 'on'));
   },
 
   save(stepId) {
@@ -156,21 +141,7 @@ var User = React.createClass({
       var _this = this;
       var stepIndex = parseInt(stepId.replace('step', ''));
       var newState = jQuery.extend(true, {}, _this.state);
-      Services.PostProfile(JSON.stringify(value), stepId).then(function (data) {
-        newState.formDef[stepIndex].status = 'success';
-        newState.activeKey = stepIndex + 2;
-        var formDef = _this.state.formDef || [];
-        for (var i = stepIndex+1; i < formDef.length; i++) {
-          if (formDef[i].status === 'success') {
-            newState.activeKey = i + 2;
-          } else {
-            break;
-          }
-        }
-        newState.value = data.userProfileData;
-        _this.setState(newState);
-        console.log(data);
-      },
+      this.props.setProfileData(JSON.stringify(value), stepId).then(null,
       function (error) {
         newState.formDef[stepIndex].status = 'danger';
       });
@@ -209,9 +180,11 @@ var User = React.createClass({
   render() {
     var output;
     var viewProfileButton = <button className='ceek-button text-uppercase' onClick={this.goToProfileView}>view profile</button>;
-    if (this.state.formDef) {
+    var formDef = this.state.formDef;
+    var formValue = this.state.value;
+    if (formDef) {
       var _this = this;
-      var steps = this.state.formDef.map(function (formDef, index) {
+      var steps = formDef.map(function (formDef, index) {
         var stepId = _this.getStepId(index);
         var evtKey = index+1;
         var header = _this.getHeader(formDef.stepTitle, formDef.status);
@@ -224,7 +197,7 @@ var User = React.createClass({
               ref={stepId}
               type={formDef.def}
               options={_this.state.options[index]}
-              value={_this.state.value}
+              value={formValue}
             />
             <button className='ceek-button text-uppercase' onClick={_this.save.bind(_this, stepId)}>Save</button>
           </Panel>
@@ -237,7 +210,7 @@ var User = React.createClass({
             <Modal.Body>Please correct the marked field(s)</Modal.Body>
             <Modal.Footer><Button onClick={this.closeErrorModal}>Close</Button></Modal.Footer>
           </Modal>
-          <UserProfileHeader newPictureUploaded={this.uploadNewProfilePic} pictureUrl={this.state.value.pictureUrl} firstName={this.state.value.firstName} lastName={this.state.value.lastName} emailAddress={this.state.value.emailAddress} marketStatus={this.state.marketStatus} marketStatusText={this.state.marketStatusText} />
+          <UserProfileHeader newPictureUploaded={this.uploadNewProfilePic} pictureUrl={formValue.pictureUrl} firstName={formValue.firstName} lastName={formValue.lastName} emailAddress={formValue.emailAddress} />
           <PanelGroup className={this.getCustomPanelClasses(0)} onSelect={this.handlePanelSelect} activeKey={this.state.activeKey} accordion>
             <Panel collapsible eventKey={0} header={this.getHeader('LinkedIn Profile PDF', this.state.linkedInCVStepStatus)}>
               <span className='steps-subtletext'>Import your LinkedIn profile, and we’ll help fill in your summary, work history, education and skills.</span>

@@ -1,0 +1,41 @@
+.ceek-nav-navbar {
+  background-color: #2B2B2B
+}
+
+.ceek-nav-navbar .ceek-nav-item {
+  font-size: 0.75rem;
+  font-family: SourceSansPro-Regular;
+}
+
+.ceek-nav-navbar li.ceek-nav-item > a,
+.ceek-nav-navbar li.ceek-nav-item > a:active,
+.ceek-nav-navbar li.ceek-nav-item > a:focus,
+.ceek-nav-navbar li.ceek-nav-item > a:hover {
+  color: #fff;
+}
+
+.ceek-nav-navbar li.market-status-nav-item {
+  /*
+    in order to match the spacing of the rest of the nav items which have 15px margin top and bottom. This is 15px - 0.375rem (-> the padding-top/bottom of the li.market-status-nav-item > a)
+  */
+  padding-top: 0.5625rem; 
+  padding-bottom: 0.5625rem;
+}
+
+.ceek-nav-navbar li.market-status-nav-item > a,
+.ceek-nav-navbar li.market-status-nav-item > a:active,
+.ceek-nav-navbar li.market-status-nav-item > a:focus,
+.ceek-nav-navbar li.market-status-nav-item > a:hover {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.125rem;
+  background-color: #f1efef;
+  color: #656262;
+}
+
+.ceek-nav-navbar li.market-status-nav-item.market-status-off-market > a,
+.ceek-nav-navbar li.market-status-nav-item.market-status-off-market > a:active,
+.ceek-nav-navbar li.market-status-nav-item.market-status-off-market > a:focus,
+.ceek-nav-navbar li.market-status-nav-item.market-status-off-market > a:hover {
+  background-color: #fc7070;
+  color: #fbfbfb;
+}

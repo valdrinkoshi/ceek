@@ -130,35 +130,19 @@ var UserView = React.createClass({
     };
   },
 
-  changeMarketStatus() {
-    var _this = this;
-    var newState = !this.state.profileData.onMarket;
-    Services.PostProfile(JSON.stringify({onMarket: newState}), 'static').then(function (response) {
-      _this.setState({
-        profileData: response.userProfileData
-      });
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      formDef: nextProps.formDef,
+      profileData: nextProps.userProfileData
     });
   },
 
   componentDidMount() {
     var _this = this;
-    if (!this.props.userData) {
-      if (Parse.User.current()) {
-        Services.GetProfile().then(function (response) {
-          _this.setState({
-            formDef: response.formDef,
-            profileData: response.userProfileData
-          });
-        });
-      } else {
-        this.transitionTo("/");
-      }
-    } else {
-      this.setState({
-        formDef: {},
-        profileData: this.props.userData
-      });
-    }
+    this.setState({
+      formDef: this.props.formDef,
+      profileData: this.props.userProfileData
+    });
   },
 
   computeWorkStyle(data) {
@@ -380,7 +364,7 @@ var UserView = React.createClass({
 
       output =
         <div>
-          <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} statusOnMarket={data.onMarket} changeMarketStatus={this.changeMarketStatus} showStatusButton={this.props.showStatusButton} />
+          <UserProfileHeader pictureUrl={data.pictureUrl} firstName={data.firstName} lastName={data.lastName} emailAddress={data.emailAddress} statusOnMarket={data.onMarket} changeMarketStatus={this.props.changeMarketStatus} showStatusButton={this.props.showStatusButton} />
           <ProfileSection title='Job Preferences'>
             <ProfileProperty name='Preferred working locations' i18nPrefix='locationPreference.'>{data.locationPreference}</ProfileProperty>
             <ProfileProperty name='Ideal roles'>{data.roleType}</ProfileProperty>

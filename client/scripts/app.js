@@ -62,6 +62,7 @@ var App = React.createClass({
         userProfileData: data.userProfileData,
         showBusyIndicator: false
       });
+      clearTimeout(_this.busyIndicatorTimeout);
     });
   },
 

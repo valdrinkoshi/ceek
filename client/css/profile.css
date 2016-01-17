@@ -50,7 +50,9 @@ body {
   font-family: SourceSansPro-Regular;
 }
 
-.step-panel-header-title > a:hover {
+.step-panel-header-container > a:focus,
+.step-panel-header-container > a:active,
+.step-panel-header-container > a:hover {
   text-decoration: none;
 }
 
@@ -82,7 +84,8 @@ body {
   background-color: #eee;
   max-width: 900px;
   padding: 1rem;
-  margin-bottom: 1rem;
+  width: 100%;
+  margin: 0 0 1rem 0;
 }
 
 .row.list-form-row textarea {
@@ -119,6 +122,10 @@ fieldset > legend {
   border-radius: 2rem;
 }
 
+.form-list-layout {
+  margin-top: 1.5rem;
+}
+
 /*upload linkedin step*/
 .steps-subtletext {
   color: #999;
@@ -145,6 +152,7 @@ fieldset > legend {
 .upload-step-img {
   height: 10rem;
   width: 23.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .upload-li-pdf {

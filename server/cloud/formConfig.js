@@ -43,12 +43,13 @@ var formDef = [
           }
         }
       },
-      "expectedSalary": {"meta": {"kind": "irreducible", "name": "Str", "options": {"template": ["forceCustomClass", "form-input-small"], "config": {"addonBefore": "$", "addonAfter": "/year"}}}},
+      "expectedSalary": {"meta": {"kind": "irreducible", "name": "Num", "options": {"template": ["forceCustomClass", "form-input-small"], "config": {"addonBefore": "$", "addonAfter": "/year"}}}},
       "workAuthorization": {
         "meta": {
           "options": {"attrs": {"className": "form-input-small"}},
           "kind": "enums",
           "props": {
+            "F1": "F1",
             "L1": "L1",
             "H1B": "H1B",
             "GC": "Green Card",
@@ -140,7 +141,7 @@ var formDef = [
   }
 },
 {
-  "stepTitle": "Portfolio",
+  "stepTitle": "Sample Project",
   "meta": {
     "kind": "struct",
     "props": {
@@ -171,10 +172,11 @@ var formDef = [
           "type": {
             "meta": {
               "kind": "list",
-              "options": {"disableOrder": true, "label": "contribution"},
+              "options": {"disableOrder": true, "label": "contribution", "template": ["getListLayout"]},
               "type": {
                 "meta": {
                   "kind": "struct",
+                  "options": {"template": ["getMultiColumnsLayout", 2]},
                   "props": {
                     "process": {
                       "meta": {
@@ -202,7 +204,7 @@ var formDef = [
   }
 },
 {
-  "stepTitle": "Questionnaire",
+  "stepTitle": "Test Your Work Style",
   "meta": {
     "kind": "struct",
     "options": {"template": ["getCarouselLayout"]},

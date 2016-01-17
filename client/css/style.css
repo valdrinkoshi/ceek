@@ -169,6 +169,7 @@ How it works
   float: left;
   margin: 0 3.125rem 0 3.125rem; /*right+left margin will be 6.25rem as desired*/
   font-family: SourceSansPro-Light;
+  text-align: center;
 }
 
 .stepicon {
@@ -254,7 +255,7 @@ Footer
 
 footer {
   background-color: #2b2b2b;
-  padding: 3.75rem 0 3.75rem 0;
+  padding: 3.75rem 3.3125rem 3.75rem 3.3125rem;
 }
 
 .footer-navlink {
@@ -267,6 +268,7 @@ footer {
   width: 30px;
   height: 30px;
   margin: 0 0.625rem 0 0.625rem;
+  float: right;
 }
 
 .icon-social-fb {

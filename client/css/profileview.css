@@ -73,3 +73,8 @@ h4 {
   border: 0.0625rem solid #ccc;
   border-radius: 0.125rem;
 }
+
+.work-style-detail {
+  margin-top: 0.5rem;
+  display: inline-block;
+}

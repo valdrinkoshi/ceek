@@ -35,7 +35,7 @@ var UserProfileHeader = React.createClass({
     if (this.props.showStatusButton) {
       var statusButtonText = 'start job matching';
       if (this.props.statusOnMarket) {
-        statusButtonText = 'take me off the market';
+        statusButtonText = 'stop job matching';
       }
       statusButton = (
       <button className='ceek-button profile-header-mkt-status-btn text-uppercase' onClick={this.props.changeMarketStatus}>

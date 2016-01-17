@@ -90,15 +90,10 @@ var User = React.createClass({
     var file = React.findDOMNode(this.refs.fileToUpload).files[0];
     var uploadFilePromise = this.uploadFile(file);
     if (uploadFilePromise) {
+      this.props.toggleBusyIndicator();
       uploadFilePromise.then(function(parseFile) {
-        Services.ParseLICV(parseFile.url()).then(function (response) {
-          console.log(response);
-          _this.setState({
-            activeKey: 1,
-            linkedInCVStepStatus: 'success',
-            value: response
-          });
-        }, function () {
+        _this.props.toggleBusyIndicator();
+        _this.props.parseLICV(parseFile).then(null, function () {
           _this.setState({
             linkedInCVStepStatus: 'danger'
           });
@@ -110,16 +105,13 @@ var User = React.createClass({
   uploadNewProfilePic (file) {
     event.preventDefault();
     var _this = this;
+    this.props.toggleBusyIndicator();
     var uploadFilePromise = this.uploadFile(file);
     if (uploadFilePromise) {
       uploadFilePromise.then(function(parseFile) {
         var data = {pictureUrl: parseFile.url()};
-        Services.PostProfile(JSON.stringify(data), 'static').then(function (data) {
-          _this.setState({
-            value: data.userProfileData
-          });
-          console.log(data);
-        },
+        _this.props.toggleBusyIndicator();
+        _this.props.setProfileData(JSON.stringify(data), 'static').then(null,
         function (error) {
           newState.formDef[stepIndex].status = 'danger';
         });

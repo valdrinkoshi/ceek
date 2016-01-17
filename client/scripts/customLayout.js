@@ -186,7 +186,7 @@ var getListLayout = function(){
       );
     });
     return (
-      <fieldset>
+      <fieldset className='form-list-layout'>
         <legend>{locals.label}</legend>
         {items}
         {getAddButton(locals.add.click)}

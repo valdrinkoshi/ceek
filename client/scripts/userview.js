@@ -338,10 +338,10 @@ var UserView = React.createClass({
         }
         questionnaire = (
           <div className='row'>
-            <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
-              <Doughnut data={data.workStyleChartData} redraw />
+            <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3'>
+              <Doughnut width='150px' data={data.workStyleChartData} redraw />
             </div>
-            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-8 col-lg-8'>
+            <div className='work-style-desc-box col-xs-12 col-sm-12 col-md-9 col-lg-9'>
               <ProfileProperty name={workStyleTitle} inline={false}>
                 <div>{workStyleDescription}.</div>
                 <div>

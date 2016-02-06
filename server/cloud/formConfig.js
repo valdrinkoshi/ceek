@@ -211,7 +211,7 @@ var formDef = [
     "props": {
       "questionnaire_question1": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question1", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question1", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Insightful & big picture oriented",
@@ -223,7 +223,7 @@ var formDef = [
       },
       "questionnaire_question2": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question2", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question2", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Probing",
@@ -235,7 +235,7 @@ var formDef = [
       },
       "questionnaire_question3": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question3", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question3", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Efficient",
@@ -247,7 +247,7 @@ var formDef = [
       },
       "questionnaire_question4": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question4", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question4", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Skill",
@@ -259,7 +259,7 @@ var formDef = [
       },
       "questionnaire_question5": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question5", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question5", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Provide written proof",
@@ -271,7 +271,7 @@ var formDef = [
       },
       "questionnaire_question6": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question6", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question6", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Spontaneous",
@@ -283,7 +283,7 @@ var formDef = [
       },
       "questionnaire_question7": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question6", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question6", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Do the work myself",
@@ -295,7 +295,7 @@ var formDef = [
       },
       "questionnaire_question8": {
         "meta": {
-          "options": {"attrs": {"className": "form-input-small"}, "label": "questionnaire.question8", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question8", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Craftmanship",
@@ -308,7 +308,7 @@ var formDef = [
     }
   }
 }
-];  
+];
 
 module.exports = {
   formDefinition: formDef

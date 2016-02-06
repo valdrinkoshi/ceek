@@ -68,7 +68,6 @@ body {
   background-color: #72D0F5;
   border: none;
   color: white;
-  
 }
 
 .form-textarea-small {
@@ -187,4 +186,10 @@ fieldset > legend {
     cursor: pointer;
     opacity: 0;
     filter: alpha(opacity=0);
+}
+
+button.ceek-button-view-profile {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

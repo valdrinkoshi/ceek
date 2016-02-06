@@ -171,7 +171,7 @@ var User = React.createClass({
 
   render() {
     var output;
-    var viewProfileButton = <button className='ceek-button text-uppercase' onClick={this.goToProfileView}>view profile</button>;
+    var viewProfileButton = <button className='ceek-button ceek-button-view-profile text-uppercase' onClick={this.goToProfileView}>view profile</button>;
     var formDef = this.state.formDef;
     var formValue = this.state.value;
     if (formDef) {
@@ -197,7 +197,7 @@ var User = React.createClass({
       });
       output =
         <div>
-          <Modal show={this.state.showErrorModal}>
+          <Modal show={this.state.showErrorModal} onHide={jQuery.noop}>
             <Modal.Header bsStyle='danger'>Error</Modal.Header>
             <Modal.Body>Please correct the marked field(s)</Modal.Body>
             <Modal.Footer><Button onClick={this.closeErrorModal}>Close</Button></Modal.Footer>

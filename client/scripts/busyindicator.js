@@ -10,7 +10,7 @@ var BusyIndicator = React.createClass({
 
   render() {
     return (
-      <Modal show={this.props.show}>
+      <Modal show={this.props.show} onHide={jQuery.noop}>
         <Modal.Body>Loading&hellip;</Modal.Body>
       </Modal>
     );

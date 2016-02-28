@@ -31,6 +31,7 @@
   "dependencies": {
     "bootstrap": "^3.3.6",
     "classnames": "^2.2.1",
+    "jasmine-node": "^1.14.5",
     "jquery": "^2.1.4",
     "parse-react": "^0.4.2",
     "react": "^0.13.3",

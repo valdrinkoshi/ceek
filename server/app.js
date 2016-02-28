@@ -39,7 +39,7 @@ var linkedInRedirectEndpoint = linkedInBaseUrl + '/uas/oauth2/authorization?';
 var linkedInValidateEndpoint = linkedInBaseUrl + '/uas/oauth2/accessToken';
 var linkedInUserEndpoint = linkedInBaseUrl + '/v1/people/~:(first-name,summary,specialties,positions,last-name,headline,location,industry,id,num-connections,picture-url,email-address,public-profile-url)?format=json';
 
-var ceekOAuth2RedirecUri = 'https://ceekdev01.parseapp.com/oauthCallback';
+var ceekOAuth2RedirecUri = 'https://www.ceek.cc/oauthCallback';
 var herokuMuleBaseUrl = 'https://boiling-stream-7630.herokuapp.com';
 var herokuMuleUploadLICVService = herokuMuleBaseUrl + '/uploadLICV';
 

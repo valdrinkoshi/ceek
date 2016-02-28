@@ -1,8 +1,9 @@
-var fs = require('fs');
+var extend = require('util')._extend;
 
 var parseCV = function (jsonCV) {
   var pages = jsonCV[pagesKey] || [];
-  var g = extractCV([0, 19, 0, 0], [0, 16, 1, 0], pages, true);
+  var normalizedPages = normalizeTextsCV(pages);
+  var g = extractCV([[0, 19, 0, 0], [0, 20, 1, 0]], [[0, 16, 1, 0]], normalizedPages, true);
   console.log("Okp!");
   return g;
 }
@@ -13,6 +14,16 @@ var textsKey = "Texts";
 var rKey = "R";
 var tKey = "T";
 var tsKey = "TS";
+
+var compareMultipleTsWithTs = function (tss, ts) {
+  for (var i = 0; i < tss.length; i++) {
+    var currentComparisonResult = compareTs(tss[i], ts);
+    if (currentComparisonResult === true) {
+      return true;
+    }
+  }
+  return false;
+}
 
 var compareTs = function (ts1, ts2) {
   if (ts1.length !== ts2.length) {
@@ -56,7 +67,7 @@ var matchSectionTitle = function (sectionTitle) {
   if (/experience/i.test(sectionTitle)) {
     return EXPERIENCE_SECTION;
   } else if (/language/i.test(sectionTitle)) {
-    return LANGUAGES_SECTION;  
+    return LANGUAGES_SECTION;
   } else if (/project/i.test(sectionTitle)) {
     return PROJECTS_SECTION;
   } else if (/patent/i.test(sectionTitle)) {
@@ -70,6 +81,7 @@ var matchSectionTitle = function (sectionTitle) {
   } else if (/projects/i.test(sectionTitle)) {
     return PROJECTS_SECTION;
   }
+  return NONE_SECTION;
 };
 
 var serializeDate = function (month, day, year) {
@@ -78,6 +90,39 @@ var serializeDate = function (month, day, year) {
   year = year || 1970;
   return new Date([day, month, year].join(' ')).toString();
 };
+
+//normalizes lines of text, if they have the same y property, merges them into one
+var normalizeTextsCV = function (pages) {
+  var newPages = [];
+  for (var i = 0; i < pages.length; i++) {
+    var currentPage = pages[i];
+    var currentPageClone = extend({}, currentPage);
+    currentPageClone[textsKey] = [];
+    newPages.push(currentPageClone);
+    var textsClone = currentPageClone[textsKey];
+    var texts = currentPage[textsKey];
+    var lastLinePointer = 0;
+    for (var j = 0; j < texts.length; j++) {
+      var text = texts[j];
+      var r = text[rKey][0]; //TODO what to do with lines here?
+      var t = unescape(r[tKey]);
+      if (j > 0) {
+        var previousText = texts[j - 1];
+        if (text.y === previousText.y) {
+          var lastLineR = textsClone[lastLinePointer][rKey][0];
+          lastLineR[tKey] += ' ' + t;
+          //delete texts[j];
+        } else {
+          textsClone.push(text)
+          lastLinePointer = textsClone.length - 1;
+        }
+        continue;
+      }
+      textsClone.push(text);
+    }
+  }
+  return newPages;
+}
 
 //find section headers and add all texts to the same group
 var extractCV = function (sectionHeaderTs, subsectionHeaderTs, pages, textOnly) {
@@ -92,7 +137,7 @@ var extractCV = function (sectionHeaderTs, subsectionHeaderTs, pages, textOnly) 
       var t = unescape(r[tKey]);
       var ts = r[tsKey];
       var tt = textOnly ? t : r;
-      if (compareTs(ts, sectionHeaderTs)) {
+      if (compareMultipleTsWithTs(sectionHeaderTs, ts)) {
         console.log(">Group header found:", t);
         currentSection = {
           sectionHeaderT: tt,
@@ -101,7 +146,7 @@ var extractCV = function (sectionHeaderTs, subsectionHeaderTs, pages, textOnly) 
           subsections: [],
         };
         sections.push(currentSection)
-      } else if (currentSection && compareTs(ts, subsectionHeaderTs)) {
+      } else if (currentSection && compareMultipleTsWithTs(subsectionHeaderTs, ts)) {
         console.log(">Group subsection header found:", t);
         var subsection = {
           subsectionHeaderT: tt,

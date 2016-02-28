@@ -1,5 +1,5 @@
 var fs = require('fs');
-var parseJsonCV = require('./server/parseJsonCV.js');
+var parseJsonCV = require('./ceekmule/parseJsonCV.js');
 var _ = require('underscore');
 var PDFParser = require("pdf2json/pdfparser.js");
 
@@ -17,4 +17,4 @@ var PDFParser = require("pdf2json/pdfparser.js");
     console.log("err", data);
   }
 
-pdfParser.loadPDF('AlbertoCerati.pdf');
+pdfParser.loadPDF('ceekmule/spec/testfiles/LP.pdf');

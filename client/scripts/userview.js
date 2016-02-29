@@ -388,7 +388,7 @@ var UserView = React.createClass({
               {education}
             </ProfileProperty>
           </ProfileSection>
-          <ProfileSection title='Portfolio'>
+          <ProfileSection title='Sample Project'>
             <ProfileProperty name='Project link'>{data.projectLink}</ProfileProperty>
             <ProfileProperty name='Description' inline={false}>{data.projectDescription}</ProfileProperty>
             <ProfileProperty name='Motivation'>{motivationOptions[data.projectWhy]}</ProfileProperty>
@@ -397,7 +397,7 @@ var UserView = React.createClass({
               {contribution}
             </ProfileProperty>
           </ProfileSection>
-          <ProfileSection title='Questionnaire Result'>
+          <ProfileSection title='Work Style Test Result'>
             {questionnaire}
           </ProfileSection>
         </div>;

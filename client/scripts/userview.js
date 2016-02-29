@@ -66,7 +66,7 @@ var ProfileProperty = React.createClass({
     } else {
       children = this.renderValue(this.props.children);
     }
-    
+
     return (
       <div className='profile-property'>
         <label className={classNames(labelClasses)}>{this.props.name}:</label>
@@ -267,7 +267,7 @@ var UserView = React.createClass({
     }
     date = new Date(date);
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[date.getMonth()] + ' ' + date.getFullYear();
+    return months[date.getUTCMonth()] + ' ' + date.getUTCFullYear();
   },
 
   formatDateRange(date1, date2) {

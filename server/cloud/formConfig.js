@@ -127,8 +127,8 @@ var formDef = [
                   "props": {
                     "collegeName": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "education.collegeName"}}},
                     "degree": {"meta": {"kind": "irreducible", "name": "Str", "options": {"label": "education.degree"}}},
-                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
-                    "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Dat"}}}},
+                    "endDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible",  "name": "CeekDate", "options": {"transformer": ["dateTransformer"], "factory": "t.form.Datetime"}}}}},
+                    "startDate": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible",  "name": "CeekDate", "options": {"transformer": ["dateTransformer"], "factory": "t.form.Datetime"}}}}},
                     "current": {"meta": {"kind": "maybe", "type": {"meta": {"kind": "irreducible", "name": "Bool"}}}}
                   }
                 }

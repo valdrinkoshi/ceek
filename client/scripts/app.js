@@ -111,7 +111,7 @@ var App = React.createClass({
   },
 
   render () {
-    var navbarItems = [{text: 'likes', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}];
+    var navbarItems = [{text: 'matches', href: '/likes'}, {text: 'edit profile', href: '/profile'}, {text: 'view profile', href: '/profileview'}];
     if (!this.state.loggedIn) {
       navbarItems = [];
     }

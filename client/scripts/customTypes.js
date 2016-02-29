@@ -5,7 +5,7 @@ var CeekDate = t.irreducible('CeekDate', function (x) {
 });
 
 function dateToTcombDateString (date) {
-  return [date.getUTCFullYear(),  date.getUTCMonth() + 1, date.getUTCDate()];
+  return [date.getUTCFullYear(),  date.getUTCMonth(), date.getUTCDate()];
 };
 
 var dateTransformer = {

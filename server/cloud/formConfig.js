@@ -283,7 +283,7 @@ var formDef = [
       },
       "questionnaire_question7": {
         "meta": {
-          "options": {"label": "questionnaire.question6", "factory": "t.form.Radio"},
+          "options": {"label": "questionnaire.question7", "factory": "t.form.Radio"},
           "kind": "enums",
           "props": {
             "1": "Do the work myself",

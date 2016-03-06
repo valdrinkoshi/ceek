@@ -1,0 +1,9 @@
+Hi <%=candidateName%>,\n
+\n
+Great news! <%=companyName%> has sent you an interview request. If you are interested in this opportunity, please accept the interview request immediately.\n
+<%=companyName%> will contact you directly to set up the onsite interview. If you do not hear back from them within 2 weeks, please contact us at support@ceek.cc.\n
+A Tip for getting hired successfully: Once you’re engaged with the hiring company, you need to move quickly. The longer you wait, the more candidates you’re going to be competing against.\n
+Best,\n
+\n
+Ceek Team\n
+Ceek.cc

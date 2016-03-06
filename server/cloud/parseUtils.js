@@ -1,5 +1,5 @@
-var getObjectById = function(className, objectId) {
-  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}]);
+var getObjectById = function(className, objectId, include) {
+  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}], include);
 };
 
 var getObjectWithProperties = function(className, properties, include) {

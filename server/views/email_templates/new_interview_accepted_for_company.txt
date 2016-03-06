@@ -1,0 +1,9 @@
+Hello,\n
+\n
+Great news! <%=candidateName%> has accepted your interview request. Please contact (<%=matchesUrl%>) the candidate immediately to set up the onsite interview.\n
+A tip for hiring successfully: Once you’re engaged with a candidate, you need to move quickly. The longer you wait, the more companies and offers you’re going to be competing against.\n
+\n
+Best,\n
+\n
+Ceek Team\n
+Contact us: support@ceek.cc

@@ -210,7 +210,7 @@ var User = React.createClass({
                 <li>Click <span className='upload-steps-important'>Profile</span> at the top of your LinkedIn homepage.</li>
                 <li>Move your cursor over the Down arrow next to the <span className='upload-steps-important'>View profile as button</span>. Select <span className='upload-steps-important'>Save to PDF</span>.</li>
                 <img className='upload-step-img' src='imgs/import_LinkedIn.png' />
-                <li>The PDF file will be downloaded and saved to your computor. Return here and upload the PDF file below.</li>
+                <li>The PDF file will be downloaded and saved to your computer. Return here and upload the PDF file below.</li>
               </ol>
               <form onSubmit={this.uploadLICV} encType='multipart/form-data'>
                 <input type='file' ref='fileToUpload' accept='.pdf' name='fileToUpload' id='fileToUpload' />

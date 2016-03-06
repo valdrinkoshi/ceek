@@ -1,5 +1,5 @@
-var getObjectById = function(className, objectId) {
-  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}]);
+var getObjectById = function(className, objectId, include) {
+  return getObjectWithProperties(className, [{name: 'objectId', value: objectId}], include);
 };
 
 var getObjectWithProperties = function(className, properties, include) {
@@ -47,8 +47,38 @@ var getObjectsWithProperties = function(className, properties, all, include) {
   }
 };
 
+var success = function (res, data) {
+  if (res.success) {
+    return res.success(data);
+  }
+  if (typeof data !== 'object') {
+    data = {msg: data};
+  }
+  return writeResponse(res, 200, 'application/json', JSON.stringify(data));
+}
+
+var fail = function (res, data) {
+  if (res.error) {
+    return res.error(data);
+  }
+  if (typeof data !== 'object') {
+    data = {msg: data};
+  }
+  return writeResponse(res, 400, 'application/json', JSON.stringify(data));
+}
+
+var writeResponse = function(res, statusCode, contentType, data) {
+  res.writeHead(statusCode, {
+    'Content-Type': contentType
+  });
+  res.end(data);
+  return res;
+}
+
 module.exports = {
   getObjectById: getObjectById,
   getObjectWithProperties: getObjectWithProperties,
-  getObjectsWithProperties: getObjectsWithProperties
+  getObjectsWithProperties: getObjectsWithProperties,
+  fail: fail,
+  success: success
 };

@@ -1,5 +1,6 @@
 // These two lines are required to initialize Express in Cloud Code.
 var express = require('express');
+var ejs = require('ejs');
 var app = express();
 var querystring = require('querystring');
 var _ = require('underscore');
@@ -11,17 +12,36 @@ var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 var parseExpressHttpsRedirect = require('parse-express-https-redirect');
 var parseExpressCookieSession = require('parse-express-cookie-session');
+
 var parseUtils = require('cloud/parseUtils.js');
 var getObjectById = parseUtils.getObjectById;
 var getObjectWithProperties = parseUtils.getObjectWithProperties;
 var getObjectsWithProperties = parseUtils.getObjectsWithProperties;
+var fail = parseUtils.fail;
+var success = parseUtils.success;
 
-var Mailgun = require('mailgun');
+var parseTypes = require('cloud/parseTypes.js');
+var TokenRequest = parseTypes.TokenRequest;
+var TokenStorage = parseTypes.TokenStorage;
+var UserProfile = parseTypes.UserProfile;
+var PublicProfile = parseTypes.PublicProfile;
+var MatchesPage = parseTypes.MatchesPage;
+var Job = parseTypes.Job;
+var Like = parseTypes.Like;
+var createPublicProfile = parseTypes.createPublicProfile;
+
+var matchesUtils = require('cloud/matchesUtils.js');
+
+var emailUtils = require('cloud/emailUtils.js');
+
 var url = require('url');
-Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
-var DEFAULT_CEEK_MAIL_ADDRESS = 'do-not-reply@ceek.cc';
+
+var candidateAcceptInterviewTemplate = '<!doctype html> <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"> <head> <!-- NAME: 1 COLUMN --> <!--[if gte mso 15]> <xml> <o:OfficeDocumentSettings> <o:AllowPNG/> <o:PixelsPerInch>96</o:PixelsPerInch> </o:OfficeDocumentSettings> </xml> <![endif]--> <meta charset="UTF-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <title>*|MC:SUBJECT|*</title> <style type="text/css"> p{ margin:10px 0; padding:0; } table{ border-collapse:collapse; } h1,h2,h3,h4,h5,h6{ display:block; margin:0; padding:0; } img,a img{ border:0; height:auto; outline:none; text-decoration:none; } body,#bodyTable,#bodyCell{ height:100%; margin:0; padding:0; width:100%; } #outlook a{ padding:0; } img{ -ms-interpolation-mode:bicubic; } table{ mso-table-lspace:0pt; mso-table-rspace:0pt; } .ReadMsgBody{ width:100%; } .ExternalClass{ width:100%; } p,a,li,td,blockquote{ mso-line-height-rule:exactly; } a[href^=tel],a[href^=sms]{ color:inherit; cursor:default; text-decoration:none; } p,a,li,td,body,table,blockquote{ -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; } .ExternalClass,.ExternalClass p,.ExternalClass td,.ExternalClass div,.ExternalClass span,.ExternalClass font{ line-height:100%; } a[x-apple-data-detectors]{ color:inherit !important; text-decoration:none !important; font-size:inherit !important; font-family:inherit !important; font-weight:inherit !important; line-height:inherit !important; } #bodyCell{ padding:10px; } .templateContainer{ max-width:600px !important; } a.mcnButton{ display:block; } .mcnImage{ vertical-align:bottom; } .mcnTextContent{ word-break:break-word; } .mcnTextContent img{ height:auto !important; } .mcnDividerBlock{ table-layout:fixed !important; } /* @tab Page @section Background Style @tip Set the background color and top border for your email. You may want to choose colors that match your company s branding. */ body,#bodyTable{ /*@editable*/background-color:#fafafa; } /* @tab Page @section Background Style @tip Set the background color and top border for your email. You may want to choose colors that match your company s branding. */ #bodyCell{ /*@editable*/border-top:0; } /* @tab Page @section Email Border @tip Set the border for your email. */ .templateContainer{ /*@editable*/border:0; } /* @tab Page @section Heading 1 @tip Set the styling for all first-level headings in your emails. These should be the largest of your headings. @style heading 1 */ h1{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:26px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 2 @tip Set the styling for all second-level headings in your emails. @style heading 2 */ h2{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:22px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 3 @tip Set the styling for all third-level headings in your emails. @style heading 3 */ h3{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:20px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 4 @tip Set the styling for all fourth-level headings in your emails. These should be the smallest of your headings. @style heading 4 */ h4{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:18px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Preheader @section Preheader Style @tip Set the background color and borders for your email s preheader area. */ #templatePreheader{ /*@editable*/background-color:#FAFAFA; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:9px; } /* @tab Preheader @section Preheader Text @tip Set the styling for your email s preheader text. Choose a size and color that is easy to read. */ #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{ /*@editable*/color:#656565; /*@editable*/font-family:Helvetica; /*@editable*/font-size:12px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Preheader @section Preheader Link @tip Set the styling for your email s preheader links. Choose a color that helps them stand out from your text. */ #templatePreheader .mcnTextContent a,#templatePreheader .mcnTextContent p a{ /*@editable*/color:#656565; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Header @section Header Style @tip Set the background color and borders for your email s header area. */ #templateHeader{ /*@editable*/background-color:#fc7070; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:0; } /* @tab Header @section Header Text @tip Set the styling for your email s header text. Choose a size and color that is easy to read. */ #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:16px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Header @section Header Link @tip Set the styling for your email s header links. Choose a color that helps them stand out from your text. */ #templateHeader .mcnTextContent a,#templateHeader .mcnTextContent p a{ /*@editable*/color:#2BAADF; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Body @section Body Style @tip Set the background color and borders for your email s body area. */ #templateBody{ /*@editable*/background-color:#FFFFFF; /*@editable*/border-top:0; /*@editable*/border-bottom:2px solid #EAEAEA; /*@editable*/padding-top:0; /*@editable*/padding-bottom:9px; } /* @tab Body @section Body Text @tip Set the styling for your email s body text. Choose a size and color that is easy to read. */ #templateBody .mcnTextContent,#templateBody .mcnTextContent p{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:16px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Body @section Body Link @tip Set the styling for your email s body links. Choose a color that helps them stand out from your text. */ #templateBody .mcnTextContent a,#templateBody .mcnTextContent p a{ /*@editable*/color:#2BAADF; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Footer @section Footer Style @tip Set the background color and borders for your email s footer area. */ #templateFooter{ /*@editable*/background-color:#FAFAFA; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:9px; } /* @tab Footer @section Footer Text @tip Set the styling for your email s footer text. Choose a size and color that is easy to read. */ #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{ /*@editable*/color:#656565; /*@editable*/font-family:Helvetica; /*@editable*/font-size:12px; /*@editable*/line-height:150%; /*@editable*/text-align:center; } /* @tab Footer @section Footer Link @tip Set the styling for your email s footer links. Choose a color that helps them stand out from your text. */ #templateFooter .mcnTextContent a,#templateFooter .mcnTextContent p a{ /*@editable*/color:#656565; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } @media only screen and (min-width:768px){ .templateContainer{ width:600px !important; } } @media only screen and (max-width: 480px){ body,table,td,p,a,li,blockquote{ -webkit-text-size-adjust:none !important; } } @media only screen and (max-width: 480px){ body{ width:100% !important; min-width:100% !important; } } @media only screen and (max-width: 480px){ #bodyCell{ padding-top:10px !important; } } @media only screen and (max-width: 480px){ .mcnImage{ width:100% !important; } } @media only screen and (max-width: 480px){ .mcnCaptionTopContent,.mcnCaptionBottomContent,.mcnTextContentContainer,.mcnBoxedTextContentContainer,.mcnImageGroupContentContainer,.mcnCaptionLeftTextContentContainer,.mcnCaptionRightTextContentContainer,.mcnCaptionLeftImageContentContainer,.mcnCaptionRightImageContentContainer,.mcnImageCardLeftTextContentContainer,.mcnImageCardRightTextContentContainer{ max-width:100% !important; width:100% !important; } } @media only screen and (max-width: 480px){ .mcnBoxedTextContentContainer{ min-width:100% !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupContent{ padding:9px !important; } } @media only screen and (max-width: 480px){ .mcnCaptionLeftContentOuter .mcnTextContent,.mcnCaptionRightContentOuter .mcnTextContent{ padding-top:9px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardTopImageContent,.mcnCaptionBlockInner .mcnCaptionTopContent:last-child .mcnTextContent{ padding-top:18px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardBottomImageContent{ padding-bottom:9px !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupBlockInner{ padding-top:0 !important; padding-bottom:0 !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupBlockOuter{ padding-top:9px !important; padding-bottom:9px !important; } } @media only screen and (max-width: 480px){ .mcnTextContent,.mcnBoxedTextContentColumn{ padding-right:18px !important; padding-left:18px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardLeftImageContent,.mcnImageCardRightImageContent{ padding-right:18px !important; padding-bottom:0 !important; padding-left:18px !important; } } @media only screen and (max-width: 480px){ .mcpreview-image-uploader{ display:none !important; width:100% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 1 @tip Make the first-level headings larger in size for better readability on small screens. */ h1{ /*@editable*/font-size:22px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 2 @tip Make the second-level headings larger in size for better readability on small screens. */ h2{ /*@editable*/font-size:20px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 3 @tip Make the third-level headings larger in size for better readability on small screens. */ h3{ /*@editable*/font-size:18px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 4 @tip Make the fourth-level headings larger in size for better readability on small screens. */ h4{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Boxed Text @tip Make the boxed text larger in size for better readability on small screens. We recommend a font size of at least 16px. */ .mcnBoxedTextContentContainer .mcnTextContent,.mcnBoxedTextContentContainer .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Preheader Visibility @tip Set the visibility of the email s preheader on small screens. You can hide it to save space. */ #templatePreheader{ /*@editable*/display:block !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Preheader Text @tip Make the preheader text larger in size for better readability on small screens. */ #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Header Text @tip Make the header text larger in size for better readability on small screens. */ #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Body Text @tip Make the body text larger in size for better readability on small screens. We recommend a font size of at least 16px. */ #templateBody .mcnTextContent,#templateBody .mcnTextContent p{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Footer Text @tip Make the footer content text larger in size for better readability on small screens. */ #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } }</style></head> <body> <center> <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable"> <tr> <td align="center" valign="top" id="bodyCell"> <!-- BEGIN TEMPLATE // --> <!--[if gte mso 9]> <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;"> <tr> <td align="center" valign="top" width="600" style="width:600px;"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer"> <tr> <td valign="top" id="templatePreheader"></td> </tr> <tr> <td valign="top" id="templateHeader"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding: 9px 18px;color: #FFFFFF;font-family: Arial,  Helvetica Neue , Helvetica, sans-serif;font-size: 18px;font-weight: bold;text-align: center;"> </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> <tr> <td valign="top" id="templateBody"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;"> <h1><strong><span style="font-size:12px">Hello,</span></strong></h1> Great news! <%=candidateName%> has accepted your interview request. Please <a href="<%=matchesUrl%>">contact the candidate</a> immediately to set up the onsite interview.<br> A tip for hiring successfully: Once you’re engaged with a candidate, you need to move quickly. The longer you wait, the more companies and offers you’re going to be competing against.<br> <br> <strong>Best,<br> <br> Ceek Team</strong><br> <strong>Contact us:&nbsp;</strong>support@ceek.cc</span></p> </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> <tr> <td valign="top" id="templateFooter"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowBlock" style="min-width:100%;"> <tbody class="mcnFollowBlockOuter"> <tr> <td align="center" valign="top" style="padding:9px" class="mcnFollowBlockInner"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentContainer" style="min-width:100%;"> <tbody><tr> <td align="center" style="padding-left:9px;padding-right:9px;"> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnFollowContent"> <tbody><tr> <td align="center" valign="top" style="padding-top:9px; padding-right:9px; padding-left:9px;"> <table align="center" border="0" cellpadding="0" cellspacing="0"> <tbody><tr> <td align="center" valign="top"> <!--[if mso]> <table align="center" border="0" cellspacing="0" cellpadding="0"> <tr> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://www.linkedin.com/company/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-linkedin-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://twitter.com/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-twitter-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:0; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://www.facebook.com/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-facebook-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> </tr> </table> <![endif]--> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody> </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock" style="min-width:100%;"> <tbody class="mcnDividerBlockOuter"> <tr> <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px 25px;"> <table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-top-width: 2px;border-top-style: solid;border-top-color: #EEEEEE;"> <tbody><tr> <td> <span></span> </td> </tr> </tbody></table> <!-- <td class="mcnDividerBlockInner" style="padding: 18px;"> <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" /> --> </td> </tr> </tbody> </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;"> <span style="font-size:12px"><em>Copyright © 2016 CEEK. All rights reserved.</em></span><br> <br> <br> <br> <br> &nbsp; </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> </table> <!--[if gte mso 9]> </td> </tr> </table> <![endif]--> <!-- // END TEMPLATE --> </td> </tr> </table> </center> </body> </html>';
+var candidateAcceptInterviewTemplateText = 'Hello,\n \n Great news! <%=candidateName%> has accepted your interview request. Please contact (<%=matchesUrl%>) the candidate immediately to set up the onsite interview.\n A tip for hiring successfully: Once you’re engaged with a candidate, you need to move quickly. The longer you wait, the more companies and offers you’re going to be competing against.\n \n Best,\n \n Ceek Team\n Contact us: support@ceek.cc';
+var candidateMatchTemplate = '<!doctype html> <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office"> <head> <!-- NAME: 1 COLUMN --> <!--[if gte mso 15]> <xml> <o:OfficeDocumentSettings> <o:AllowPNG/> <o:PixelsPerInch>96</o:PixelsPerInch> </o:OfficeDocumentSettings> </xml> <![endif]--> <meta charset="UTF-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <title>*|MC:SUBJECT|*</title> <style type="text/css"> p{ margin:10px 0; padding:0; } table{ border-collapse:collapse; } h1,h2,h3,h4,h5,h6{ display:block; margin:0; padding:0; } img,a img{ border:0; height:auto; outline:none; text-decoration:none; } body,#bodyTable,#bodyCell{ height:100%; margin:0; padding:0; width:100%; } #outlook a{ padding:0; } img{ -ms-interpolation-mode:bicubic; } table{ mso-table-lspace:0pt; mso-table-rspace:0pt; } .ReadMsgBody{ width:100%; } .ExternalClass{ width:100%; } p,a,li,td,blockquote{ mso-line-height-rule:exactly; } a[href^=tel],a[href^=sms]{ color:inherit; cursor:default; text-decoration:none; } p,a,li,td,body,table,blockquote{ -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; } .ExternalClass,.ExternalClass p,.ExternalClass td,.ExternalClass div,.ExternalClass span,.ExternalClass font{ line-height:100%; } a[x-apple-data-detectors]{ color:inherit !important; text-decoration:none !important; font-size:inherit !important; font-family:inherit !important; font-weight:inherit !important; line-height:inherit !important; } #bodyCell{ padding:10px; } .templateContainer{ max-width:600px !important; } a.mcnButton{ display:block; } .mcnImage{ vertical-align:bottom; } .mcnTextContent{ word-break:break-word; } .mcnTextContent img{ height:auto !important; } .mcnDividerBlock{ table-layout:fixed !important; } /* @tab Page @section Background Style @tip Set the background color and top border for your email. You may want to choose colors that match your company s branding. */ body,#bodyTable{ /*@editable*/background-color:#fafafa; } /* @tab Page @section Background Style @tip Set the background color and top border for your email. You may want to choose colors that match your company s branding. */ #bodyCell{ /*@editable*/border-top:0; } /* @tab Page @section Email Border @tip Set the border for your email. */ .templateContainer{ /*@editable*/border:0; } /* @tab Page @section Heading 1 @tip Set the styling for all first-level headings in your emails. These should be the largest of your headings. @style heading 1 */ h1{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:26px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 2 @tip Set the styling for all second-level headings in your emails. @style heading 2 */ h2{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:22px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 3 @tip Set the styling for all third-level headings in your emails. @style heading 3 */ h3{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:20px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Page @section Heading 4 @tip Set the styling for all fourth-level headings in your emails. These should be the smallest of your headings. @style heading 4 */ h4{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:18px; /*@editable*/font-style:normal; /*@editable*/font-weight:bold; /*@editable*/line-height:125%; /*@editable*/letter-spacing:normal; /*@editable*/text-align:left; } /* @tab Preheader @section Preheader Style @tip Set the background color and borders for your email s preheader area. */ #templatePreheader{ /*@editable*/background-color:#FAFAFA; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:9px; } /* @tab Preheader @section Preheader Text @tip Set the styling for your email s preheader text. Choose a size and color that is easy to read. */ #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{ /*@editable*/color:#656565; /*@editable*/font-family:Helvetica; /*@editable*/font-size:12px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Preheader @section Preheader Link @tip Set the styling for your email s preheader links. Choose a color that helps them stand out from your text. */ #templatePreheader .mcnTextContent a,#templatePreheader .mcnTextContent p a{ /*@editable*/color:#656565; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Header @section Header Style @tip Set the background color and borders for your email s header area. */ #templateHeader{ /*@editable*/background-color:#fc7070; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:0; } /* @tab Header @section Header Text @tip Set the styling for your email s header text. Choose a size and color that is easy to read. */ #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:16px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Header @section Header Link @tip Set the styling for your email s header links. Choose a color that helps them stand out from your text. */ #templateHeader .mcnTextContent a,#templateHeader .mcnTextContent p a{ /*@editable*/color:#2BAADF; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Body @section Body Style @tip Set the background color and borders for your email s body area. */ #templateBody{ /*@editable*/background-color:#FFFFFF; /*@editable*/border-top:0; /*@editable*/border-bottom:2px solid #EAEAEA; /*@editable*/padding-top:0; /*@editable*/padding-bottom:9px; } /* @tab Body @section Body Text @tip Set the styling for your email s body text. Choose a size and color that is easy to read. */ #templateBody .mcnTextContent,#templateBody .mcnTextContent p{ /*@editable*/color:#202020; /*@editable*/font-family:Helvetica; /*@editable*/font-size:16px; /*@editable*/line-height:150%; /*@editable*/text-align:left; } /* @tab Body @section Body Link @tip Set the styling for your email s body links. Choose a color that helps them stand out from your text. */ #templateBody .mcnTextContent a,#templateBody .mcnTextContent p a{ /*@editable*/color:#2BAADF; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } /* @tab Footer @section Footer Style @tip Set the background color and borders for your email s footer area. */ #templateFooter{ /*@editable*/background-color:#FAFAFA; /*@editable*/border-top:0; /*@editable*/border-bottom:0; /*@editable*/padding-top:9px; /*@editable*/padding-bottom:9px; } /* @tab Footer @section Footer Text @tip Set the styling for your email s footer text. Choose a size and color that is easy to read. */ #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{ /*@editable*/color:#656565; /*@editable*/font-family:Helvetica; /*@editable*/font-size:12px; /*@editable*/line-height:150%; /*@editable*/text-align:center; } /* @tab Footer @section Footer Link @tip Set the styling for your email s footer links. Choose a color that helps them stand out from your text. */ #templateFooter .mcnTextContent a,#templateFooter .mcnTextContent p a{ /*@editable*/color:#656565; /*@editable*/font-weight:normal; /*@editable*/text-decoration:underline; } @media only screen and (min-width:768px){ .templateContainer{ width:600px !important; } } @media only screen and (max-width: 480px){ body,table,td,p,a,li,blockquote{ -webkit-text-size-adjust:none !important; } } @media only screen and (max-width: 480px){ body{ width:100% !important; min-width:100% !important; } } @media only screen and (max-width: 480px){ #bodyCell{ padding-top:10px !important; } } @media only screen and (max-width: 480px){ .mcnImage{ width:100% !important; } } @media only screen and (max-width: 480px){ .mcnCaptionTopContent,.mcnCaptionBottomContent,.mcnTextContentContainer,.mcnBoxedTextContentContainer,.mcnImageGroupContentContainer,.mcnCaptionLeftTextContentContainer,.mcnCaptionRightTextContentContainer,.mcnCaptionLeftImageContentContainer,.mcnCaptionRightImageContentContainer,.mcnImageCardLeftTextContentContainer,.mcnImageCardRightTextContentContainer{ max-width:100% !important; width:100% !important; } } @media only screen and (max-width: 480px){ .mcnBoxedTextContentContainer{ min-width:100% !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupContent{ padding:9px !important; } } @media only screen and (max-width: 480px){ .mcnCaptionLeftContentOuter .mcnTextContent,.mcnCaptionRightContentOuter .mcnTextContent{ padding-top:9px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardTopImageContent,.mcnCaptionBlockInner .mcnCaptionTopContent:last-child .mcnTextContent{ padding-top:18px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardBottomImageContent{ padding-bottom:9px !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupBlockInner{ padding-top:0 !important; padding-bottom:0 !important; } } @media only screen and (max-width: 480px){ .mcnImageGroupBlockOuter{ padding-top:9px !important; padding-bottom:9px !important; } } @media only screen and (max-width: 480px){ .mcnTextContent,.mcnBoxedTextContentColumn{ padding-right:18px !important; padding-left:18px !important; } } @media only screen and (max-width: 480px){ .mcnImageCardLeftImageContent,.mcnImageCardRightImageContent{ padding-right:18px !important; padding-bottom:0 !important; padding-left:18px !important; } } @media only screen and (max-width: 480px){ .mcpreview-image-uploader{ display:none !important; width:100% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 1 @tip Make the first-level headings larger in size for better readability on small screens. */ h1{ /*@editable*/font-size:22px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 2 @tip Make the second-level headings larger in size for better readability on small screens. */ h2{ /*@editable*/font-size:20px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 3 @tip Make the third-level headings larger in size for better readability on small screens. */ h3{ /*@editable*/font-size:18px !important; /*@editable*/line-height:125% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Heading 4 @tip Make the fourth-level headings larger in size for better readability on small screens. */ h4{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Boxed Text @tip Make the boxed text larger in size for better readability on small screens. We recommend a font size of at least 16px. */ .mcnBoxedTextContentContainer .mcnTextContent,.mcnBoxedTextContentContainer .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Preheader Visibility @tip Set the visibility of the email s preheader on small screens. You can hide it to save space. */ #templatePreheader{ /*@editable*/display:block !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Preheader Text @tip Make the preheader text larger in size for better readability on small screens. */ #templatePreheader .mcnTextContent,#templatePreheader .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Header Text @tip Make the header text larger in size for better readability on small screens. */ #templateHeader .mcnTextContent,#templateHeader .mcnTextContent p{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Body Text @tip Make the body text larger in size for better readability on small screens. We recommend a font size of at least 16px. */ #templateBody .mcnTextContent,#templateBody .mcnTextContent p{ /*@editable*/font-size:16px !important; /*@editable*/line-height:150% !important; } } @media only screen and (max-width: 480px){ /* @tab Mobile Styles @section Footer Text @tip Make the footer content text larger in size for better readability on small screens. */ #templateFooter .mcnTextContent,#templateFooter .mcnTextContent p{ /*@editable*/font-size:14px !important; /*@editable*/line-height:150% !important; } }</style></head> <body> <center> <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable"> <tr> <td align="center" valign="top" id="bodyCell"> <!-- BEGIN TEMPLATE // --> <!--[if gte mso 9]> <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;"> <tr> <td align="center" valign="top" width="600" style="width:600px;"> <![endif]--> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer"> <tr> <td valign="top" id="templatePreheader"></td> </tr> <tr> <td valign="top" id="templateHeader"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding: 9px 18px;color: #FFFFFF;font-family: Arial,  Helvetica Neue , Helvetica, sans-serif;font-size: 18px;font-weight: bold;text-align: center;">   </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> <tr> <td valign="top" id="templateBody"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;"> <h1><strong><span style="font-size:12px">Hi <%=candidateName%>,</span></strong></h1> <p><span style="font-size:12px"> Great news! <%=companyName%> has sent you an interview request. If you are interested in this opportunity, please accept the interview request immediately.<br> <%=companyName%> will contact you directly to set up the onsite interview. If you do not hear back from them within 2 weeks, please contact us at support@ceek.cc.<br> A Tip for getting hired successfully: Once you’re engaged with the hiring company, you need to move quickly. The longer you wait, the more candidates you’re going to be competing against.<br> <br> <strong>Best,<br> <br> Ceek Team</strong><br> <strong>Contact us:&nbsp;</strong>support@ceek.cc</span></p> </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> <tr> <td valign="top" id="templateFooter"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowBlock" style="min-width:100%;"> <tbody class="mcnFollowBlockOuter"> <tr> <td align="center" valign="top" style="padding:9px" class="mcnFollowBlockInner"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentContainer" style="min-width:100%;"> <tbody><tr> <td align="center" style="padding-left:9px;padding-right:9px;"> <table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnFollowContent"> <tbody><tr> <td align="center" valign="top" style="padding-top:9px; padding-right:9px; padding-left:9px;"> <table align="center" border="0" cellpadding="0" cellspacing="0"> <tbody><tr> <td align="center" valign="top"> <!--[if mso]> <table align="center" border="0" cellspacing="0" cellpadding="0"> <tr> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://www.linkedin.com/company/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-linkedin-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://twitter.com/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-twitter-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> <td align="center" valign="top"> <![endif]--> <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;"> <tbody><tr> <td valign="top" style="padding-right:0; padding-bottom:9px;" class="mcnFollowContentItemContainer"> <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnFollowContentItem"> <tbody><tr> <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;"> <table align="left" border="0" cellpadding="0" cellspacing="0" width=""> <tbody><tr> <td align="center" valign="middle" width="24" class="mcnFollowIconContent"> <a href="https://www.facebook.com/goceek" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-dark-facebook-48.png" style="display:block;" height="24" width="24" class=""></a> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> <!--[if mso]> </td> <![endif]--> <!--[if mso]> </tr> </table> <![endif]--> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody></table> </td> </tr> </tbody> </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock" style="min-width:100%;"> <tbody class="mcnDividerBlockOuter"> <tr> <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px 25px;"> <table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-top-width: 2px;border-top-style: solid;border-top-color: #EEEEEE;"> <tbody><tr> <td> <span></span> </td> </tr> </tbody></table> <!-- <td class="mcnDividerBlockInner" style="padding: 18px;"> <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" /> --> </td> </tr> </tbody> </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;"> <tbody class="mcnTextBlockOuter"> <tr> <td valign="top" class="mcnTextBlockInner"> <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%;" class="mcnTextContentContainer"> <tbody><tr> <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;"> <span style="font-size:12px"><em>Copyright © 2016 CEEK. All rights reserved.</em></span><br> <br> <br> <br> <br> &nbsp; </td> </tr> </tbody></table> </td> </tr> </tbody> </table></td> </tr> </table> <!--[if gte mso 9]> </td> </tr> </table> <![endif]--> <!-- // END TEMPLATE --> </td> </tr> </table> </center> </body> </html>';
+var candidateMatchTemplateText = 'Hi <%=candidateName%>,\n \n Great news! <%=companyName%> has sent you an interview request. If you are interested in this opportunity, please accept the interview request immediately.\n <%=companyName%> will contact you directly to set up the onsite interview. If you do not hear back from them within 2 weeks, please contact us at support@ceek.cc.\n A Tip for getting hired successfully: Once you’re engaged with the hiring company, you need to move quickly. The longer you wait, the more candidates you’re going to be competing against.\n Best,\n \n Ceek Team\n Ceek.cc';
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -50,22 +70,7 @@ if (process && process.env && process.env.CEEK_LOCAL === '1') {
   isLocal = true;
 }
 
-/**
- * In the Data Browser, set the Class Permissions for these 2 classes to
- *   disallow public access for Get/Find/Create/Update/Delete operations.
- * Only the master key should be able to query or write to these classes.
- */
-var TokenRequest = Parse.Object.extend('TokenRequest');
-var TokenStorage = Parse.Object.extend('TokenStorage');
-var UserProfile = Parse.Object.extend('UserProfile');
-var PublicProfile = Parse.Object.extend('PublicProfile');
-var MatchesPage = Parse.Object.extend('MatchesPage');
-var Job = Parse.Object.extend('Job');
-var Like = Parse.Object.extend('Like');
-
-var restrictedAcl = new Parse.ACL();
-restrictedAcl.setPublicReadAccess(false);
-restrictedAcl.setPublicWriteAccess(false);
+var restrictedAcl = parseTypes.restrictedAcl;
 
 // This is an example of hooking up a request handler with a specific request
 // path and HTTP verb using the Express routing API.
@@ -264,7 +269,7 @@ var newLinkedInUser = function(accessToken, linkedInData) {
     userRoleQuery.equalTo('name', 'user');
     userRoleQuery.ascending('createdAt');
     return userRoleQuery.first({useMasterKey: true}).then(function (role) {
-      var relation = role.relation('users'); 
+      var relation = role.relation('users');
       relation.add(user);
       role.save();
       // Use the master key because TokenStorage objects should be protected.
@@ -348,34 +353,6 @@ function checkActualParams (response, requiredParams, receivedParams) {
     }
   }
   return receivedParams;
-}
-
-function success (res, data) {
-  if (res.success) {
-    return res.success(data);
-  }
-  if (typeof data !== 'object') {
-    data = {msg: data};
-  }
-  return writeResponse(res, 200, 'application/json', JSON.stringify(data));
-}
-
-function fail (res, data) {
-  if (res.error) {
-    return res.error(data);
-  }
-  if (typeof data !== 'object') {
-    data = {msg: data};
-  }
-  return writeResponse(res, 400, 'application/json', JSON.stringify(data));
-}
-
-function writeResponse (res, statusCode, contentType, data) {
-  res.writeHead(statusCode, {
-    'Content-Type': contentType
-  });
-  res.end(data);
-  return res;
 }
 
 var ParseLICV = function (user, request, response) {
@@ -543,16 +520,6 @@ app.get('/pprofile/:id', function(request, response) {
   });
 });
 
-var createPublicProfile = function (userId) {
-  var publicProfile = new PublicProfile();
-  publicProfile.setACL(restrictedAcl);
-  publicProfile.set('userProfileId', userId);
-  publicProfile.set('publicProfileId', undefined);
-  publicProfile.set('visible', true);
-  publicProfile.set('expireDate', new Date(Date.now()+86400000));
-  return publicProfile.save(null, {useMasterKey: true});
-};
-
 var PostPProfile = function (user, request, response, params) {
   var requiredParams = [{key: 'userId', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
@@ -674,61 +641,12 @@ var PostMatches = function (user, request, response, params) {
     if (isAdmin) {
       var userProfileIds = JSON.parse(receivedParams.userProfileIds);
       var jobId = receivedParams.jobId;
-      var userPProfilePromises = [];
-      for (var i = 0; i < userProfileIds.length; i++) {
-        userPProfilePromises.push(createPublicProfile(userProfileIds[i]));
-      }
-      Parse.Promise.when(userPProfilePromises).then(
-        function () {
-          if (arguments.length > 0) {
-            getObjectById(Job, jobId).then(function (job) {
-              if (job) {
-                var userPProfileIds = [];
-                for (var i = 0; i < arguments.length; i++) {
-                  userPProfileIds.push(arguments[i].id);
-                }
-                getObjectWithProperties(MatchesPage, [{name: 'jobId', value: jobId}]).then(
-                function (matchesPage) {
-                  //if a page already exists for this jobId, just update the object with the new profiles
-                  if (matchesPage) {
-                    var today = new Date();
-                    var expirationDate = matchesPage.get('expireDate');
-                    if (!(today > expirationDate)) {
-                      return fail(response, {msg: 'This match has not expired yet.'});
-                    }
-                    matchesPage.set('otherUserProfileIds', matchesPage.get('userProfileIds'));
-                    matchesPage.set('otherPublicProfileIds', matchesPage.get('publicProfileIds'));
-                  } else {
-                    matchesPage = new MatchesPage();
-                    matchesPage.setACL(restrictedAcl);
-                    matchesPage.set('jobId', jobId);
-                    matchesPage.set('job', job);
-                  }
-                  matchesPage.set('userProfileIds', userProfileIds);
-                  matchesPage.set('publicProfileIds', userPProfileIds);
-                  matchesPage.set('visible', true);
-                  matchesPage.set('matchesPageId', undefined);
-                  matchesPage.set('expireDate', new Date(Date.now()+86400000));
-                
-                  matchesPage.save(null, {
-                    useMasterKey: true,
-                    success: function (matchesPage) {
-                      success(response, {matchesPageId: matchesPage.id});
-                    },
-                    error: function (object, error) {
-                      fail(response, {msg: error});
-                    }
-                  });
-                });
-              } else {
-                fail(response, {msg: 'Job lost!'});
-              }
-            }, function (error) {
-              fail(response, {msg: error});
-            });
-          }
+      matchesUtils.createMatch(userProfileIds, jobId).then(
+        function (matchesPage) {
+          success(response, {matchesPageId: matchesPage.id});
         },
         function (error) {
+          fail(response, {msg: error});
         }
       );
     }
@@ -747,22 +665,6 @@ app.post('/matches', function(request, response) {
   });
 });
 
-var sendEmail = function (to, from, subject, text, html, successCallback, errorCallback) {
-  if (!from) {
-    from = DEFAULT_CEEK_MAIL_ADDRESS;
-  }
-  Mailgun.sendEmail({
-    to: to,
-    from: from,
-    subject: subject,
-    text: text,
-    html: html
-  }, {
-    success: successCallback,
-    error: errorCallback
-  });
-};
-
 var PostMail = function (user, request, response, params) {
   var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}, {key: 'html', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
@@ -771,7 +673,7 @@ var PostMail = function (user, request, response, params) {
   }
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      sendEmail(receivedParams.to, receivedParams.from, receivedParams.subject, receivedParams.text, receivedParams.html,
+      emailUtils.sendEmail(receivedParams.to, receivedParams.from, receivedParams.subject, receivedParams.text, receivedParams.html,
         function() {
           success(response, {msg: 'Message Sent!'});
         },
@@ -814,13 +716,14 @@ app.get('/likeu/:id', function(request, response) {
         {name: 'userProfileIds', value: [userProfileId], operator: 'containedIn'},
         {name: 'expireDate', value: new Date(), operator: 'greaterThan'},
         {name: 'visible', value: true}
-      ]).then(function(matchPageData) {
+      ], ['job']).then(function(matchPageData) {
         if (matchPageData) {
           getObjectById(UserProfile, userProfileId)
           .then(function (userProfile) {
             var likeObj = new Like();
             likeObj.setACL(restrictedAcl);
             likeObj.set('userProfileId', userProfileId);
+            likeObj.set('user', userProfile);
             likeObj.set('matchesPageId', matchId);
             likeObj.set('jobId', matchPageData.get('jobId'));
             likeObj.set('job', matchPageData.get('job'));
@@ -836,9 +739,11 @@ app.get('/likeu/:id', function(request, response) {
               }
             }
             likeObj.save(null, {useMasterKey: true}).then(function () {
-              //TODO send email
               if (!isLocal && userProfile.get('emailAddress') && likeResp) {
-                //sendEmail(userProfile.get('emailAddress'), null, 'Somebody wants to interview you!', 'They saw your profile on ceek and they are interested in interviewing you!', '<b>They saw your profile on ceek and they are interested in interviewing you</b>');
+                var matchEmailData = {candidateName: userProfile.get('firstName'), companyName: matchPageData.get('job').get('companyName')};
+                var text = ejs.render(candidateMatchTemplateText, matchEmailData);
+                var html = ejs.render(candidateMatchTemplate, matchEmailData);
+                emailUtils.sendEmail(userProfile.get('emailAddress'), null, 'Interview Request from ' + matchEmailData.companyName, text, html);
               }
               success(response, {msg: 'You liked the user!'});
             });
@@ -859,7 +764,7 @@ var GetLikeJ = function (user, request, response) {
   var likeId = request.params.id;
   var likeResp = request.query.like === "true" ? true : false;
   var likeReason = request.query.reason;
-  getObjectById(Like, likeId).then(function(like) {
+  getObjectById(Like, likeId, ['job', 'user']).then(function(like) {
     if (like) {
       if (likeReason) {
         likeReason = formValidationUtils.validateForm(rejectionReasonFormConfig.candidateRejectionFormConfig, likeReason);
@@ -874,6 +779,12 @@ var GetLikeJ = function (user, request, response) {
       }
       like.save({'mutual': likeResp, candidateReason: likeReason}, {useMasterKey: true}).then(
       function () {
+        if (!isLocal && like.get('job').get('contact')) {
+          var matchEmailData = {candidateName: like.get('user').get('firstName'), matchesUrl: 'https://www.ceek.cc/matches/'+like.get('matchesPageId')};
+          var text = ejs.render(candidateAcceptInterviewTemplateText, matchEmailData);
+          var html = ejs.render(candidateAcceptInterviewTemplate, matchEmailData);
+          emailUtils.sendEmail(like.get('job').get('contact'), null, 'Your interview request is accepted', text, html);
+        }
         success(response, {msg:'You liked the job!'});
       },
       function (error) {
@@ -920,7 +831,7 @@ var GetLikes = function (user, request, response) {
         } else {
           outLikes.push(like);
         }
-        
+
       }
       success(response, {
         likes: outLikes,

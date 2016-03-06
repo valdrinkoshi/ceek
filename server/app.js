@@ -11,17 +11,31 @@ var formValidationUtils = require('cloud/formValidationUtils.js');
 var Buffer = require('buffer').Buffer;
 var parseExpressHttpsRedirect = require('parse-express-https-redirect');
 var parseExpressCookieSession = require('parse-express-cookie-session');
+
 var parseUtils = require('cloud/parseUtils.js');
 var getObjectById = parseUtils.getObjectById;
 var getObjectWithProperties = parseUtils.getObjectWithProperties;
 var getObjectsWithProperties = parseUtils.getObjectsWithProperties;
+var fail = parseUtils.fail;
+var success = parseUtils.success;
 
-var Mailgun = require('mailgun');
+var parseTypes = require('cloud/parseTypes.js');
+var TokenRequest = parseTypes.TokenRequest;
+var TokenStorage = parseTypes.TokenStorage;
+var UserProfile = parseTypes.UserProfile;
+var PublicProfile = parseTypes.PublicProfile;
+var MatchesPage = parseTypes.MatchesPage;
+var Job = parseTypes.Job;
+var Like = parseTypes.Like;
+var createPublicProfile = parseTypes.createPublicProfile;
+
+var matchesUtils = require('cloud/matchesUtils.js');
+
+var emailUtils = require('cloud/emailUtils.js');
+
 var url = require('url');
-Mailgun.initialize('mg.ceek.cc', 'key-51cd852db71e7753d513fb690c7e37e0');
 
 var ADMIN_ROLE_NAME = 'admin';
-var DEFAULT_CEEK_MAIL_ADDRESS = 'do-not-reply@ceek.cc';
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -50,22 +64,7 @@ if (process && process.env && process.env.CEEK_LOCAL === '1') {
   isLocal = true;
 }
 
-/**
- * In the Data Browser, set the Class Permissions for these 2 classes to
- *   disallow public access for Get/Find/Create/Update/Delete operations.
- * Only the master key should be able to query or write to these classes.
- */
-var TokenRequest = Parse.Object.extend('TokenRequest');
-var TokenStorage = Parse.Object.extend('TokenStorage');
-var UserProfile = Parse.Object.extend('UserProfile');
-var PublicProfile = Parse.Object.extend('PublicProfile');
-var MatchesPage = Parse.Object.extend('MatchesPage');
-var Job = Parse.Object.extend('Job');
-var Like = Parse.Object.extend('Like');
-
-var restrictedAcl = new Parse.ACL();
-restrictedAcl.setPublicReadAccess(false);
-restrictedAcl.setPublicWriteAccess(false);
+var restrictedAcl = parseTypes.restrictedAcl;
 
 // This is an example of hooking up a request handler with a specific request
 // path and HTTP verb using the Express routing API.
@@ -264,7 +263,7 @@ var newLinkedInUser = function(accessToken, linkedInData) {
     userRoleQuery.equalTo('name', 'user');
     userRoleQuery.ascending('createdAt');
     return userRoleQuery.first({useMasterKey: true}).then(function (role) {
-      var relation = role.relation('users'); 
+      var relation = role.relation('users');
       relation.add(user);
       role.save();
       // Use the master key because TokenStorage objects should be protected.
@@ -348,34 +347,6 @@ function checkActualParams (response, requiredParams, receivedParams) {
     }
   }
   return receivedParams;
-}
-
-function success (res, data) {
-  if (res.success) {
-    return res.success(data);
-  }
-  if (typeof data !== 'object') {
-    data = {msg: data};
-  }
-  return writeResponse(res, 200, 'application/json', JSON.stringify(data));
-}
-
-function fail (res, data) {
-  if (res.error) {
-    return res.error(data);
-  }
-  if (typeof data !== 'object') {
-    data = {msg: data};
-  }
-  return writeResponse(res, 400, 'application/json', JSON.stringify(data));
-}
-
-function writeResponse (res, statusCode, contentType, data) {
-  res.writeHead(statusCode, {
-    'Content-Type': contentType
-  });
-  res.end(data);
-  return res;
 }
 
 var ParseLICV = function (user, request, response) {
@@ -543,16 +514,6 @@ app.get('/pprofile/:id', function(request, response) {
   });
 });
 
-var createPublicProfile = function (userId) {
-  var publicProfile = new PublicProfile();
-  publicProfile.setACL(restrictedAcl);
-  publicProfile.set('userProfileId', userId);
-  publicProfile.set('publicProfileId', undefined);
-  publicProfile.set('visible', true);
-  publicProfile.set('expireDate', new Date(Date.now()+86400000));
-  return publicProfile.save(null, {useMasterKey: true});
-};
-
 var PostPProfile = function (user, request, response, params) {
   var requiredParams = [{key: 'userId', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
@@ -674,61 +635,12 @@ var PostMatches = function (user, request, response, params) {
     if (isAdmin) {
       var userProfileIds = JSON.parse(receivedParams.userProfileIds);
       var jobId = receivedParams.jobId;
-      var userPProfilePromises = [];
-      for (var i = 0; i < userProfileIds.length; i++) {
-        userPProfilePromises.push(createPublicProfile(userProfileIds[i]));
-      }
-      Parse.Promise.when(userPProfilePromises).then(
-        function () {
-          if (arguments.length > 0) {
-            getObjectById(Job, jobId).then(function (job) {
-              if (job) {
-                var userPProfileIds = [];
-                for (var i = 0; i < arguments.length; i++) {
-                  userPProfileIds.push(arguments[i].id);
-                }
-                getObjectWithProperties(MatchesPage, [{name: 'jobId', value: jobId}]).then(
-                function (matchesPage) {
-                  //if a page already exists for this jobId, just update the object with the new profiles
-                  if (matchesPage) {
-                    var today = new Date();
-                    var expirationDate = matchesPage.get('expireDate');
-                    if (!(today > expirationDate)) {
-                      return fail(response, {msg: 'This match has not expired yet.'});
-                    }
-                    matchesPage.set('otherUserProfileIds', matchesPage.get('userProfileIds'));
-                    matchesPage.set('otherPublicProfileIds', matchesPage.get('publicProfileIds'));
-                  } else {
-                    matchesPage = new MatchesPage();
-                    matchesPage.setACL(restrictedAcl);
-                    matchesPage.set('jobId', jobId);
-                    matchesPage.set('job', job);
-                  }
-                  matchesPage.set('userProfileIds', userProfileIds);
-                  matchesPage.set('publicProfileIds', userPProfileIds);
-                  matchesPage.set('visible', true);
-                  matchesPage.set('matchesPageId', undefined);
-                  matchesPage.set('expireDate', new Date(Date.now()+86400000));
-                
-                  matchesPage.save(null, {
-                    useMasterKey: true,
-                    success: function (matchesPage) {
-                      success(response, {matchesPageId: matchesPage.id});
-                    },
-                    error: function (object, error) {
-                      fail(response, {msg: error});
-                    }
-                  });
-                });
-              } else {
-                fail(response, {msg: 'Job lost!'});
-              }
-            }, function (error) {
-              fail(response, {msg: error});
-            });
-          }
+      matchesUtils.createMatch(userProfileIds, jobId).then(
+        function (matchesPage) {
+          success(response, {matchesPageId: matchesPage.id});
         },
         function (error) {
+          fail(response, {msg: error});
         }
       );
     }
@@ -747,22 +659,6 @@ app.post('/matches', function(request, response) {
   });
 });
 
-var sendEmail = function (to, from, subject, text, html, successCallback, errorCallback) {
-  if (!from) {
-    from = DEFAULT_CEEK_MAIL_ADDRESS;
-  }
-  Mailgun.sendEmail({
-    to: to,
-    from: from,
-    subject: subject,
-    text: text,
-    html: html
-  }, {
-    success: successCallback,
-    error: errorCallback
-  });
-};
-
 var PostMail = function (user, request, response, params) {
   var requiredParams = [{key: 'to', type: 'email'}, {key: 'from', type: 'email'}, {key: 'subject', type: 'string'}, {key: 'text', type: 'string'}, {key: 'html', type: 'string'}];
   var receivedParams = checkParams(request, response, params, requiredParams);
@@ -771,7 +667,7 @@ var PostMail = function (user, request, response, params) {
   }
   userHasAdminPermission(user, response).then(function (isAdmin) {
     if (isAdmin) {
-      sendEmail(receivedParams.to, receivedParams.from, receivedParams.subject, receivedParams.text, receivedParams.html,
+      emailUtils.sendEmail(receivedParams.to, receivedParams.from, receivedParams.subject, receivedParams.text, receivedParams.html,
         function() {
           success(response, {msg: 'Message Sent!'});
         },
@@ -920,7 +816,7 @@ var GetLikes = function (user, request, response) {
         } else {
           outLikes.push(like);
         }
-        
+
       }
       success(response, {
         likes: outLikes,

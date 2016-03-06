@@ -1,0 +1,9 @@
+Hello,\n
+\n
+Ceek is the matchmaking platform for the job candidates and the hiring companies. Our mission is to help growing technology companies hire amazing talents quickly and effortlessly.&nbsp;All the candidates we match are active on the job market and available for hire immediately.\n
+\n
+We have found <%=totCandidates%> candidates for the role <%=title%> that match your requirement for the position. You are competing with other companies for these talents. Please take a look of their profile: <%= matchesPageUrl %> and respond within 24 hours.\n
+Best,\n
+\n
+Ceek Team\n
+Contact us: support@ceek.cc

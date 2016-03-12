@@ -583,7 +583,6 @@ app.get('/matches/:id', function(request, response) {
               var otherUserProfiles = [];
               for (var i = 0; i < arguments.length; i++) {
                 if (arguments[i]) {
-                  //TODO: trim data?
                   var userProfile = arguments[i].attributes;
                   userProfile.id = arguments[i].id;
                   var like = _.find(likes, function (like) {
@@ -594,6 +593,9 @@ app.get('/matches/:id', function(request, response) {
                     userProfile.mutual = like.get('mutual') || false;
                   }
                   if (_.contains(userProfileIds, userProfile.id)) {
+                    //trim private info.
+                    delete userProfile.emailAddress;
+                    delete userProfile.phoneNumber;
                     userProfiles.push(userProfile);
                   } else if (userProfile.mutual) {
                     otherUserProfiles.push(userProfile);

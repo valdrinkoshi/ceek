@@ -140,7 +140,7 @@ var UserView = React.createClass({
   componentDidMount() {
     var _this = this;
     this.setState({
-      formDef: this.props.formDef,
+      formDef: this.props.formDef || {},
       profileData: this.props.userProfileData
     });
   },

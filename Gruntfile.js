@@ -32,7 +32,8 @@ module.exports = function (grunt) {
                     './client/scripts/cards.js:Cards',
                     './client/scripts/expirationdatecountdown.js:ExpirationDateCountDown',
                     './client/scripts/usermatches.js:UserMatches',
-                    './client/scripts/userview.js:UserView'
+                    './client/scripts/userview.js:UserView',
+                    './client/scripts/jobmatchingconfirmationmessage.js:JobMatchingConfirmationMessage'
                   ],
                   external: ['react'],
                   browserifyOptions: {

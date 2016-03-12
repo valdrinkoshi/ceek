@@ -273,7 +273,11 @@ var UserView = React.createClass({
   formatDateRange(date1, date2) {
     var date1String = this.formatDate(date1);
     var date2String = this.formatDate(date2) || 'present';
-    return date1String + ' - ' + date2String;
+    if (date1String && date2String) {
+      return date1String + ' - ' + date2String;
+    } else if (date2String) {
+      return date2String;
+    }
   },
 
   render() {
@@ -317,7 +321,7 @@ var UserView = React.createClass({
       }
 
       this.computeWorkStyle(data);
-      var questionnaire = <span>Can't determine work style</span>
+      var questionnaire = <span>Cannot determine work style</span>
       if (data.questionnaire) {
         var workStyleTitle = data.firstName + "'s work style";
         var workStyleDescriptionBase = 'Based on the questionnaire result, ' + data.firstName;

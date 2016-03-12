@@ -6,7 +6,7 @@ var User = require('User');
 var UserView = require('UserView');
 var UserMatches = require('UserMatches').UserMatches;
 var BusyIndicator = require('BusyIndicator');
-
+var JobMatchingConfirmationMessage = require('JobMatchingConfirmationMessage');
 
 var Services = require('./Services.js');
 
@@ -86,9 +86,16 @@ var App = React.createClass({
     Services.PostProfile(JSON.stringify({onMarket: newMarketStatus}), 'static').then(function (response) {
       _this.setState({
         userProfileData: response.userProfileData,
-        showBusyIndicator: false
+        showBusyIndicator: false,
+        showJobMatchingConfirmationStatus: true
       });
       clearTimeout(_this.busyIndicatorTimeout);
+    });
+  },
+
+  closeShowJobMatchingConfirmationMessage() {
+    this.setState({
+      showJobMatchingConfirmationStatus: false
     });
   },
 
@@ -122,6 +129,7 @@ var App = React.createClass({
           <RouteHandler userProfileData={this.state.userProfileData} formDef={this.state.formDef} setProfileData={this.setProfileData} likesData={this.state.likesData} changeMarketStatus={this.changeMarketStatus} toggleBusyIndicator={this.toggleBusyIndicator} parseLICV={this.parseLICV} />
         </div>
         <BusyIndicator show={this.state.showBusyIndicator} />
+        <JobMatchingConfirmationMessage show={this.state.showJobMatchingConfirmationStatus} onClose={this.closeShowJobMatchingConfirmationMessage} statusOnMarket={this.state.userProfileData.onMarket} />
       </div>
     )
   }

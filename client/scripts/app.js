@@ -40,10 +40,10 @@ var App = React.createClass({
 
   toggleBusyIndicator() {
     if (this.state.showBusyIndicator === true) {
+      clearTimeout(this.busyIndicatorTimeout);
       this.setState({
         showBusyIndicator: false
       });
-      clearTimeout(this.busyIndicatorTimeout);
     } else {
       var _this = this;
       this.busyIndicatorTimeout = setTimeout(function () {
@@ -58,11 +58,11 @@ var App = React.createClass({
     this.toggleBusyIndicator();
     var _this = this;
     return Services.PostProfile(data, stepId).then(function (data) {
+      clearTimeout(_this.busyIndicatorTimeout);
       return _this.setState({
         userProfileData: data.userProfileData,
         showBusyIndicator: false
       });
-      clearTimeout(_this.busyIndicatorTimeout);
     });
   },
 
